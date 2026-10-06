@@ -122,7 +122,9 @@ app.add_middleware(
 
         "http://127.0.0.1:5500",
 
-        "http://localhost:5500"
+        "http://localhost:5500",
+
+        "https://obliviondoc-site.onrender.com"
 
     ],
 
@@ -232,7 +234,7 @@ FRONTEND_URL = os.getenv(
 
     "OBLIVION_FRONTEND_URL",
 
-    "http://127.0.0.1:5500"
+    "https://obliviondoc-site.onrender.com"
 
 )
 
