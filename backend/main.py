@@ -41,7 +41,6 @@ import json
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
-import threading
 
 
 from pathlib import Path
@@ -928,32 +927,29 @@ def forgot_password(
 
     )
 
-    # Отправляем письмо в отдельном потоке, чтобы запрос браузера
-    # не ждал ответа внешнего сервиса отправки почты.
-    email_thread = threading.Thread(
-
-        target=send_password_reset_email,
-
-        args=(user.email, reset_link),
-
-        daemon=True
-
+    # Отправляем письмо напрямую через HTTPS API Resend.
+    # Так мы точно получаем ответ сервиса и можем увидеть
+    # причину ошибки в логах Render.
+    email_sent = send_password_reset_email(
+        user.email,
+        reset_link
     )
 
-    email_thread.start()
-
-    return {
-
-        "message": (
-
-            "Если аккаунт с таким email "
-
-            "существует, ссылка для "
-
-            "восстановления отправлена."
-
+    if not email_sent:
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                "Не удалось отправить письмо "
+                "для восстановления пароля."
+            )
         )
 
+    return {
+        "message": (
+            "Если аккаунт с таким email "
+            "существует, ссылка для "
+            "восстановления отправлена."
+        )
     }
 
 # ============================================================
