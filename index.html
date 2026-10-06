@@ -1,0 +1,3676 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OblivionDoc</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* =========================
+           АВТОРИЗАЦИЯ
+        ========================= */
+
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            font-size: 30px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: #f3f4f6;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: #111827;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            outline: none;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .primary-btn {
+            width: 100%;
+            border: none;
+            background: #111827;
+            color: white;
+            padding: 13px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .primary-btn:hover {
+            background: #1f2937;
+        }
+
+        .auth-link {
+            display: block;
+            margin-top: 14px;
+            border: none;
+            background: transparent;
+            color: #4f46e5;
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-back {
+            margin-top: 12px;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 12px;
+            line-height: 1.4;
+        }
+
+        .success-message {
+            color: #16a34a;
+            font-size: 14px;
+            margin-top: 12px;
+            line-height: 1.4;
+        }
+
+        /* =========================
+           ПРИЛОЖЕНИЕ
+        ========================= */
+
+        .app {
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-email {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            border: 1px solid #d1d5db;
+            background: white;
+            padding: 9px 14px;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #f9fafb;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 0 auto;
+            padding: 35px 25px;
+        }
+
+        .page-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .page-title h1 {
+            margin: 0 0 7px;
+            font-size: 30px;
+        }
+
+        .page-title p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .add-btn {
+            border: none;
+            background: #111827;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .add-btn:hover {
+            background: #1f2937;
+        }
+
+        /* =========================
+           СТАТИСТИКА
+        ========================= */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           ТАБЛИЦА
+        ========================= */
+
+        .documents-card {
+            background: white;
+            border-radius: 15px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .documents-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .documents-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 16px 18px;
+            text-align: left;
+            border-bottom: 1px solid #f0f1f3;
+            vertical-align: middle;
+        }
+
+        th {
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 700;
+            background: #fafafa;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .document-name {
+            font-weight: 700;
+        }
+
+        .status {
+            display: inline-flex;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-archived {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .status-deleted {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-text {
+            color: #6b7280;
+        }
+
+        .operations {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .small-btn {
+            border: 1px solid #d1d5db;
+            background: white;
+            padding: 7px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .small-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .edit-btn {
+            color: #4338ca;
+        }
+
+        .delete-btn {
+            color: #dc2626;
+        }
+
+        .empty-state {
+            padding: 45px 20px;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        /* =========================
+           МОДАЛЬНОЕ ОКНО
+        ========================= */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .close-btn {
+            border: none;
+            background: transparent;
+            font-size: 26px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .secondary-btn {
+            border: 1px solid #d1d5db;
+            background: white;
+            padding: 11px 16px;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        .modal-primary-btn {
+            border: none;
+            background: #111827;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .file-info {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 7px;
+        }
+
+        .date-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.4fr;
+            gap: 8px;
+        }
+
+        .time-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+            max-width: 250px;
+        }
+
+        .date-label {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .date-part {
+            text-align: center;
+        }
+
+        .date-error {
+            color: #dc2626;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* =========================
+           ЖУРНАЛ ДЕЙСТВИЙ
+        ========================= */
+
+        .audit-card {
+            background: white;
+            border-radius: 15px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            margin-top: 25px;
+        }
+
+        .audit-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .audit-header h2 { margin: 0; font-size: 20px; }
+        .audit-refresh-btn { border: 1px solid #d1d5db; background: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+        .audit-refresh-btn:hover { background: #f3f4f6; }
+        .audit-table-wrapper { overflow-x: auto; }
+        .audit-empty { padding: 35px 20px; text-align: center; color: #6b7280; }
+        .audit-action { font-weight: 700; }
+        .audit-result-success { color: #16a34a; font-weight: 600; }
+        .audit-date { white-space: nowrap; color: #6b7280; }
+
+        /* =========================
+           АДАПТИВНОСТЬ
+        ========================= */
+
+        @media (max-width: 850px) {
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .page-title {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .topbar {
+                padding: 15px 18px;
+            }
+
+            .user-email {
+                display: none;
+            }
+        }
+
+        @media (max-width: 550px) {
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 25px 15px;
+            }
+
+            .auth-card {
+                padding: 25px;
+            }
+
+            .date-row {
+                grid-template-columns: 1fr 1fr 1.4fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     СТРАНИЦА АВТОРИЗАЦИИ
+========================================================= -->
+
+<div id="authPage" class="auth-page">
+
+    <div class="auth-card">
+
+        <div class="logo">
+            OblivionDoc
+        </div>
+
+        <div class="subtitle">
+            Умное управление документами и сроками хранения
+        </div>
+
+
+        <!-- Вкладки -->
+
+        <div class="auth-tabs">
+
+            <button
+                id="loginTab"
+                class="auth-tab active"
+                onclick="showLogin()"
+                type="button"
+            >
+                Вход
+            </button>
+
+            <button
+                id="registerTab"
+                class="auth-tab"
+                onclick="showRegister()"
+                type="button"
+            >
+                Регистрация
+            </button>
+
+        </div>
+
+
+        <!-- =====================================================
+             ВХОД
+        ====================================================== -->
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label for="loginEmail">
+                    Email
+                </label>
+
+                <input
+                    id="loginEmail"
+                    type="email"
+                    required
+                    autocomplete="email"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="loginPassword">
+                    Пароль
+                </label>
+
+                <input
+                    id="loginPassword"
+                    type="password"
+                    required
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+
+            <button
+                class="primary-btn"
+                type="submit"
+            >
+                Войти
+            </button>
+
+
+            <div
+                id="loginError"
+                class="error-message"
+            ></div>
+
+
+            <button
+                type="button"
+                class="auth-link"
+                onclick="showForgotPassword()"
+            >
+                Забыли пароль?
+            </button>
+
+        </form>
+
+
+        <!-- =====================================================
+             ЗАБЫЛИ ПАРОЛЬ
+        ====================================================== -->
+
+        <form
+            id="forgotPasswordForm"
+            class="hidden"
+        >
+
+            <div class="form-group">
+
+                <label for="forgotEmail">
+                    Email
+                </label>
+
+                <input
+                    id="forgotEmail"
+                    type="email"
+                    required
+                    autocomplete="email"
+                    placeholder="Введите email аккаунта"
+                >
+
+            </div>
+
+
+            <button
+                class="primary-btn"
+                type="submit"
+            >
+                Отправить ссылку
+            </button>
+
+
+            <div
+                id="forgotError"
+                class="error-message"
+            ></div>
+
+
+            <div
+                id="forgotSuccess"
+                class="success-message"
+            ></div>
+
+
+            <button
+                type="button"
+                class="auth-link auth-back"
+                onclick="showLogin()"
+            >
+                Вернуться ко входу
+            </button>
+
+        </form>
+
+
+        <!-- =====================================================
+             НОВЫЙ ПАРОЛЬ
+        ====================================================== -->
+
+        <form
+            id="resetPasswordForm"
+            class="hidden"
+        >
+
+            <div class="form-group">
+
+                <label for="resetPassword">
+                    Новый пароль
+                </label>
+
+                <input
+                    id="resetPassword"
+                    type="password"
+                    minlength="6"
+                    required
+                    autocomplete="new-password"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="resetPasswordConfirm">
+                    Повторите новый пароль
+                </label>
+
+                <input
+                    id="resetPasswordConfirm"
+                    type="password"
+                    minlength="6"
+                    required
+                    autocomplete="new-password"
+                >
+
+            </div>
+
+
+            <button
+                class="primary-btn"
+                type="submit"
+            >
+                Сохранить новый пароль
+            </button>
+
+
+            <div
+                id="resetError"
+                class="error-message"
+            ></div>
+
+        </form>
+
+
+        <!-- =====================================================
+             РЕГИСТРАЦИЯ
+        ====================================================== -->
+
+        <form
+            id="registerForm"
+            class="hidden"
+        >
+
+            <div class="form-group">
+
+                <label for="registerEmail">
+                    Email
+                </label>
+
+                <input
+                    id="registerEmail"
+                    type="email"
+                    required
+                    autocomplete="email"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="registerPassword">
+                    Пароль
+                </label>
+
+                <input
+                    id="registerPassword"
+                    type="password"
+                    minlength="6"
+                    required
+                    autocomplete="new-password"
+                >
+
+            </div>
+
+
+            <button
+                class="primary-btn"
+                type="submit"
+            >
+                Создать аккаунт
+            </button>
+
+
+            <div
+                id="registerError"
+                class="error-message"
+            ></div>
+
+
+            <div
+                id="registerSuccess"
+                class="success-message"
+            ></div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ОСНОВНОЕ ПРИЛОЖЕНИЕ
+========================================================= -->
+
+<div
+    id="app"
+    class="app hidden"
+>
+
+    <header class="topbar">
+
+        <div class="brand">
+            OblivionDoc
+        </div>
+
+
+        <div class="user-area">
+
+            <span
+                id="userEmail"
+                class="user-email"
+            ></span>
+
+
+            <button
+                class="logout-btn"
+                onclick="logout()"
+                type="button"
+            >
+                Выйти
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+        <div class="page-title">
+
+            <div>
+
+                <h1>
+                    Мои документы
+                </h1>
+
+                <p>
+                    Управляйте документами и их сроками хранения.
+                </p>
+
+            </div>
+
+
+            <button
+                class="add-btn"
+                onclick="openAddModal()"
+                type="button"
+            >
+                + Добавить документ
+            </button>
+
+        </div>
+
+
+        <!-- =====================================================
+             СТАТИСТИКА
+        ====================================================== -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+
+                <div class="stat-title">
+                    Всего документов
+                </div>
+
+                <div
+                    id="totalCount"
+                    class="stat-value"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-title">
+                    Активные
+                </div>
+
+                <div
+                    id="activeCount"
+                    class="stat-value"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-title">
+                    В архиве
+                </div>
+
+                <div
+                    id="archivedCount"
+                    class="stat-value"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-title">
+                    Удалённые
+                </div>
+
+                <div
+                    id="deletedCount"
+                    class="stat-value"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ДОКУМЕНТЫ
+        ====================================================== -->
+
+        <div class="documents-card">
+
+            <div class="documents-header">
+
+                <h2>
+                    Документы
+                </h2>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Название
+                            </th>
+
+                            <th>
+                                Срок действия
+                            </th>
+
+                            <th>
+                                Статус
+                            </th>
+
+                            <th>
+                                Действие
+                            </th>
+
+                            <th>
+                                Операции
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="documentsTable"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ЖУРНАЛ ДЕЙСТВИЙ
+        ====================================================== -->
+
+        <div class="audit-card">
+            <div class="audit-header">
+                <h2>📋 Журнал действий</h2>
+                <button class="audit-refresh-btn" onclick="loadAuditLog()" type="button">
+                    Обновить
+                </button>
+            </div>
+            <div class="audit-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Дата и время</th>
+                            <th>Документ</th>
+                            <th>Действие</th>
+                            <th>Результат</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     МОДАЛЬНОЕ ОКНО ДОКУМЕНТА
+========================================================= -->
+
+<div
+    id="documentModal"
+    class="modal-overlay hidden"
+>
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2 id="modalTitle">
+                Добавить документ
+            </h2>
+
+
+            <button
+                class="close-btn"
+                onclick="closeDocumentModal()"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="documentForm">
+
+            <!-- Название -->
+
+            <div class="form-group">
+
+                <label for="documentName">
+                    Название документа
+                </label>
+
+                <input
+                    id="documentName"
+                    type="text"
+                    maxlength="200"
+                    required
+                    placeholder="Например: Договор"
+                >
+
+            </div>
+
+
+            <!-- Файл -->
+
+            <div
+                id="fileGroup"
+                class="form-group"
+            >
+
+                <label for="documentFile">
+                    Файл
+                </label>
+
+                <input
+                    id="documentFile"
+                    type="file"
+                >
+
+                <div class="file-info">
+                    PDF, DOC, DOCX, TXT, PNG или JPG до 10 МБ.
+                </div>
+
+            </div>
+
+
+            <!-- Дата -->
+
+            <div class="form-group">
+
+                <label>
+                    Срок хранения
+                </label>
+
+
+                <div class="date-row">
+
+                    <div>
+
+                        <span class="date-label">
+                            День
+                        </span>
+
+                        <input
+                            id="expireDay"
+                            class="date-part"
+                            type="text"
+                            inputmode="numeric"
+                            maxlength="2"
+                            placeholder="ДД"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="date-label">
+                            Месяц
+                        </span>
+
+                        <input
+                            id="expireMonth"
+                            class="date-part"
+                            type="text"
+                            inputmode="numeric"
+                            maxlength="2"
+                            placeholder="ММ"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="date-label">
+                            Год
+                        </span>
+
+                        <input
+                            id="expireYear"
+                            class="date-part"
+                            type="text"
+                            inputmode="numeric"
+                            maxlength="4"
+                            placeholder="ГГГГ"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="time-row">
+
+                    <div>
+
+                        <span class="date-label">
+                            Часы
+                        </span>
+
+                        <input
+                            id="expireHour"
+                            class="date-part"
+                            type="text"
+                            inputmode="numeric"
+                            maxlength="2"
+                            placeholder="ЧЧ"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="date-label">
+                            Минуты
+                        </span>
+
+                        <input
+                            id="expireMinute"
+                            class="date-part"
+                            type="text"
+                            inputmode="numeric"
+                            maxlength="2"
+                            placeholder="ММ"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="file-info">
+                    Формат: день / месяц / год, затем часы и минуты.
+                </div>
+
+
+                <div
+                    id="dateError"
+                    class="date-error"
+                ></div>
+
+            </div>
+
+
+            <!-- Действие -->
+
+            <div class="form-group">
+
+                <label for="documentAction">
+                    Что сделать после окончания срока?
+                </label>
+
+
+                <select id="documentAction">
+
+                    <option value="archive">
+                        Архивировать
+                    </option>
+
+                    <option value="delete">
+                        Удалить
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div
+                id="modalError"
+                class="error-message"
+            ></div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    onclick="closeDocumentModal()"
+                >
+                    Отмена
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="modal-primary-btn"
+                >
+                    Сохранить
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /* =========================================================
+       НАСТРОЙКИ
+    ========================================================= */
+
+    const API_URL =
+        "http://127.0.0.1:8000";
+
+    const TOKEN_KEY =
+        "obliviondoc_token";
+
+
+    let currentUser = null;
+
+    let editingDocumentId = null;
+
+
+    /* =========================================================
+       ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    ========================================================= */
+
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+
+    function getToken() {
+
+        return localStorage.getItem(
+            TOKEN_KEY
+        );
+
+    }
+
+
+    function authHeaders() {
+
+        return {
+            "Authorization":
+                `Bearer ${getToken()}`
+        };
+
+    }
+
+
+    async function apiFetch(
+        url,
+        options = {}
+    ) {
+
+        options.headers = {
+            ...(options.headers || {}),
+            ...authHeaders()
+        };
+
+
+        const response =
+            await fetch(
+                API_URL + url,
+                options
+            );
+
+
+        if (response.status === 401) {
+
+            localStorage.removeItem(
+                TOKEN_KEY
+            );
+
+            currentUser = null;
+
+            showAuth();
+
+            throw new Error(
+                "Сессия закончилась. Войдите снова."
+            );
+
+        }
+
+
+        return response;
+
+    }
+
+
+    function formatDate(dateString) {
+
+        if (!dateString) {
+            return "—";
+        }
+
+
+        const date =
+            new Date(dateString);
+
+
+        if (isNaN(date.getTime())) {
+            return dateString;
+        }
+
+
+        return date.toLocaleString(
+            "ru-RU",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    }
+
+
+    function getStatusClass(status) {
+
+        if (status === "active") {
+            return "status-active";
+        }
+
+        if (status === "archived") {
+            return "status-archived";
+        }
+
+        if (status === "deleted") {
+            return "status-deleted";
+        }
+
+        return "";
+
+    }
+
+
+    function getStatusText(status) {
+
+        if (status === "active") {
+            return "Активен";
+        }
+
+        if (status === "archived") {
+            return "В архиве";
+        }
+
+        if (status === "deleted") {
+            return "Удалён";
+        }
+
+        return status;
+
+    }
+
+
+    function getActionText(action) {
+
+        if (action === "archive") {
+            return "Архивировать";
+        }
+
+        if (action === "delete") {
+            return "Удалить";
+        }
+
+        return action;
+
+    }
+
+
+    /* =========================================================
+       РАБОТА С ДАТОЙ
+    ========================================================= */
+
+    function onlyDigits(
+        input,
+        maxLength
+    ) {
+
+        input.value =
+            input.value
+                .replace(/\D/g, "")
+                .slice(0, maxLength);
+
+    }
+
+
+    function setupNumericInput(
+        id,
+        maxLength
+    ) {
+
+        const input =
+            document.getElementById(id);
+
+
+        input.addEventListener(
+            "input",
+            function() {
+
+                onlyDigits(
+                    this,
+                    maxLength
+                );
+
+            }
+        );
+
+
+        input.addEventListener(
+            "paste",
+            function() {
+
+                setTimeout(
+                    () => {
+                        onlyDigits(
+                            this,
+                            maxLength
+                        );
+                    },
+                    0
+                );
+
+            }
+        );
+
+    }
+
+
+    setupNumericInput(
+        "expireDay",
+        2
+    );
+
+    setupNumericInput(
+        "expireMonth",
+        2
+    );
+
+    setupNumericInput(
+        "expireYear",
+        4
+    );
+
+    setupNumericInput(
+        "expireHour",
+        2
+    );
+
+    setupNumericInput(
+        "expireMinute",
+        2
+    );
+
+
+    function getDateFromForm() {
+
+        const day =
+            document
+                .getElementById("expireDay")
+                .value;
+
+        const month =
+            document
+                .getElementById("expireMonth")
+                .value;
+
+        const year =
+            document
+                .getElementById("expireYear")
+                .value;
+
+        const hour =
+            document
+                .getElementById("expireHour")
+                .value;
+
+        const minute =
+            document
+                .getElementById("expireMinute")
+                .value;
+
+
+        if (
+            day.length !== 2 ||
+            month.length !== 2 ||
+            year.length !== 4 ||
+            hour.length !== 2 ||
+            minute.length !== 2
+        ) {
+
+            throw new Error(
+                "Заполните дату и время полностью."
+            );
+
+        }
+
+
+        const dayNumber =
+            Number(day);
+
+        const monthNumber =
+            Number(month);
+
+        const yearNumber =
+            Number(year);
+
+        const hourNumber =
+            Number(hour);
+
+        const minuteNumber =
+            Number(minute);
+
+
+        if (
+            monthNumber < 1 ||
+            monthNumber > 12
+        ) {
+
+            throw new Error(
+                "Месяц должен быть от 01 до 12."
+            );
+
+        }
+
+
+        if (
+            dayNumber < 1 ||
+            dayNumber > 31
+        ) {
+
+            throw new Error(
+                "День должен быть от 01 до 31."
+            );
+
+        }
+
+
+        if (
+            hourNumber < 0 ||
+            hourNumber > 23
+        ) {
+
+            throw new Error(
+                "Часы должны быть от 00 до 23."
+            );
+
+        }
+
+
+        if (
+            minuteNumber < 0 ||
+            minuteNumber > 59
+        ) {
+
+            throw new Error(
+                "Минуты должны быть от 00 до 59."
+            );
+
+        }
+
+
+        const date =
+            new Date(
+                yearNumber,
+                monthNumber - 1,
+                dayNumber,
+                hourNumber,
+                minuteNumber,
+                0,
+                0
+            );
+
+
+        if (
+            date.getFullYear() !== yearNumber ||
+            date.getMonth() !== monthNumber - 1 ||
+            date.getDate() !== dayNumber ||
+            date.getHours() !== hourNumber ||
+            date.getMinutes() !== minuteNumber
+        ) {
+
+            throw new Error(
+                "Такой даты не существует."
+            );
+
+        }
+
+
+        return date;
+
+    }
+
+
+    function formatDateForApi(date) {
+
+        const year =
+            date.getFullYear();
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(2, "0");
+
+        const day =
+            String(
+                date.getDate()
+            ).padStart(2, "0");
+
+        const hour =
+            String(
+                date.getHours()
+            ).padStart(2, "0");
+
+        const minute =
+            String(
+                date.getMinutes()
+            ).padStart(2, "0");
+
+
+        return (
+            `${year}-${month}-${day}T${hour}:${minute}:00`
+        );
+
+    }
+
+
+    function fillDateForm(dateString) {
+
+        const date =
+            new Date(dateString);
+
+
+        if (
+            isNaN(date.getTime())
+        ) {
+            return;
+        }
+
+
+        document
+            .getElementById("expireDay")
+            .value =
+                String(
+                    date.getDate()
+                ).padStart(2, "0");
+
+
+        document
+            .getElementById("expireMonth")
+            .value =
+                String(
+                    date.getMonth() + 1
+                ).padStart(2, "0");
+
+
+        document
+            .getElementById("expireYear")
+            .value =
+                String(
+                    date.getFullYear()
+                ).padStart(4, "0");
+
+
+        document
+            .getElementById("expireHour")
+            .value =
+                String(
+                    date.getHours()
+                ).padStart(2, "0");
+
+
+        document
+            .getElementById("expireMinute")
+            .value =
+                String(
+                    date.getMinutes()
+                ).padStart(2, "0");
+
+    }
+
+
+    function clearDateForm() {
+
+        document
+            .getElementById("expireDay")
+            .value = "";
+
+        document
+            .getElementById("expireMonth")
+            .value = "";
+
+        document
+            .getElementById("expireYear")
+            .value = "";
+
+        document
+            .getElementById("expireHour")
+            .value = "";
+
+        document
+            .getElementById("expireMinute")
+            .value = "";
+
+    }
+
+
+    /* =========================================================
+       ФОРМЫ АВТОРИЗАЦИИ
+    ========================================================= */
+
+    function hideAuthForms() {
+
+        [
+            "loginForm",
+            "registerForm",
+            "forgotPasswordForm",
+            "resetPasswordForm"
+        ].forEach(
+            function(id) {
+
+                document
+                    .getElementById(id)
+                    .classList
+                    .add("hidden");
+
+            }
+        );
+
+    }
+
+
+    function showLogin() {
+
+        hideAuthForms();
+
+
+        document
+            .getElementById("loginForm")
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById("loginTab")
+            .classList
+            .add("active");
+
+
+        document
+            .getElementById("registerTab")
+            .classList
+            .remove("active");
+
+    }
+
+
+    function showRegister() {
+
+        hideAuthForms();
+
+
+        document
+            .getElementById("registerForm")
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById("loginTab")
+            .classList
+            .remove("active");
+
+
+        document
+            .getElementById("registerTab")
+            .classList
+            .add("active");
+
+    }
+
+
+    function showForgotPassword() {
+
+        hideAuthForms();
+
+
+        document
+            .getElementById("forgotPasswordForm")
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById("loginTab")
+            .classList
+            .remove("active");
+
+
+        document
+            .getElementById("registerTab")
+            .classList
+            .remove("active");
+
+
+        document
+            .getElementById("forgotError")
+            .textContent = "";
+
+
+        document
+            .getElementById("forgotSuccess")
+            .textContent = "";
+
+    }
+
+
+    /*
+        ВАЖНО!
+
+        Эта функция специально принудительно:
+        1. показывает authPage;
+        2. скрывает приложение;
+        3. скрывает все остальные формы;
+        4. показывает ТОЛЬКО resetPasswordForm.
+
+        Благодаря этому ссылка с reset_token
+        больше не открывает форму "Забыли пароль?".
+    */
+
+    function showResetPassword() {
+
+        document
+            .getElementById("authPage")
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById("app")
+            .classList
+            .add("hidden");
+
+
+        document
+            .getElementById("loginForm")
+            .classList
+            .add("hidden");
+
+
+        document
+            .getElementById("registerForm")
+            .classList
+            .add("hidden");
+
+
+        document
+            .getElementById("forgotPasswordForm")
+            .classList
+            .add("hidden");
+
+
+        document
+            .getElementById("resetPasswordForm")
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById("loginTab")
+            .classList
+            .remove("active");
+
+
+        document
+            .getElementById("registerTab")
+            .classList
+            .remove("active");
+
+
+        document
+            .getElementById("resetError")
+            .textContent = "";
+
+    }
+
+
+    /* =========================================================
+       ВХОД
+    ========================================================= */
+
+    document
+        .getElementById("loginForm")
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const email =
+                    document
+                        .getElementById("loginEmail")
+                        .value
+                        .trim();
+
+
+                const password =
+                    document
+                        .getElementById("loginPassword")
+                        .value;
+
+
+                const error =
+                    document
+                        .getElementById("loginError");
+
+
+                error.textContent = "";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL +
+                            "/auth/login",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        email: email,
+                                        password: password
+                                    })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.detail ||
+                            "Ошибка входа."
+                        );
+
+                    }
+
+
+                    localStorage.setItem(
+                        TOKEN_KEY,
+                        data.session_token
+                    );
+
+
+                    currentUser =
+                        data.user;
+
+
+                    showApp();
+
+                } catch (errorObject) {
+
+                    error.textContent =
+                        errorObject.message;
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       РЕГИСТРАЦИЯ
+    ========================================================= */
+
+    document
+        .getElementById("registerForm")
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const email =
+                    document
+                        .getElementById("registerEmail")
+                        .value
+                        .trim();
+
+
+                const password =
+                    document
+                        .getElementById("registerPassword")
+                        .value;
+
+
+                const error =
+                    document
+                        .getElementById("registerError");
+
+
+                const success =
+                    document
+                        .getElementById("registerSuccess");
+
+
+                error.textContent = "";
+
+                success.textContent = "";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL +
+                            "/auth/register",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        email: email,
+                                        password: password
+                                    })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.detail ||
+                            "Ошибка регистрации."
+                        );
+
+                    }
+
+
+                    success.textContent =
+                        "Аккаунт создан. Теперь можно войти.";
+
+
+                    document
+                        .getElementById(
+                            "registerForm"
+                        )
+                        .reset();
+
+                } catch (errorObject) {
+
+                    error.textContent =
+                        errorObject.message;
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       ЗАБЫЛИ ПАРОЛЬ
+    ========================================================= */
+
+    document
+        .getElementById("forgotPasswordForm")
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const email =
+                    document
+                        .getElementById("forgotEmail")
+                        .value
+                        .trim();
+
+
+                const error =
+                    document
+                        .getElementById("forgotError");
+
+
+                const success =
+                    document
+                        .getElementById("forgotSuccess");
+
+
+                error.textContent = "";
+
+                success.textContent = "";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL +
+                            "/auth/forgot-password",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        email: email
+                                    })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.detail ||
+                            "Не удалось отправить письмо."
+                        );
+
+                    }
+
+
+                    success.textContent =
+                        data.message ||
+                        "Если такой аккаунт существует, ссылка для восстановления отправлена.";
+
+                } catch (errorObject) {
+
+                    error.textContent =
+                        errorObject.message;
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       НОВЫЙ ПАРОЛЬ
+    ========================================================= */
+
+    document
+        .getElementById("resetPasswordForm")
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const password =
+                    document
+                        .getElementById("resetPassword")
+                        .value;
+
+
+                const passwordConfirm =
+                    document
+                        .getElementById(
+                            "resetPasswordConfirm"
+                        )
+                        .value;
+
+
+                const error =
+                    document
+                        .getElementById("resetError");
+
+
+                error.textContent = "";
+
+
+                if (
+                    password !==
+                    passwordConfirm
+                ) {
+
+                    error.textContent =
+                        "Пароли не совпадают.";
+
+                    return;
+
+                }
+
+
+                if (
+                    password.length < 6
+                ) {
+
+                    error.textContent =
+                        "Пароль должен содержать минимум 6 символов.";
+
+                    return;
+
+                }
+
+
+                const params =
+                    new URLSearchParams(
+                        window.location.search
+                    );
+
+
+                const token =
+                    params.get(
+                        "reset_token"
+                    );
+
+
+                if (!token) {
+
+                    error.textContent =
+                        "Ссылка восстановления недействительна.";
+
+                    return;
+
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            API_URL +
+                            "/auth/reset-password",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        token: token,
+                                        password: password
+                                    })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.detail ||
+                            "Не удалось изменить пароль."
+                        );
+
+                    }
+
+
+                    /*
+                        Убираем reset_token
+                        из адресной строки.
+                    */
+
+                    history.replaceState(
+                        {},
+                        document.title,
+                        window.location.pathname
+                    );
+
+
+                    alert(
+                        "Пароль успешно изменён. Теперь войдите с новым паролем."
+                    );
+
+
+                    document
+                        .getElementById(
+                            "resetPasswordForm"
+                        )
+                        .reset();
+
+
+                    showLogin();
+
+                } catch (errorObject) {
+
+                    error.textContent =
+                        errorObject.message;
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       СЕССИЯ
+    ========================================================= */
+
+    async function checkSession() {
+
+        const token =
+            getToken();
+
+
+        if (!token) {
+
+            showAuth();
+
+            return;
+
+        }
+
+
+        try {
+
+            const response =
+                await apiFetch(
+                    "/auth/me"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Сессия недействительна."
+                );
+
+            }
+
+
+            currentUser =
+                await response.json();
+
+
+            showApp();
+
+        } catch (errorObject) {
+
+            localStorage.removeItem(
+                TOKEN_KEY
+            );
+
+            showAuth();
+
+        }
+
+    }
+
+
+    function showApp() {
+
+        document
+            .getElementById("authPage")
+            .classList
+            .add("hidden");
+
+
+        document
+            .getElementById("app")
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById("userEmail")
+            .textContent =
+                currentUser.email;
+
+
+        loadDocuments();
+
+    }
+
+
+    function showAuth() {
+
+        document
+            .getElementById("authPage")
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById("app")
+            .classList
+            .add("hidden");
+
+    }
+
+
+    /* =========================================================
+       ВЫХОД
+    ========================================================= */
+
+    async function logout() {
+
+        try {
+
+            if (getToken()) {
+
+                await fetch(
+                    API_URL +
+                    "/auth/logout",
+                    {
+                        method: "POST",
+
+                        headers:
+                            authHeaders()
+                    }
+                );
+
+            }
+
+        } catch (errorObject) {
+
+            console.log(
+                errorObject
+            );
+
+        }
+
+
+        localStorage.removeItem(
+            TOKEN_KEY
+        );
+
+
+        currentUser = null;
+
+
+        showAuth();
+
+    }
+
+
+    /* =========================================================
+       ЗАГРУЗКА ДОКУМЕНТОВ
+    ========================================================= */
+
+    async function loadDocuments() {
+
+        try {
+
+            const response =
+                await apiFetch(
+                    "/documents"
+                );
+
+
+            if (!response.ok) {
+
+                const data =
+                    await response.json();
+
+
+                throw new Error(
+                    data.detail ||
+                    "Не удалось загрузить документы."
+                );
+
+            }
+
+
+            const documents =
+                await response.json();
+
+
+            renderDocuments(
+                documents
+            );
+
+            await loadAuditLog();
+
+        } catch (errorObject) {
+
+            console.error(
+                "Ошибка загрузки документов:",
+                errorObject
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       ЖУРНАЛ ДЕЙСТВИЙ
+    ========================================================= */
+
+    function getAuditActionText(action) {
+        if (action === "create") return "Создание";
+        if (action === "upload") return "Загрузка";
+        if (action === "update") return "Изменение";
+        if (action === "delete") return "Удаление";
+        if (action === "manual_delete") return "Удаление вручную";
+        if (action === "archive") return "Архивирование";
+        return action;
+    }
+
+    function getAuditResultText(result) {
+        if (["success", "created", "uploaded", "updated", "deleted", "archived"].includes(result)) return "Успешно";
+        return result;
+    }
+
+    async function loadAuditLog() {
+        try {
+            const response = await apiFetch("/audit-log");
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.detail || "Не удалось загрузить журнал действий.");
+            }
+            const logs = await response.json();
+            renderAuditLog(logs);
+        } catch (errorObject) {
+            console.error("Ошибка загрузки журнала:", errorObject);
+        }
+    }
+
+    function renderAuditLog(logs) {
+        const table = document.getElementById("auditTable");
+        if (!table) return;
+        table.innerHTML = "";
+        if (!logs || logs.length === 0) {
+            table.innerHTML = `<tr><td colspan="4"><div class="audit-empty">Журнал действий пока пуст.</div></td></tr>`;
+            return;
+        }
+        logs.forEach(function(log) {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="audit-date">${formatDate(log.created_at)}</td>
+                <td><strong>${escapeHtml(log.document_name)}</strong></td>
+                <td><span class="audit-action">${escapeHtml(getAuditActionText(log.action))}</span></td>
+                <td><span class="audit-result-success">${escapeHtml(getAuditResultText(log.result))}</span></td>
+            `;
+            table.appendChild(row);
+        });
+    }
+
+
+    /* =========================================================
+       ОТОБРАЖЕНИЕ ДОКУМЕНТОВ
+    ========================================================= */
+
+    function renderDocuments(
+        documents
+    ) {
+
+        const table =
+            document
+                .getElementById(
+                    "documentsTable"
+                );
+
+
+        table.innerHTML = "";
+
+
+        let active = 0;
+
+        let archived = 0;
+
+        let deleted = 0;
+
+
+        documents.forEach(
+            function(doc) {
+
+                if (
+                    doc.status ===
+                    "active"
+                ) {
+                    active++;
+                }
+
+
+                if (
+                    doc.status ===
+                    "archived"
+                ) {
+                    archived++;
+                }
+
+
+                if (
+                    doc.status ===
+                    "deleted"
+                ) {
+                    deleted++;
+                }
+
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                let operations;
+
+
+                if (
+                    doc.status !==
+                    "deleted"
+                ) {
+
+                    operations = `
+
+                        <div class="operations">
+
+                            <button
+                                class="small-btn edit-btn"
+                                onclick="openEditModal(${doc.id})"
+                                type="button"
+                            >
+                                Изменить
+                            </button>
+
+                            <button
+                                class="small-btn"
+                                onclick="downloadDocument(${doc.id})"
+                                type="button"
+                            >
+                                Скачать
+                            </button>
+
+                            <button
+                                class="small-btn delete-btn"
+                                onclick="deleteDocument(${doc.id})"
+                                type="button"
+                            >
+                                Удалить
+                            </button>
+
+                        </div>
+
+                    `;
+
+                } else {
+
+                    operations = "—";
+
+                }
+
+
+                row.innerHTML = `
+
+                    <td>
+                        <div class="document-name">
+                            ${escapeHtml(doc.name)}
+                        </div>
+                    </td>
+
+                    <td>
+                        ${formatDate(doc.expires_at)}
+                    </td>
+
+                    <td>
+
+                        <span
+                            class="status ${getStatusClass(doc.status)}"
+                        >
+                            ${getStatusText(doc.status)}
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        <span class="action-text">
+                            ${getActionText(doc.action)}
+                        </span>
+
+                    </td>
+
+                    <td>
+                        ${operations}
+                    </td>
+
+                `;
+
+
+                table.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+        document
+            .getElementById(
+                "totalCount"
+            )
+            .textContent =
+                documents.length;
+
+
+        document
+            .getElementById(
+                "activeCount"
+            )
+            .textContent =
+                active;
+
+
+        document
+            .getElementById(
+                "archivedCount"
+            )
+            .textContent =
+                archived;
+
+
+        document
+            .getElementById(
+                "deletedCount"
+            )
+            .textContent =
+                deleted;
+
+
+        if (
+            documents.length === 0
+        ) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td colspan="5">
+
+                        <div class="empty-state">
+                            Документов пока нет.
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       ДОБАВЛЕНИЕ ДОКУМЕНТА
+    ========================================================= */
+
+    function openAddModal() {
+
+        editingDocumentId = null;
+
+
+        document
+            .getElementById(
+                "modalTitle"
+            )
+            .textContent =
+                "Добавить документ";
+
+
+        document
+            .getElementById(
+                "documentForm"
+            )
+            .reset();
+
+
+        clearDateForm();
+
+
+        document
+            .getElementById(
+                "fileGroup"
+            )
+            .classList
+            .remove("hidden");
+
+
+        document
+            .getElementById(
+                "modalError"
+            )
+            .textContent = "";
+
+
+        document
+            .getElementById(
+                "dateError"
+            )
+            .textContent = "";
+
+
+        document
+            .getElementById(
+                "documentModal"
+            )
+            .classList
+            .remove("hidden");
+
+    }
+
+
+    /* =========================================================
+       РЕДАКТИРОВАНИЕ
+    ========================================================= */
+
+    async function openEditModal(
+        documentId
+    ) {
+
+        try {
+
+            const response =
+                await apiFetch(
+                    "/documents"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Не удалось загрузить документы."
+                );
+
+            }
+
+
+            const documents =
+                await response.json();
+
+
+            const foundDocument =
+                documents.find(
+                    item =>
+                        item.id ===
+                        documentId
+                );
+
+
+            if (!foundDocument) {
+
+                throw new Error(
+                    "Документ не найден."
+                );
+
+            }
+
+
+            editingDocumentId =
+                documentId;
+
+
+            document
+                .getElementById(
+                    "modalTitle"
+                )
+                .textContent =
+                    "Изменить документ";
+
+
+            document
+                .getElementById(
+                    "documentName"
+                )
+                .value =
+                    foundDocument.name;
+
+
+            fillDateForm(
+                foundDocument.expires_at
+            );
+
+
+            document
+                .getElementById(
+                    "documentAction"
+                )
+                .value =
+                    foundDocument.action;
+
+
+            document
+                .getElementById(
+                    "fileGroup"
+                )
+                .classList
+                .add("hidden");
+
+
+            document
+                .getElementById(
+                    "modalError"
+                )
+                .textContent = "";
+
+
+            document
+                .getElementById(
+                    "dateError"
+                )
+                .textContent = "";
+
+
+            document
+                .getElementById(
+                    "documentModal"
+                )
+                .classList
+                .remove("hidden");
+
+        } catch (errorObject) {
+
+            alert(
+                errorObject.message
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА
+    ========================================================= */
+
+    function closeDocumentModal() {
+
+        editingDocumentId = null;
+
+
+        document
+            .getElementById(
+                "documentModal"
+            )
+            .classList
+            .add("hidden");
+
+
+        document
+            .getElementById(
+                "documentForm"
+            )
+            .reset();
+
+
+        clearDateForm();
+
+
+        document
+            .getElementById(
+                "modalError"
+            )
+            .textContent = "";
+
+
+        document
+            .getElementById(
+                "dateError"
+            )
+            .textContent = "";
+
+    }
+
+
+    /* =========================================================
+       СОХРАНЕНИЕ ДОКУМЕНТА
+    ========================================================= */
+
+    document
+        .getElementById(
+            "documentForm"
+        )
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const modalError =
+                    document
+                        .getElementById(
+                            "modalError"
+                        );
+
+
+                const dateError =
+                    document
+                        .getElementById(
+                            "dateError"
+                        );
+
+
+                modalError.textContent = "";
+
+                dateError.textContent = "";
+
+
+                const name =
+                    document
+                        .getElementById(
+                            "documentName"
+                        )
+                        .value
+                        .trim();
+
+
+                const action =
+                    document
+                        .getElementById(
+                            "documentAction"
+                        )
+                        .value;
+
+
+                if (!name) {
+
+                    modalError.textContent =
+                        "Введите название документа.";
+
+                    return;
+
+                }
+
+
+                let date;
+
+
+                try {
+
+                    date =
+                        getDateFromForm();
+
+                } catch (errorObject) {
+
+                    dateError.textContent =
+                        errorObject.message;
+
+                    return;
+
+                }
+
+
+                try {
+
+                    /* =========================================
+                       РЕДАКТИРОВАНИЕ
+                    ========================================== */
+
+                    if (
+                        editingDocumentId !==
+                        null
+                    ) {
+
+                        const response =
+                            await apiFetch(
+                                `/documents/${editingDocumentId}`,
+                                {
+                                    method:
+                                        "PUT",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+
+                                    body:
+                                        JSON.stringify({
+                                            name:
+                                                name,
+
+                                            expires_at:
+                                                formatDateForApi(
+                                                    date
+                                                ),
+
+                                            action:
+                                                action
+                                        })
+                                }
+                            );
+
+
+                        const data =
+                            await response.json();
+
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                data.detail ||
+                                "Не удалось изменить документ."
+                            );
+
+                        }
+
+
+                        closeDocumentModal();
+
+                        await loadDocuments();
+
+                        return;
+
+                    }
+
+
+                    /* =========================================
+                       ДОБАВЛЕНИЕ
+                    ========================================== */
+
+                    const file =
+                        document
+                            .getElementById(
+                                "documentFile"
+                            )
+                            .files[0];
+
+
+                    let response;
+
+
+                    if (file) {
+
+                        const formData =
+                            new FormData();
+
+
+                        formData.append(
+                            "name",
+                            name
+                        );
+
+
+                        formData.append(
+                            "expires_at",
+                            formatDateForApi(
+                                date
+                            )
+                        );
+
+
+                        formData.append(
+                            "action",
+                            action
+                        );
+
+
+                        formData.append(
+                            "file",
+                            file
+                        );
+
+
+                        response =
+                            await apiFetch(
+                                "/documents/upload",
+                                {
+                                    method:
+                                        "POST",
+
+                                    body:
+                                        formData
+                                }
+                            );
+
+                    } else {
+
+                        response =
+                            await apiFetch(
+                                "/documents",
+                                {
+                                    method:
+                                        "POST",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+
+                                    body:
+                                        JSON.stringify({
+                                            name:
+                                                name,
+
+                                            expires_at:
+                                                formatDateForApi(
+                                                    date
+                                                ),
+
+                                            action:
+                                                action
+                                        })
+                                }
+                            );
+
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.detail ||
+                            "Не удалось добавить документ."
+                        );
+
+                    }
+
+
+                    closeDocumentModal();
+
+                    await loadDocuments();
+
+                } catch (errorObject) {
+
+                    modalError.textContent =
+                        errorObject.message;
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       СКАЧИВАНИЕ
+    ========================================================= */
+
+    async function downloadDocument(
+        documentId
+    ) {
+
+        try {
+
+            const response =
+                await apiFetch(
+                    `/documents/${documentId}/download`
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Не удалось скачать документ."
+                );
+
+            }
+
+
+            const blob =
+                await response.blob();
+
+
+            const url =
+                URL.createObjectURL(
+                    blob
+                );
+
+
+            const link =
+                document.createElement(
+                    "a"
+                );
+
+
+            link.href = url;
+
+            // Получаем актуальные данные документа, чтобы сохранить
+            // именно отображаемое имя и исходное расширение файла.
+            const documentsResponse =
+                await apiFetch("/documents");
+
+            if (!documentsResponse.ok) {
+                throw new Error(
+                    "Не удалось определить имя файла."
+                );
+            }
+
+            const documents =
+                await documentsResponse.json();
+
+            const documentData =
+                documents.find(
+                    function(item) {
+                        return item.id === documentId;
+                    }
+                );
+
+            if (!documentData) {
+                throw new Error(
+                    "Документ не найден."
+                );
+            }
+
+            const displayName =
+                documentData.name ||
+                "document";
+
+            let extension = "";
+
+            if (documentData.file_path) {
+                const pathWithoutQuery =
+                    documentData.file_path.split("?")[0];
+
+                const lastPart =
+                    pathWithoutQuery.split("/").pop();
+
+                if (lastPart && lastPart.includes(".")) {
+                    extension =
+                        lastPart.substring(
+                            lastPart.lastIndexOf(".")
+                        );
+                }
+            }
+
+            link.download =
+                displayName + extension;
+
+
+            document.body.appendChild(
+                link
+            );
+
+
+            link.click();
+
+            link.remove();
+
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        } catch (errorObject) {
+
+            alert(
+                errorObject.message
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       УДАЛЕНИЕ
+    ========================================================= */
+
+    async function deleteDocument(
+        documentId
+    ) {
+
+        const confirmed =
+            confirm(
+                "Вы действительно хотите удалить этот документ?"
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await apiFetch(
+                    `/documents/${documentId}`,
+                    {
+                        method:
+                            "DELETE"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    "Не удалось удалить документ."
+                );
+
+            }
+
+
+            await loadDocuments();
+
+        } catch (errorObject) {
+
+            alert(
+                errorObject.message
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       ESC — ЗАКРЫТЬ МОДАЛЬНОЕ ОКНО
+    ========================================================= */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                const modal =
+                    document
+                        .getElementById(
+                            "documentModal"
+                        );
+
+
+                if (
+                    !modal
+                        .classList
+                        .contains("hidden")
+                ) {
+
+                    closeDocumentModal();
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       САМОЕ ВАЖНОЕ — ЗАПУСК СТРАНИЦЫ
+    ========================================================= */
+
+    const initialResetToken =
+        new URLSearchParams(
+            window.location.search
+        ).get("reset_token");
+
+
+    /*
+        ЕСЛИ В АДРЕСЕ ЕСТЬ reset_token:
+
+        НЕ проверяем старую сессию.
+        НЕ показываем dashboard.
+        НЕ показываем обычный вход.
+        НЕ показываем "Забыли пароль?".
+
+        СРАЗУ открываем форму нового пароля.
+    */
+
+    if (initialResetToken) {
+
+        localStorage.removeItem(
+            TOKEN_KEY
+        );
+
+
+        currentUser = null;
+
+
+        showResetPassword();
+
+    } else {
+
+        checkSession();
+
+    }
+
+</script>
+
+</body>
+</html>
