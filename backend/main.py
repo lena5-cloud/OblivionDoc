@@ -206,6 +206,11 @@ RESEND_FROM = os.getenv(
 
 RESEND_API_URL = "https://api.resend.com/emails"
 
+FRONTEND_URL = os.getenv(
+    "OBLIVION_FRONTEND_URL",
+    "https://obliviondoc-site.onrender.com"
+)
+
 # ============================================================
 
 # СОЗДАНИЕ ТАБЛИЦ
