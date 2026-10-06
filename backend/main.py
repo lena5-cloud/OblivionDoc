@@ -37,12 +37,12 @@ import hashlib
 import base64
 
 import uuid
-
-import smtplib
+import json
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 
 import threading
 
-from email.message import EmailMessage
 
 from pathlib import Path
 
@@ -188,69 +188,23 @@ ALLOWED_EXTENSIONS = {
 
 RESET_TOKEN_LIFETIME_MINUTES = 60
 
-SMTP_HOST = os.getenv(
+RESEND_API_KEY = os.getenv(
 
-    "OBLIVION_SMTP_HOST",
-
-    "smtp.gmail.com"
-
-)
-
-SMTP_PORT = int(
-
-    os.getenv(
-
-        "OBLIVION_SMTP_PORT",
-
-        "587"
-
-    )
-
-)
-
-SMTP_USER = os.getenv(
-
-    "OBLIVION_SMTP_USER",
+    "RESEND_API_KEY",
 
     ""
 
 )
 
-SMTP_PASSWORD = os.getenv(
+RESEND_FROM = os.getenv(
 
-    "OBLIVION_SMTP_PASSWORD",
+    "RESEND_FROM",
 
-    ""
-
-)
-
-SMTP_FROM = os.getenv(
-
-    "OBLIVION_SMTP_FROM",
-
-    SMTP_USER
+    "onboarding@resend.dev"
 
 )
 
-FRONTEND_URL = os.getenv(
-
-    "OBLIVION_FRONTEND_URL",
-
-    "https://obliviondoc-site.onrender.com"
-
-)
-
-SMTP_TIMEOUT_SECONDS = int(
-
-    os.getenv(
-
-        "OBLIVION_SMTP_TIMEOUT",
-
-        "10"
-
-    )
-
-)
+RESEND_API_URL = "https://api.resend.com/emails"
 
 # ============================================================
 
@@ -502,34 +456,21 @@ def send_password_reset_email(
 
 ):
 
-    message = EmailMessage()
+    """Отправляет письмо восстановления через Resend HTTPS API."""
 
-    # Делаем каждое письмо отдельной Gmail-цепочкой.
-    # Если несколько писем восстановления имеют одинаковую тему,
-    # Gmail может объединить их в одну переписку и спрятать
-    # повторяющееся содержимое под кнопкой «...».
-    message["Subject"] = (
+    subject = (
         "OblivionDoc — восстановление пароля "
         f"({datetime.now().strftime('%d.%m.%Y %H:%M')})"
     )
 
-    message["From"] = SMTP_FROM
-    message["To"] = email
-
-    # --------------------------------------------------------
-    # HTML-версия письма
-    # --------------------------------------------------------
-
     html_text = f"""
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Восстановление пароля OblivionDoc</title>
 </head>
-
 <body style="
     margin: 0;
     padding: 0;
@@ -537,232 +478,91 @@ def send_password_reset_email(
     font-family: Arial, Helvetica, sans-serif;
     color: #111111;
 ">
-
-    <table
-        width="100%"
-        cellpadding="0"
-        cellspacing="0"
-        border="0"
-        style="
-            background-color: #f4f6f8;
-            padding: 32px 0;
-        "
-    >
-
-        <tr>
-            <td align="center">
-
-                <table
-                    width="600"
-                    cellpadding="0"
-                    cellspacing="0"
-                    border="0"
-                    style="
-                        width: 600px;
-                        max-width: 600px;
-                        background-color: #ffffff;
-                        border-radius: 12px;
-                    "
-                >
-
-                    <tr>
-                        <td style="padding: 34px 30px;">
-
-                            <h2 style="
-                                margin: 0 0 24px 0;
-                                padding: 0;
-                                font-size: 22px;
-                                line-height: 1.3;
-                                font-weight: 700;
-                                color: #111111;
-                            ">
-                                Восстановление пароля OblivionDoc
-                            </h2>
-
-                            <p style="
-                                margin: 0 0 18px 0;
-                                padding: 0;
-                                font-size: 16px;
-                                line-height: 1.6;
-                                color: #111111;
-                            ">
-                                Здравствуйте!
-                            </p>
-
-                            <p style="
-                                margin: 0 0 18px 0;
-                                padding: 0;
-                                font-size: 16px;
-                                line-height: 1.6;
-                                color: #111111;
-                            ">
-                                Вы запросили восстановление пароля
-                                для OblivionDoc.
-                            </p>
-
-                            <p style="
-                                margin: 0 0 24px 0;
-                                padding: 0;
-                                font-size: 16px;
-                                line-height: 1.6;
-                                color: #111111;
-                            ">
-                                Для восстановления пароля нажмите
-                                на кнопку ниже:
-                            </p>
-
-                            <table
-                                width="100%"
-                                cellpadding="0"
-                                cellspacing="0"
-                                border="0"
-                            >
-                                <tr>
-                                    <td
-                                        align="center"
-                                        style="padding: 4px 0 28px 0;"
-                                    >
-
-                                        <a
-                                            href="{reset_link}"
-                                            target="_blank"
-                                            style="
-                                                display: inline-block;
-                                                padding: 14px 24px;
-                                                background-color: #222222;
-                                                color: #ffffff;
-                                                text-decoration: none;
-                                                border-radius: 8px;
-                                                font-size: 16px;
-                                                font-weight: bold;
-                                                line-height: 1.2;
-                                            "
-                                        >
-                                            Восстановить пароль
-                                        </a>
-
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <p style="
-                                margin: 0 0 18px 0;
-                                padding: 0;
-                                font-size: 14px;
-                                line-height: 1.6;
-                                color: #555555;
-                            ">
-                                Ссылка действует
-                                <strong>{RESET_TOKEN_LIFETIME_MINUTES} минут</strong>.
-                            </p>
-
-                            <p style="
-                                margin: 0 0 24px 0;
-                                padding: 0;
-                                font-size: 14px;
-                                line-height: 1.6;
-                                color: #555555;
-                            ">
-                                Если вы не запрашивали восстановление
-                                пароля, просто проигнорируйте это письмо.
-                            </p>
-
-                            <p style="
-                                margin: 0;
-                                padding: 0;
-                                font-size: 14px;
-                                line-height: 1.6;
-                                color: #111111;
-                            ">
-                                С уважением,<br>
-                                <strong>OblivionDoc</strong>
-                            </p>
-
-                        </td>
-                    </tr>
-
-                </table>
-
-            </td>
-        </tr>
-
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6f8;padding:32px 0;">
+        <tr><td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background-color:#ffffff;border-radius:12px;">
+                <tr><td style="padding:34px 30px;">
+                    <h2 style="margin:0 0 24px 0;font-size:22px;line-height:1.3;color:#111111;">
+                        Восстановление пароля OblivionDoc
+                    </h2>
+                    <p style="margin:0 0 18px 0;font-size:16px;line-height:1.6;color:#111111;">
+                        Здравствуйте!
+                    </p>
+                    <p style="margin:0 0 18px 0;font-size:16px;line-height:1.6;color:#111111;">
+                        Вы запросили восстановление пароля для OblivionDoc.
+                    </p>
+                    <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#111111;">
+                        Для восстановления пароля нажмите на кнопку ниже:
+                    </p>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr><td align="center" style="padding:4px 0 28px 0;">
+                            <a href="{reset_link}" target="_blank" style="display:inline-block;padding:14px 24px;background-color:#222222;color:#ffffff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:bold;line-height:1.2;">
+                                Восстановить пароль
+                            </a>
+                        </td></tr>
+                    </table>
+                    <p style="margin:0 0 18px 0;font-size:14px;line-height:1.6;color:#555555;">
+                        Ссылка действует <strong>{RESET_TOKEN_LIFETIME_MINUTES} минут</strong>.
+                    </p>
+                    <p style="margin:0 0 24px 0;font-size:14px;line-height:1.6;color:#555555;">
+                        Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо.
+                    </p>
+                    <p style="margin:0;font-size:14px;line-height:1.6;color:#111111;">
+                        С уважением,<br><strong>OblivionDoc</strong>
+                    </p>
+                </td></tr>
+            </table>
+        </td></tr>
     </table>
-
 </body>
 </html>
 """
 
-    # Отправляем только HTML-версию письма.
-    # Так Gmail не получает отдельную текстовую часть,
-    # которую он может сворачивать под кнопкой «...».
+    if not RESEND_API_KEY:
+        print("RESEND_API_KEY не настроен.")
+        return False
 
-    message.set_content(
-        html_text,
-        subtype="html"
+    payload = {
+        "from": RESEND_FROM,
+        "to": [email],
+        "subject": subject,
+        "html": html_text,
+    }
+
+    request = Request(
+        RESEND_API_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
     )
 
-    # --------------------------------------------------------
-    # ПРОВЕРКА SMTP
-    # --------------------------------------------------------
-
-    if not SMTP_USER or not SMTP_PASSWORD:
-
-        print("=" * 60)
-
-        print("SMTP НЕ НАСТРОЕН")
-
-        print("Ссылка восстановления:")
-
-        print(reset_link)
-
-        print(
-            f"Ссылка действует "
-            f"{RESET_TOKEN_LIFETIME_MINUTES} минут."
-        )
-
-        print("=" * 60)
-
-        return
-
-    # --------------------------------------------------------
-    # ОТПРАВКА EMAIL
-    # --------------------------------------------------------
-
     try:
+        with urlopen(request, timeout=20) as response:
+            response_body = response.read().decode("utf-8")
 
-        with smtplib.SMTP(
-            SMTP_HOST,
-            SMTP_PORT
-        ) as server:
+        result = json.loads(response_body)
+        print("Письмо восстановления успешно отправлено через Resend.")
+        print("Resend ID:", result.get("id", "не указан"))
+        return True
 
-            server.starttls()
+    except HTTPError as error:
+        try:
+            error_body = error.read().decode("utf-8")
+        except Exception:
+            error_body = ""
+        print("Ошибка Resend API:", error.code, error_body)
+        return False
 
-            server.login(
-                SMTP_USER,
-                SMTP_PASSWORD
-            )
-
-            server.send_message(
-                message
-            )
-
-            print(
-                "Письмо восстановления "
-                "пароля успешно отправлено."
-            )
+    except URLError as error:
+        print("Ошибка подключения к Resend:", error.reason)
+        return False
 
     except Exception as error:
-
-        print(
-            "Ошибка отправки email:",
-            error
-        )
-
-        print(
-            "Ссылка восстановления:"
-        )
-
-        print(reset_link)
+        print("Ошибка отправки email через Resend:", error)
+        return False
 
 
 def create_password_reset_token(
@@ -1124,9 +924,7 @@ def forgot_password(
     )
 
     # Отправляем письмо в отдельном потоке, чтобы запрос браузера
-    # не ждал подключения к SMTP. На Render Free SMTP-порты
-    # 25/465/587 заблокированы, поэтому ошибка не должна
-    # заставлять кнопку восстановления долго "висеть".
+    # не ждал ответа внешнего сервиса отправки почты.
     email_thread = threading.Thread(
 
         target=send_password_reset_email,
