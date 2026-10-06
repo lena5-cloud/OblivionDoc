@@ -40,6 +40,8 @@ import uuid
 
 import smtplib
 
+import threading
+
 from email.message import EmailMessage
 
 from pathlib import Path
@@ -235,6 +237,18 @@ FRONTEND_URL = os.getenv(
     "OBLIVION_FRONTEND_URL",
 
     "https://obliviondoc-site.onrender.com"
+
+)
+
+SMTP_TIMEOUT_SECONDS = int(
+
+    os.getenv(
+
+        "OBLIVION_SMTP_TIMEOUT",
+
+        "10"
+
+    )
 
 )
 
@@ -1109,13 +1123,21 @@ def forgot_password(
 
     )
 
-    send_password_reset_email(
+    # Отправляем письмо в отдельном потоке, чтобы запрос браузера
+    # не ждал подключения к SMTP. На Render Free SMTP-порты
+    # 25/465/587 заблокированы, поэтому ошибка не должна
+    # заставлять кнопку восстановления долго "висеть".
+    email_thread = threading.Thread(
 
-        user.email,
+        target=send_password_reset_email,
 
-        reset_link
+        args=(user.email, reset_link),
+
+        daemon=True
 
     )
+
+    email_thread.start()
 
     return {
 
