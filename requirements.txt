@@ -1,0 +1,7 @@
+fastapi==0.142.2
+uvicorn==0.54.0
+sqlalchemy
+python-multipart==0.0.32
+apscheduler==3.11.3
+tzlocal==5.4.4
+tzdata==2026.5
