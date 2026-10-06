@@ -530,6 +530,123 @@
         .audit-result-success { color: #16a34a; font-weight: 600; }
         .audit-date { white-space: nowrap; color: #6b7280; }
 
+
+        /* =========================
+           ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ
+        ========================= */
+
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1100;
+            animation: confirmFadeIn 0.18s ease;
+        }
+
+        .confirm-overlay.hidden {
+            display: none !important;
+        }
+
+        .confirm-dialog {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+            animation: confirmScaleIn 0.18s ease;
+        }
+
+        .confirm-icon {
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: #fee2e2;
+            color: #dc2626;
+            font-size: 22px;
+            margin-bottom: 17px;
+        }
+
+        .confirm-dialog h3 {
+            margin: 0 0 9px;
+            font-size: 21px;
+            color: #111827;
+        }
+
+        .confirm-dialog p {
+            margin: 0;
+            color: #6b7280;
+            line-height: 1.55;
+            font-size: 14px;
+        }
+
+        .confirm-warning {
+            margin-top: 10px !important;
+            color: #9ca3af !important;
+            font-size: 13px !important;
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .confirm-cancel-btn,
+        .confirm-delete-btn {
+            border-radius: 9px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .confirm-cancel-btn {
+            border: 1px solid #d1d5db;
+            background: white;
+            color: #374151;
+        }
+
+        .confirm-cancel-btn:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .confirm-delete-btn {
+            border: 1px solid #dc2626;
+            background: #dc2626;
+            color: white;
+        }
+
+        .confirm-delete-btn:hover {
+            background: #b91c1c;
+            border-color: #b91c1c;
+        }
+
+        .confirm-cancel-btn:active,
+        .confirm-delete-btn:active {
+            transform: translateY(1px);
+        }
+
+        @keyframes confirmFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes confirmScaleIn {
+            from { transform: scale(0.97); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
         /* =========================
            АДАПТИВНОСТЬ
         ========================= */
@@ -1347,6 +1464,61 @@
 </div>
 
 
+
+<!-- =========================================================
+     КАСТОМНОЕ ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ
+========================================================= -->
+
+<div
+    id="deleteConfirmModal"
+    class="confirm-overlay hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deleteConfirmTitle"
+>
+
+    <div class="confirm-dialog">
+
+        <div class="confirm-icon" aria-hidden="true">
+            🗑
+        </div>
+
+        <h3 id="deleteConfirmTitle">
+            Удалить документ?
+        </h3>
+
+        <p>
+            Вы действительно хотите удалить этот документ?
+        </p>
+
+        <p class="confirm-warning">
+            Это действие нельзя отменить.
+        </p>
+
+        <div class="confirm-actions">
+
+            <button
+                id="deleteConfirmCancel"
+                class="confirm-cancel-btn"
+                type="button"
+            >
+                Отмена
+            </button>
+
+            <button
+                id="deleteConfirmAccept"
+                class="confirm-delete-btn"
+                type="button"
+            >
+                Удалить
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script>
 
     /* =========================================================
@@ -1354,7 +1526,7 @@
     ========================================================= */
 
     const API_URL =
-        "https://obliviondoc.onrender.com";
+        "http://127.0.0.1:8000";
 
     const TOKEN_KEY =
         "obliviondoc_token";
@@ -3541,14 +3713,75 @@
        УДАЛЕНИЕ
     ========================================================= */
 
+    function showDeleteConfirm() {
+
+        const modal =
+            document.getElementById(
+                "deleteConfirmModal"
+            );
+
+        const cancelButton =
+            document.getElementById(
+                "deleteConfirmCancel"
+            );
+
+        const acceptButton =
+            document.getElementById(
+                "deleteConfirmAccept"
+            );
+
+        return new Promise(function(resolve) {
+
+            modal.classList.remove("hidden");
+
+            function close(result) {
+                modal.classList.add("hidden");
+                cancelButton.removeEventListener("click", onCancel);
+                acceptButton.removeEventListener("click", onAccept);
+                document.removeEventListener("keydown", onKeyDown);
+                modal.removeEventListener("click", onOverlayClick);
+                resolve(result);
+            }
+
+            function onCancel() {
+                close(false);
+            }
+
+            function onAccept() {
+                close(true);
+            }
+
+            function onKeyDown(event) {
+                if (event.key === "Escape") {
+                    close(false);
+                }
+            }
+
+            function onOverlayClick(event) {
+                if (event.target === modal) {
+                    close(false);
+                }
+            }
+
+            cancelButton.addEventListener("click", onCancel);
+            acceptButton.addEventListener("click", onAccept);
+            document.addEventListener("keydown", onKeyDown);
+            modal.addEventListener("click", onOverlayClick);
+
+            setTimeout(function() {
+                cancelButton.focus();
+            }, 0);
+
+        });
+    }
+
+
     async function deleteDocument(
         documentId
     ) {
 
         const confirmed =
-            confirm(
-                "Вы действительно хотите удалить этот документ?"
-            );
+            await showDeleteConfirm();
 
 
         if (!confirmed) {
