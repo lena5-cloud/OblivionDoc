@@ -717,71 +717,34 @@ def root():
 
 # ============================================================
 
-@app.post(
-
-    "/auth/register",
-
-    response_model=UserResponse
-
-)
-
+@app.post("/auth/register", response_model=LoginResponse)
 def register(
-
     user_data: UserRegister,
-
     db: Session = Depends(get_db)
-
 ):
-
-    existing_user = (
-
-        db.query(User)
-
-        .filter(
-
-            User.email == user_data.email
-
-        )
-
-        .first()
-
-    )
-
+    email = user_data.email.strip().lower()
+    existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
-
         raise HTTPException(
-
             status_code=400,
-
-            detail=(
-
-                "Пользователь с таким "
-
-                "email уже существует."
-
-            )
-
+            detail="Пользователь с таким email уже существует."
         )
 
+    session_token = secrets.token_urlsafe(32)
     user = User(
-
-        email=user_data.email,
-
-        password_hash=hash_password(
-
-            user_data.password
-
-        )
-
+        email=email,
+        password_hash=hash_password(user_data.password),
+        session_token=session_token
     )
-
     db.add(user)
-
     db.commit()
-
     db.refresh(user)
 
-    return user
+    return LoginResponse(
+        message="Аккаунт создан. Добро пожаловать в OblivionDoc!",
+        session_token=session_token,
+        user=user
+    )
 
 # ============================================================
 
@@ -811,7 +774,7 @@ def login(
 
         .filter(
 
-            User.email == login_data.email
+            User.email == login_data.email.strip().lower()
 
         )
 
@@ -1544,64 +1507,39 @@ def update_document(
 
         )
 
-    new_expires_at = normalize_datetime(
+    new_name = document_data.name.strip()
+    new_expires_at = normalize_datetime(document_data.expires_at)
+    new_action = document_data.action
 
-        document_data.expires_at
-
+    changed = (
+        document.name != new_name
+        or document.expires_at != new_expires_at
+        or document.action != new_action
     )
 
-    document.name = (
+    if not changed:
+        return document
 
-        document_data.name
-
-    )
-
-    document.expires_at = (
-
-        new_expires_at
-
-    )
-
-    document.action = (
-
-        document_data.action
-
-    )
+    document.name = new_name
+    document.expires_at = new_expires_at
+    document.action = new_action
 
     if document.expires_at > utc_now():
-
         document.status = "active"
-
-    else:
-
-        if document.action == "archive":
-
-            document.status = "archived"
-
-        elif document.action == "delete":
-
-            document.status = "deleted"
-
-    db.commit()
-
-    db.refresh(document)
+    elif document.action == "archive":
+        document.status = "archived"
+    elif document.action == "delete":
+        document.status = "deleted"
 
     audit = AuditLog(
-
         document_id=document.id,
-
         document_name=document.name,
-
         action="update",
-
         result="success"
-
     )
-
     db.add(audit)
-
     db.commit()
-
+    db.refresh(document)
     return document
 
 # ============================================================
