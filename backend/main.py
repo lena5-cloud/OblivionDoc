@@ -702,14 +702,11 @@ def get_current_user(
 # ============================================================
 
 @app.get("/")
-
 def root():
-
-    return {
-
-        "message": "OblivionDoc API работает"
-
-    }
+    frontend_file = BASE_DIR / "frontend" / "index.html"
+    if frontend_file.exists():
+        return FileResponse(frontend_file, media_type="text/html")
+    return {"message": "OblivionDoc API работает"}
 
 # ============================================================
 
