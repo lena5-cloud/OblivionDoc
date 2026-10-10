@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, LargeBinary
 from datetime import datetime
 
 from .database import Base
@@ -59,6 +59,16 @@ class Document(Base):
     )
 
     file_path = Column(
+        String,
+        nullable=True
+    )
+
+    file_content = Column(
+        LargeBinary,
+        nullable=True
+    )
+
+    file_name = Column(
         String,
         nullable=True
     )
@@ -160,3 +170,15 @@ class PasswordResetToken(Base):
         DateTime,
         nullable=True
     )
+
+
+class OrganizationProfile(Base):
+    __tablename__ = "organization_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, unique=True, nullable=False, index=True)
+    organization_name = Column(String, nullable=False, default="")
+    subdivision = Column(String, nullable=False, default="")
+    responsible_person = Column(String, nullable=False, default="")
+    retention_policy = Column(String, nullable=False, default="")
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
