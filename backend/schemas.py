@@ -125,3 +125,10 @@ class PasswordResetConfirm(BaseModel):
         min_length=6,
         max_length=100
     )
+
+
+class OrganizationSettingsData(BaseModel):
+    organization_name: str = Field(default="", max_length=200)
+    subdivision: str = Field(default="", max_length=200)
+    responsible_person: str = Field(default="", max_length=200)
+    retention_policy: str = Field(default="", max_length=1000)
