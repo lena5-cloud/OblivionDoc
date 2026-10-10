@@ -16,7 +16,7 @@ from fastapi import (
 
 from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -38,6 +38,8 @@ import base64
 
 import uuid
 import json
+import mimetypes
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -67,7 +69,8 @@ from .models import (
 
     AuditLog,
 
-    PasswordResetToken
+    PasswordResetToken,
+    OrganizationProfile
 
 )
 
@@ -91,7 +94,8 @@ from .schemas import (
 
     PasswordResetRequest,
 
-    PasswordResetConfirm
+    PasswordResetConfirm,
+    OrganizationSettingsData
 
 )
 
@@ -225,46 +229,37 @@ Base.metadata.create_all(bind=engine)
 # ============================================================
 
 def migrate_database():
+    # Миграция без SQLite-only PRAGMA — работает и с PostgreSQL.
+    from sqlalchemy import inspect
 
-    with engine.connect() as connection:
+    inspector = inspect(engine)
+    if "documents" not in inspector.get_table_names():
+        return
 
-        result = connection.execute(
+    columns = {column["name"] for column in inspector.get_columns("documents")}
 
-            text("PRAGMA table_info(documents)")
-
-        )
-
-        columns = [
-
-            row[1]
-
-            for row in result
-
-        ]
-
+    with engine.begin() as connection:
         if "user_id" not in columns:
-
             connection.execute(
-
-                text(
-
-                    "ALTER TABLE documents "
-
-                    "ADD COLUMN user_id INTEGER"
-
-                )
-
+                text("ALTER TABLE documents ADD COLUMN user_id INTEGER")
             )
+            print("База данных обновлена: добавлен user_id.")
 
-            connection.commit()
-
-            print(
-
-                "База данных обновлена: "
-
-                "добавлен user_id."
-
+        if "file_content" not in columns:
+            statement = (
+                "ALTER TABLE documents ADD COLUMN file_content BYTEA"
+                if engine.dialect.name == "postgresql"
+                else "ALTER TABLE documents ADD COLUMN file_content BLOB"
             )
+            connection.execute(text(statement))
+            print("База данных обновлена: добавлено хранилище файлов.")
+
+        if "file_name" not in columns:
+            connection.execute(
+                text("ALTER TABLE documents ADD COLUMN file_name VARCHAR")
+            )
+            print("База данных обновлена: добавлено имя файла.")
+
 
 migrate_database()
 
@@ -701,6 +696,64 @@ def get_current_user(
 
 # ============================================================
 
+
+
+@app.get("/settings/organization")
+def get_organization_settings(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    profile = (
+        db.query(OrganizationProfile)
+        .filter(OrganizationProfile.user_id == current_user.id)
+        .first()
+    )
+    if not profile:
+        return {
+            "organization_name": "",
+            "subdivision": "",
+            "responsible_person": "",
+            "retention_policy": ""
+        }
+    return {
+        "organization_name": profile.organization_name,
+        "subdivision": profile.subdivision,
+        "responsible_person": profile.responsible_person,
+        "retention_policy": profile.retention_policy
+    }
+
+
+@app.put("/settings/organization")
+def save_organization_settings(
+    settings: OrganizationSettingsData,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    profile = (
+        db.query(OrganizationProfile)
+        .filter(OrganizationProfile.user_id == current_user.id)
+        .first()
+    )
+    if not profile:
+        profile = OrganizationProfile(user_id=current_user.id)
+        db.add(profile)
+
+    profile.organization_name = settings.organization_name.strip()
+    profile.subdivision = settings.subdivision.strip()
+    profile.responsible_person = settings.responsible_person.strip()
+    profile.retention_policy = settings.retention_policy.strip()
+    db.commit()
+    db.refresh(profile)
+
+    return {
+        "message": "Настройки организации сохранены.",
+        "organization_name": profile.organization_name,
+        "subdivision": profile.subdivision,
+        "responsible_person": profile.responsible_person,
+        "retention_policy": profile.retention_policy
+    }
+
+
 @app.get("/")
 def root():
     frontend_file = BASE_DIR / "frontend" / "index.html"
@@ -849,7 +902,7 @@ def forgot_password(
 
         .filter(
 
-            User.email == request.email
+            User.email == request.email.strip().lower()
 
         )
 
@@ -1284,21 +1337,19 @@ async def create_document_upload(
 
         )
 
-    expires_at = normalize_datetime(
+    if file is None or not file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="При создании документа необходимо прикрепить файл."
+        )
 
-        expires_at
-
-    )
+    expires_at = normalize_datetime(expires_at)
 
     file_path = None
+    file_content = bytearray()
+    original_name = file.filename or ""
 
     if file:
-
-        original_name = (
-
-            file.filename or ""
-
-        )
 
         extension = Path(
 
@@ -1365,6 +1416,7 @@ async def create_document_upload(
                         break
 
                     total_size += len(chunk)
+                    file_content.extend(chunk)
 
                     if total_size > MAX_FILE_SIZE:
 
@@ -1415,6 +1467,9 @@ async def create_document_upload(
         name=name,
 
         file_path=file_path,
+
+        file_content=bytes(file_content),
+        file_name=original_name,
 
         expires_at=expires_at,
 
@@ -1592,6 +1647,8 @@ def delete_document(
     # Сохраняем запись документа в БД со статусом deleted.
     # Так история действий остаётся доступной в аудите.
     document.file_path = None
+    document.file_content = None
+    document.file_name = None
     document.status = "deleted"
 
     audit = AuditLog(
@@ -1670,28 +1727,30 @@ def download_document(
 
         )
 
-    file_path = Path(
+    file_path = Path(document.file_path)
 
-        document.file_path
-
-    )
-
-    if not file_path.exists():
-
-        raise HTTPException(
-
-            status_code=404,
-
-            detail="Файл не найден."
-
+    if file_path.exists():
+        return FileResponse(
+            path=file_path,
+            filename=document.file_name or document.name
         )
 
-    return FileResponse(
+    # Резервная копия вложения находится в БД, поэтому файл доступен
+    # и после перезапуска сервиса с временной файловой системой.
+    if document.file_content:
+        filename = document.file_name or document.name
+        media_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+        return Response(
+            content=document.file_content,
+            media_type=media_type,
+            headers={
+                "Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"
+            }
+        )
 
-        path=file_path,
-
-        filename=document.name
-
+    raise HTTPException(
+        status_code=404,
+        detail="Файл не найден. Для старой записи файл мог быть удалён при перезапуске хостинга."
     )
 
 # ============================================================
@@ -1777,14 +1836,21 @@ def process_expired_documents():
                 source_path = Path(document.file_path)
 
                 if not source_path.exists():
-                    # Файл нельзя переместить — не скрываем проблему.
-                    # Документ остаётся active, планировщик попробует снова.
-                    db.add(AuditLog(
-                        document_id=document.id,
-                        document_name=document.name,
-                        action="archive",
-                        result="error_file_not_found"
-                    ))
+                    if document.file_content:
+                        document.status = "archived"
+                        db.add(AuditLog(
+                            document_id=document.id,
+                            document_name=document.name,
+                            action="archive",
+                            result="success_database_copy"
+                        ))
+                    else:
+                        db.add(AuditLog(
+                            document_id=document.id,
+                            document_name=document.name,
+                            action="archive",
+                            result="error_file_not_found"
+                        ))
                     continue
 
                 archive_name = (
@@ -1831,6 +1897,8 @@ def process_expired_documents():
             elif document.action == "delete":
 
                 if not document.file_path:
+                    document.file_content = None
+                    document.file_name = None
                     document.status = "deleted"
 
                     db.add(AuditLog(
@@ -1846,6 +1914,8 @@ def process_expired_documents():
                 if not file_path.exists():
                     # Файла уже нет — требуемое состояние достигнуто.
                     document.file_path = None
+                    document.file_content = None
+                    document.file_name = None
                     document.status = "deleted"
 
                     db.add(AuditLog(
@@ -1860,6 +1930,8 @@ def process_expired_documents():
                     file_path.unlink()
 
                     document.file_path = None
+                    document.file_content = None
+                    document.file_name = None
                     document.status = "deleted"
 
                     db.add(AuditLog(
