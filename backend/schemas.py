@@ -2,26 +2,22 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Literal
 
-
 class UserRegister(BaseModel):
 
     email: str = Field(
         min_length=5,
-        max_length=100
+        max_length=254,
+        pattern=r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
     )
 
     password: str = Field(
-        min_length=6,
+        min_length=8,
         max_length=100
     )
 
-
 class UserLogin(BaseModel):
-
-    email: str
-
-    password: str
-
+    email: str = Field(min_length=5, max_length=254)
+    password: str = Field(min_length=1, max_length=100)
 
 class UserResponse(BaseModel):
 
@@ -34,7 +30,6 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
 class LoginResponse(BaseModel):
 
     message: str
@@ -42,7 +37,6 @@ class LoginResponse(BaseModel):
     session_token: str
 
     user: UserResponse
-
 
 class DocumentCreate(BaseModel):
 
@@ -55,7 +49,6 @@ class DocumentCreate(BaseModel):
         "delete"
     ] = "archive"
 
-
 class DocumentUpdate(BaseModel):
 
     name: str
@@ -67,7 +60,6 @@ class DocumentUpdate(BaseModel):
         "delete"
     ]
 
-
 class DocumentResponse(BaseModel):
 
     id: int
@@ -77,6 +69,8 @@ class DocumentResponse(BaseModel):
     name: str
 
     file_path: str | None
+
+    file_name: str | None = None
 
     created_at: datetime
 
@@ -88,7 +82,6 @@ class DocumentResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
 
 class AuditLogResponse(BaseModel):
 
@@ -107,25 +100,20 @@ class AuditLogResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
-# =========================================================
 # ВОССТАНОВЛЕНИЕ ПАРОЛЯ
-# =========================================================
 
 class PasswordResetRequest(BaseModel):
 
     email: str
-
 
 class PasswordResetConfirm(BaseModel):
 
     token: str
 
     password: str = Field(
-        min_length=6,
+        min_length=8,
         max_length=100
     )
-
 
 class OrganizationSettingsData(BaseModel):
     organization_name: str = Field(default="", max_length=200)
