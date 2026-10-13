@@ -3,7 +3,15 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./obliviondoc.db")
+raw_database_url = os.getenv("DATABASE_URL", "").strip()
+is_render = bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
+
+if is_render and not raw_database_url:
+    raise RuntimeError(
+
+    )
+
+DATABASE_URL = raw_database_url or "sqlite:///./obliviondoc.db"
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace(
@@ -15,7 +23,6 @@ elif DATABASE_URL.startswith("postgresql://"):
     )
 
 engine_options = {"pool_pre_ping": True}
-
 if DATABASE_URL.startswith("sqlite"):
     engine_options["connect_args"] = {"check_same_thread": False}
 
@@ -24,11 +31,10 @@ engine = create_engine(DATABASE_URL, **engine_options)
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
-    bind=engine
+    bind=engine,
 )
 
 Base = declarative_base()
-
 
 def get_db():
     db = SessionLocal()
