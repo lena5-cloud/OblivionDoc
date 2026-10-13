@@ -43,8 +43,6 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
-
-
 from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -99,25 +97,23 @@ from .schemas import (
 
 )
 
-# ============================================================
-
 # FASTAPI
 
-# ============================================================
+app = FastAPI(title="OblivionDoc API", version="1.0.0")
 
-app = FastAPI(
-
-    title="OblivionDoc API",
-
-    version="1.0.0"
-
-)
-
-# ============================================================
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Cache-Control"] = "no-store"
+    if request.url.scheme == "https":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 # CORS
-
-# ============================================================
 
 app.add_middleware(
 
@@ -141,11 +137,7 @@ app.add_middleware(
 
 )
 
-# ============================================================
-
 # ПУТИ К ПАПКАМ
-
-# ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -157,11 +149,7 @@ UPLOADS_DIR.mkdir(exist_ok=True)
 
 ARCHIVE_DIR.mkdir(exist_ok=True)
 
-# ============================================================
-
 # НАСТРОЙКИ ФАЙЛОВ
-
-# ============================================================
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
@@ -183,11 +171,7 @@ ALLOWED_EXTENSIONS = {
 
 }
 
-# ============================================================
-
 # НАСТРОЙКИ ВОССТАНОВЛЕНИЯ ПАРОЛЯ
-
-# ============================================================
 
 RESET_TOKEN_LIFETIME_MINUTES = 60
 
@@ -214,22 +198,14 @@ FRONTEND_URL = os.getenv(
     "https://obliviondoc-site.onrender.com"
 )
 
-# ============================================================
-
 # СОЗДАНИЕ ТАБЛИЦ
-
-# ============================================================
 
 Base.metadata.create_all(bind=engine)
 
-# ============================================================
-
 # МИГРАЦИЯ БАЗЫ
 
-# ============================================================
-
 def migrate_database():
-    # Миграция без SQLite-only PRAGMA — работает и с PostgreSQL.
+  
     from sqlalchemy import inspect
 
     inspector = inspect(engine)
@@ -260,14 +236,38 @@ def migrate_database():
             )
             print("База данных обновлена: добавлено имя файла.")
 
+        user_count = connection.execute(
+            text("SELECT COUNT(*) FROM users")
+        ).scalar_one()
+        if user_count == 1:
+            connection.execute(
+                text(
+                    "UPDATE documents SET user_id = (SELECT id FROM users LIMIT 1) "
+                    "WHERE user_id IS NULL"
+                )
+            )
+
+        stored_tokens = connection.execute(
+            text("SELECT id, session_token FROM users WHERE session_token IS NOT NULL")
+        ).all()
+        for user_id, stored_token in stored_tokens:
+            token_value = str(stored_token)
+            already_hashed = (
+                len(token_value) == 64
+                and all(char in "0123456789abcdefABCDEF" for char in token_value)
+            )
+            if not already_hashed:
+                connection.execute(
+                    text("UPDATE users SET session_token = :token WHERE id = :user_id"),
+                    {
+                        "token": hashlib.sha256(token_value.encode("utf-8")).hexdigest(),
+                        "user_id": user_id,
+                    },
+                )
 
 migrate_database()
 
-# ============================================================
-
 # РАБОТА С ДАТОЙ
-
-# ============================================================
 
 def normalize_datetime(
 
@@ -323,11 +323,7 @@ def utc_now() -> datetime:
 
     )
 
-# ============================================================
-
 # ХЕШИРОВАНИЕ ПАРОЛЯ
-
-# ============================================================
 
 def hash_password(
 
@@ -409,8 +405,9 @@ def verify_password(
 
         )
 
-        if algorithm != "scrypt":
-
+        if algorithm != "scrypt" or (n, r, p) != (16384, 8, 1):
+            return False
+        if len(salt) != 16 or len(original_hash) != 64:
             return False
 
         new_hash = hashlib.scrypt(
@@ -441,11 +438,7 @@ def verify_password(
 
         return False
 
-# ============================================================
-
 # ВОССТАНОВЛЕНИЕ ПАРОЛЯ
-
-# ============================================================
 
 def send_password_reset_email(
 
@@ -563,7 +556,6 @@ def send_password_reset_email(
         print("Ошибка отправки email через Resend:", error)
         return False
 
-
 def create_password_reset_token(
 
     user: User,
@@ -642,11 +634,7 @@ def create_password_reset_token(
 
     return reset_link
 
-# ============================================================
-
 # АВТОРИЗАЦИЯ
-
-# ============================================================
 
 security = HTTPBearer()
 
@@ -662,21 +650,8 @@ def get_current_user(
 
 ):
 
-    token = credentials.credentials
-
-    user = (
-
-        db.query(User)
-
-        .filter(
-
-            User.session_token == token
-
-        )
-
-        .first()
-
-    )
+    token_hash = hashlib.sha256(credentials.credentials.encode("utf-8")).hexdigest()
+    user = db.query(User).filter(User.session_token == token_hash).first()
 
     if not user:
 
@@ -690,13 +665,7 @@ def get_current_user(
 
     return user
 
-# ============================================================
-
 # ГЛАВНАЯ
-
-# ============================================================
-
-
 
 @app.get("/settings/organization")
 def get_organization_settings(
@@ -722,13 +691,22 @@ def get_organization_settings(
         "retention_policy": profile.retention_policy
     }
 
-
 @app.put("/settings/organization")
 def save_organization_settings(
     settings: OrganizationSettingsData,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    organization_name = settings.organization_name.strip()
+    subdivision = settings.subdivision.strip()
+    responsible_person = settings.responsible_person.strip()
+    retention_policy = settings.retention_policy.strip()
+    if not organization_name or not subdivision or not responsible_person:
+        raise HTTPException(
+            status_code=422,
+            detail="Укажите название организации, подразделение и ответственного за документы.",
+        )
+
     profile = (
         db.query(OrganizationProfile)
         .filter(OrganizationProfile.user_id == current_user.id)
@@ -738,10 +716,10 @@ def save_organization_settings(
         profile = OrganizationProfile(user_id=current_user.id)
         db.add(profile)
 
-    profile.organization_name = settings.organization_name.strip()
-    profile.subdivision = settings.subdivision.strip()
-    profile.responsible_person = settings.responsible_person.strip()
-    profile.retention_policy = settings.retention_policy.strip()
+    profile.organization_name = organization_name
+    profile.subdivision = subdivision
+    profile.responsible_person = responsible_person
+    profile.retention_policy = retention_policy
     db.commit()
     db.refresh(profile)
 
@@ -753,7 +731,6 @@ def save_organization_settings(
         "retention_policy": profile.retention_policy
     }
 
-
 @app.get("/")
 def root():
     frontend_file = BASE_DIR / "frontend" / "index.html"
@@ -761,11 +738,19 @@ def root():
         return FileResponse(frontend_file, media_type="text/html")
     return {"message": "OblivionDoc API работает"}
 
-# ============================================================
+@app.get("/health")
+def health(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception as error:
+        db.rollback()
+        raise HTTPException(
+            status_code=503,
+            detail="API запущен, но база данных недоступна.",
+        ) from error
+    return {"status": "ok", "database": "connected"}
 
 # РЕГИСТРАЦИЯ
-
-# ============================================================
 
 @app.post("/auth/register", response_model=LoginResponse)
 def register(
@@ -784,7 +769,7 @@ def register(
     user = User(
         email=email,
         password_hash=hash_password(user_data.password),
-        session_token=session_token
+        session_token=hashlib.sha256(session_token.encode("utf-8")).hexdigest(),
     )
     db.add(user)
     db.commit()
@@ -796,11 +781,7 @@ def register(
         user=user
     )
 
-# ============================================================
-
 # ВХОД
-
-# ============================================================
 
 @app.post(
 
@@ -860,7 +841,7 @@ def login(
 
     session_token = secrets.token_urlsafe(32)
 
-    user.session_token = session_token
+    user.session_token = hashlib.sha256(session_token.encode("utf-8")).hexdigest()
 
     db.commit()
 
@@ -876,11 +857,7 @@ def login(
 
     )
 
-# ============================================================
-
 # ЗАПРОС ВОССТАНОВЛЕНИЯ ПАРОЛЯ
-
-# ============================================================
 
 @app.post(
 
@@ -965,11 +942,7 @@ def forgot_password(
         )
     }
 
-# ============================================================
-
 # УСТАНОВКА НОВОГО ПАРОЛЯ
-
-# ============================================================
 
 @app.post(
 
@@ -1107,11 +1080,7 @@ def reset_password(
 
     }
 
-# ============================================================
-
 # ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ
-
-# ============================================================
 
 @app.get(
 
@@ -1133,11 +1102,7 @@ def get_me(
 
     return current_user
 
-# ============================================================
-
 # ВЫХОД
-
-# ============================================================
 
 @app.post("/auth/logout")
 
@@ -1163,11 +1128,7 @@ def logout(
 
     }
 
-# ============================================================
-
 # ПОЛУЧИТЬ ДОКУМЕНТЫ
-
-# ============================================================
 
 @app.get(
 
@@ -1213,85 +1174,20 @@ def get_documents(
 
     return documents
 
-# ============================================================
-
 # СОЗДАНИЕ ДОКУМЕНТА
 
-# ============================================================
-
-@app.post(
-
-    "/documents",
-
-    response_model=DocumentResponse
-
-)
-
-def create_document(
-
+@app.post("/documents", response_model=DocumentResponse)
+def create_document_without_file(
     document_data: DocumentCreate,
-
-    current_user: User = Depends(
-
-        get_current_user
-
-    ),
-
-    db: Session = Depends(get_db)
-
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-
-    expires_at = normalize_datetime(
-
-        document_data.expires_at
-
+    raise HTTPException(
+        status_code=400,
+        detail="При создании документа необходимо прикрепить файл.",
     )
-
-    document = Document(
-
-        user_id=current_user.id,
-
-        name=document_data.name,
-
-        file_path=None,
-
-        expires_at=expires_at,
-
-        status="active",
-
-        action=document_data.action
-
-    )
-
-    db.add(document)
-
-    db.commit()
-
-    db.refresh(document)
-
-    audit = AuditLog(
-
-        document_id=document.id,
-
-        document_name=document.name,
-
-        action="create",
-
-        result="success"
-
-    )
-
-    db.add(audit)
-
-    db.commit()
-
-    return document
-
-# ============================================================
 
 # СОЗДАНИЕ ДОКУМЕНТА С ФАЙЛОМ
-
-# ============================================================
 
 @app.post(
 
@@ -1309,7 +1205,7 @@ async def create_document_upload(
 
     action: str = Form("archive"),
 
-    file: UploadFile | None = File(None),
+    file: UploadFile = File(...),
 
     current_user: User = Depends(
 
@@ -1479,35 +1375,32 @@ async def create_document_upload(
 
     )
 
-    db.add(document)
-
-    db.commit()
-
-    db.refresh(document)
-
-    audit = AuditLog(
-
-        document_id=document.id,
-
-        document_name=document.name,
-
-        action="create",
-
-        result="success"
-
-    )
-
-    db.add(audit)
-
-    db.commit()
+    try:
+        db.add(document)
+        db.flush()
+        db.add(AuditLog(
+            document_id=document.id,
+            document_name=document.name,
+            action="create",
+            result="success",
+        ))
+        db.commit()
+        db.refresh(document)
+    except Exception as error:
+        db.rollback()
+        if file_path and Path(file_path).exists():
+            try:
+                Path(file_path).unlink()
+            except OSError:
+                pass
+        raise HTTPException(
+            status_code=500,
+            detail="Не удалось сохранить документ в базе данных. Попробуйте ещё раз.",
+        ) from error
 
     return document
 
-# ============================================================
-
 # ИЗМЕНЕНИЕ ДОКУМЕНТА
-
-# ============================================================
 
 @app.put(
 
@@ -1594,11 +1487,7 @@ def update_document(
     db.refresh(document)
     return document
 
-# ============================================================
-
 # УДАЛЕНИЕ ДОКУМЕНТА
-
-# ============================================================
 
 @app.delete(
 
@@ -1665,11 +1554,7 @@ def delete_document(
         "message": "Документ удалён."
     }
 
-# ============================================================
-
 # СКАЧИВАНИЕ
-
-# ============================================================
 
 @app.get(
 
@@ -1717,26 +1602,16 @@ def download_document(
 
         )
 
-    if not document.file_path:
+    # Сначала пробуем локальный файл. Он ускоряет скачивание, но на хостинге
+    # может исчезнуть после перезапуска — в таком случае используется копия в БД.
+    if document.file_path:
+        file_path = Path(document.file_path)
+        if file_path.exists():
+            return FileResponse(
+                path=file_path,
+                filename=document.file_name or document.name,
+            )
 
-        raise HTTPException(
-
-            status_code=404,
-
-            detail="У документа нет файла."
-
-        )
-
-    file_path = Path(document.file_path)
-
-    if file_path.exists():
-        return FileResponse(
-            path=file_path,
-            filename=document.file_name or document.name
-        )
-
-    # Резервная копия вложения находится в БД, поэтому файл доступен
-    # и после перезапуска сервиса с временной файловой системой.
     if document.file_content:
         filename = document.file_name or document.name
         media_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
@@ -1745,7 +1620,7 @@ def download_document(
             media_type=media_type,
             headers={
                 "Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"
-            }
+            },
         )
 
     raise HTTPException(
@@ -1753,11 +1628,7 @@ def download_document(
         detail="Файл не найден. Для старой записи файл мог быть удалён при перезапуске хостинга."
     )
 
-# ============================================================
-
 # АУДИТ
-
-# ============================================================
 
 @app.get(
 
@@ -1792,11 +1663,7 @@ def get_audit_log(
 
     return logs
 
-# ============================================================
-
 # ОБРАБОТКА ИСТЁКШИХ ДОКУМЕНТОВ
-
-# ============================================================
 
 def process_expired_documents():
 
@@ -1817,9 +1684,7 @@ def process_expired_documents():
 
         for document in documents:
 
-            # ------------------------------------------------
             # АРХИВИРОВАНИЕ
-            # ------------------------------------------------
             if document.action == "archive":
 
                 if not document.file_path:
@@ -1891,9 +1756,7 @@ def process_expired_documents():
                         result="error"
                     ))
 
-            # ------------------------------------------------
             # УДАЛЕНИЕ
-            # ------------------------------------------------
             elif document.action == "delete":
 
                 if not document.file_path:
@@ -1967,11 +1830,7 @@ def process_expired_documents():
     finally:
         db.close()
 
-# ============================================================
-
 # ПЛАНИРОВЩИК
-
-# ============================================================
 
 scheduler = BackgroundScheduler()
 
