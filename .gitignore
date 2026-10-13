@@ -1,35 +1,30 @@
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual environment
 venv/
 .venv/
 env/
 
-# Database
 *.db
 *.sqlite
 *.sqlite3
 
-# User uploaded files
-uploads/*
-archive/*
+/uploads/
+/archive/
 
-# Environment variables / secrets
 .env
 .env.*
 !.env.example
 
-# IDE
+.vs/
 .vscode/
 .idea/
 
-# OS
 .DS_Store
 Thumbs.db
 
-# Temporary files
 *.tmp
 *.log
+test*.txt
+*.exe
