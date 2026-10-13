@@ -183,13 +183,15 @@ RESEND_API_KEY = os.getenv(
 
 )
 
-RESEND_FROM = os.getenv(
+RESEND_FROM = os.getenv("RESEND_FROM", "").strip()
 
-    "RESEND_FROM",
-
-    "onboarding@resend.dev"
-
+RUSENDER_API_KEY = os.getenv("RUSENDER_API_KEY", "").strip()
+RUSENDER_KEY_ID = os.getenv("RUSENDER_KEY_ID", "").strip()
+RUSENDER_FROM = (
+    os.getenv("RUSENDER_FROM", "").strip()
+    or os.getenv("OBLIVION_SMTP_FROM", "").strip()
 )
+RUSENDER_API_URL = "https://api.rusender.ru/api/v1/external-mails/send"
 
 RESEND_API_URL = "https://api.resend.com/emails"
 
@@ -440,6 +442,44 @@ def verify_password(
 
 # ВОССТАНОВЛЕНИЕ ПАРОЛЯ
 
+def _post_email_json(provider: str, url: str, payload: dict, headers: dict) -> bool:
+    """Send JSON email request and log provider responses without exposing API keys."""
+    request = Request(
+        url,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={**headers, "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=20) as response:
+            body = response.read().decode("utf-8", errors="replace")
+        try:
+            result = json.loads(body) if body else {}
+        except json.JSONDecodeError:
+            result = {}
+        message_id = result.get("id") or result.get("uuid") or "не указан"
+        print("{}: письмо принято сервисом; ID: {}".format(provider, message_id))
+        return True
+    except HTTPError as error:
+        try:
+            body = error.read().decode("utf-8", errors="replace")
+            try:
+                data = json.loads(body)
+                detail = data.get("message") or data.get("detail") or data.get("error") or "без описания"
+            except json.JSONDecodeError:
+                detail = body[:300] or "без описания"
+        except Exception:
+            detail = "не удалось прочитать ответ сервиса"
+        print("{}: HTTP {}: {}".format(provider, error.code, str(detail)[:300]))
+        return False
+    except URLError as error:
+        print("{}: ошибка соединения: {}".format(provider, error.reason))
+        return False
+    except Exception as error:
+        print("{}: ошибка отправки: {}: {}".format(provider, type(error).__name__, error))
+        return False
+
+
 def send_password_reset_email(
 
     email: str,
@@ -510,51 +550,62 @@ def send_password_reset_email(
 </html>
 """
 
-    if not RESEND_API_KEY:
-        print("RESEND_API_KEY не настроен.")
-        return False
+    # RuSender: SMTP credentials are not used here; Render Free restricts SMTP ports.
+    if RUSENDER_API_KEY and RUSENDER_FROM:
+        payload = {
+            "idempotencyKey": "obliviondoc-reset-" + secrets.token_urlsafe(18),
+            "mail": {
+                "to": {"email": email},
+                "from": {"email": RUSENDER_FROM, "name": "OblivionDoc"},
+                "subject": subject,
+                "html": html_text,
+            },
+        }
+        if RUSENDER_API_KEY.startswith("rs_ck_v1_"):
+            if RUSENDER_KEY_ID:
+                sent = _post_email_json(
+                    "RuSender",
+                    RUSENDER_API_URL + "/" + quote(RUSENDER_KEY_ID, safe=""),
+                    payload,
+                    {"Authorization": "Bearer " + RUSENDER_API_KEY},
+                )
+                if sent:
+                    return True
+            else:
+                print("RuSender: токен rs_ck_v1_ требует RUSENDER_KEY_ID в Environment Render.")
+        else:
+            sent = _post_email_json(
+                "RuSender",
+                RUSENDER_API_URL,
+                payload,
+                {"X-Api-Key": RUSENDER_API_KEY},
+            )
+            if sent:
+                return True
+    elif RUSENDER_API_KEY:
+        print("RuSender: RUSENDER_API_KEY есть, но не задан адрес OBLIVION_SMTP_FROM/RUSENDER_FROM.")
 
-    payload = {
-        "from": RESEND_FROM,
-        "to": [email],
-        "subject": subject,
-        "html": html_text,
-    }
+    # Resend is an optional fallback only if a sender on a verified domain is configured.
+    if RESEND_API_KEY and RESEND_FROM:
+        resend_payload = {
+            "from": RESEND_FROM,
+            "to": [email],
+            "subject": subject,
+            "html": html_text,
+        }
+        if _post_email_json(
+            "Resend",
+            RESEND_API_URL,
+            resend_payload,
+            {"Authorization": "Bearer " + RESEND_API_KEY},
+        ):
+            return True
+    elif RESEND_API_KEY:
+        print("Resend: RESEND_FROM не задан. Для реальной отправки нужен подтверждённый домен и адрес отправителя.")
 
-    request = Request(
-        RESEND_API_URL,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {RESEND_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
+    print("Ссылка восстановления не отправлена; проверьте сообщения выше в Render Logs.")
+    return False
 
-    try:
-        with urlopen(request, timeout=20) as response:
-            response_body = response.read().decode("utf-8")
-
-        result = json.loads(response_body)
-        print("Письмо восстановления успешно отправлено через Resend.")
-        print("Resend ID:", result.get("id", "не указан"))
-        return True
-
-    except HTTPError as error:
-        try:
-            error_body = error.read().decode("utf-8")
-        except Exception:
-            error_body = ""
-        print("Ошибка Resend API:", error.code, error_body)
-        return False
-
-    except URLError as error:
-        print("Ошибка подключения к Resend:", error.reason)
-        return False
-
-    except Exception as error:
-        print("Ошибка отправки email через Resend:", error)
-        return False
 
 def create_password_reset_token(
 
