@@ -3,7 +3,6 @@ from datetime import datetime
 
 from .database import Base
 
-
 class User(Base):
     __tablename__ = "users"
 
@@ -36,7 +35,6 @@ class User(Base):
         DateTime,
         default=datetime.utcnow
     )
-
 
 class Document(Base):
     __tablename__ = "documents"
@@ -93,7 +91,6 @@ class Document(Base):
         default="archive"
     )
 
-
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
@@ -128,10 +125,7 @@ class AuditLog(Base):
         default=datetime.utcnow
     )
 
-
-# =========================================================
 # ТОКЕНЫ ВОССТАНОВЛЕНИЯ ПАРОЛЯ
-# =========================================================
 
 class PasswordResetToken(Base):
 
@@ -170,7 +164,6 @@ class PasswordResetToken(Base):
         DateTime,
         nullable=True
     )
-
 
 class OrganizationProfile(Base):
     __tablename__ = "organization_profiles"
