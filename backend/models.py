@@ -165,6 +165,16 @@ class PasswordResetToken(Base):
         nullable=True
     )
 
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, unique=True, nullable=False, index=True)
+    first_name = Column(String, nullable=False, default="")
+    last_name = Column(String, nullable=False, default="")
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class OrganizationProfile(Base):
     __tablename__ = "organization_profiles"
 
