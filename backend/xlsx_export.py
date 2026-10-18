@@ -14,10 +14,11 @@ def _column_name(number):
 
 def _xml_text(value):
     text = "" if value is None else str(value)
-    return escape(text, {'"': "&quot;", "'": "&apos;"})
+    return escape(text, {"\"": "&quot;", "'": "&apos;"})
 
 
 def build_xlsx(rows, sheet_name="Данные", max_widths=None):
+    """Return an .xlsx file with a styled header, wrapped cells and filters."""
     normalized = [["" if value is None else str(value) for value in row] for row in rows]
     if not normalized:
         normalized = [["Данные"]]
@@ -30,7 +31,8 @@ def build_xlsx(rows, sheet_name="Данные", max_widths=None):
     widths = []
     for index in range(column_count):
         longest = max((len(line) for row in normalized for line in row[index].splitlines()), default=0)
-        widths.append(max(12, min(longest + 2, limits[index])))
+        width = max(12, min(longest + 2, limits[index]))
+        widths.append(width)
 
     row_xml = []
     for row_number, row in enumerate(normalized, start=1):

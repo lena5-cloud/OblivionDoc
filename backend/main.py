@@ -211,7 +211,7 @@ Base.metadata.create_all(bind=engine)
 # МИГРАЦИЯ БАЗЫ
 
 def migrate_database():
-  
+
     from sqlalchemy import inspect
 
     inspector = inspect(engine)
@@ -799,8 +799,10 @@ def get_user_profile(
     )
     if not profile:
         return {"first_name": "", "last_name": ""}
-    return {"first_name": profile.first_name, "last_name": profile.last_name}
-
+    return {
+        "first_name": profile.first_name,
+        "last_name": profile.last_name
+    }
 
 @app.put("/profile")
 def save_user_profile(
@@ -808,6 +810,8 @@ def save_user_profile(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    first_name = data.first_name.strip()
+    last_name = data.last_name.strip()
     profile = (
         db.query(UserProfile)
         .filter(UserProfile.user_id == current_user.id)
@@ -816,8 +820,8 @@ def save_user_profile(
     if not profile:
         profile = UserProfile(user_id=current_user.id)
         db.add(profile)
-    profile.first_name = data.first_name.strip()
-    profile.last_name = data.last_name.strip()
+    profile.first_name = first_name
+    profile.last_name = last_name
     db.commit()
     db.refresh(profile)
     return {
@@ -1770,8 +1774,15 @@ def export_documents_xlsx(
         .order_by(Document.id.desc())
         .all()
     )
-    status_labels = {"active": "На хранении", "archived": "В архиве", "deleted": "Удалён"}
-    action_labels = {"archive": "Архивировать", "delete": "Удалить по сроку"}
+    status_labels = {
+        "active": "На хранении",
+        "archived": "В архиве",
+        "deleted": "Удалён"
+    }
+    action_labels = {
+        "archive": "Архивировать",
+        "delete": "Удалить по сроку"
+    }
     rows = [["ID", "Название", "Создан", "Срок хранения", "Статус", "Действие по сроку"]]
     for document in documents:
         rows.append([
@@ -1782,13 +1793,16 @@ def export_documents_xlsx(
             status_labels.get(document.status, document.status or "—"),
             action_labels.get(document.action, document.action or "—")
         ])
-    content = build_xlsx(rows, sheet_name="Документы", max_widths=[10, 52, 22, 22, 18, 28])
+    content = build_xlsx(
+        rows,
+        sheet_name="Документы",
+        max_widths=[10, 52, 22, 22, 18, 28]
+    )
     return Response(
         content=content,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": "attachment; filename=obliviondoc-documents.xlsx"}
     )
-
 
 @app.get("/exports/audit.xlsx")
 def export_audit_xlsx(
@@ -1819,7 +1833,11 @@ def export_audit_xlsx(
             action_labels.get(log.action, log.action or "Операция"),
             "Выполнено" if log.result == "success" else (log.result or "—")
         ])
-    content = build_xlsx(rows, sheet_name="Журнал действий", max_widths=[22, 14, 48, 34, 22])
+    content = build_xlsx(
+        rows,
+        sheet_name="Журнал действий",
+        max_widths=[22, 14, 48, 34, 22]
+    )
     return Response(
         content=content,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
