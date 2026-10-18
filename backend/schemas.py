@@ -120,3 +120,8 @@ class OrganizationSettingsData(BaseModel):
     subdivision: str = Field(default="", max_length=200)
     responsible_person: str = Field(default="", max_length=200)
     retention_policy: str = Field(default="", max_length=1000)
+
+
+class UserProfileData(BaseModel):
+    first_name: str = Field(default="", max_length=100)
+    last_name: str = Field(default="", max_length=100)
