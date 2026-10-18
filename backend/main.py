@@ -1560,11 +1560,12 @@ def update_document(
 
     new_name = document_data.name.strip()
     new_expires_at = normalize_datetime(document_data.expires_at)
+    stored_expires_at = normalize_datetime(document.expires_at)
     new_action = document_data.action
 
     changed = (
         document.name != new_name
-        or document.expires_at != new_expires_at
+        or stored_expires_at != new_expires_at
         or document.action != new_action
     )
 
@@ -1574,13 +1575,9 @@ def update_document(
     document.name = new_name
     document.expires_at = new_expires_at
     document.action = new_action
-
-    if document.expires_at > utc_now():
-        document.status = "active"
-    elif document.action == "archive":
-        document.status = "archived"
-    elif document.action == "delete":
-        document.status = "deleted"
+    # Editing retention settings must not mark the file archived/deleted before
+    # the scheduled job has actually performed that file operation.
+    document.status = "active"
 
     audit = AuditLog(
         document_id=document.id,
@@ -1588,9 +1585,17 @@ def update_document(
         action="update",
         result="success"
     )
-    db.add(audit)
-    db.commit()
-    db.refresh(document)
+    try:
+        db.add(audit)
+        db.commit()
+        db.refresh(document)
+    except Exception as error:
+        db.rollback()
+        print("Ошибка сохранения изменений документа:", repr(error))
+        raise HTTPException(
+            status_code=500,
+            detail="Не удалось сохранить изменения документа. Проверьте журналы сервера Render."
+        ) from error
     return document
 
 # УДАЛЕНИЕ ДОКУМЕНТА
