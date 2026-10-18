@@ -6,12 +6,20 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 raw_database_url = os.getenv("DATABASE_URL", "").strip()
 is_render = bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
 
-if is_render and not raw_database_url:
-    raise RuntimeError(
-
-    )
-
-DATABASE_URL = raw_database_url or "sqlite:///./obliviondoc.db"
+if is_render:
+    if not raw_database_url:
+        raise RuntimeError("DATABASE_URL должен быть задан в настройках Render.")
+    DATABASE_URL = raw_database_url
+else:
+    DATABASE_URL = os.getenv(
+        "OBLIVION_TEST_DATABASE_URL",
+        "sqlite:///./obliviondoc_test.db"
+    ).strip()
+    if not DATABASE_URL.startswith("sqlite:"):
+        raise RuntimeError(
+            "Локальная тестовая копия использует только SQLite. "
+            "Проверьте OBLIVION_TEST_DATABASE_URL."
+        )
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace(

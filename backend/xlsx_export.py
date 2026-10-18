@@ -2,6 +2,7 @@
 from io import BytesIO
 from zipfile import ZIP_DEFLATED, ZipFile
 from xml.sax.saxutils import escape
+import re
 
 
 def _column_name(number):
@@ -14,6 +15,7 @@ def _column_name(number):
 
 def _xml_text(value):
     text = "" if value is None else str(value)
+    text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F]", "", text)
     return escape(text, {"\"": "&quot;", "'": "&apos;"})
 
 

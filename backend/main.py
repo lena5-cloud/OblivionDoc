@@ -199,10 +199,17 @@ RUSENDER_API_URL = "https://api.rusender.ru/api/v1/external-mails/send"
 
 RESEND_API_URL = "https://api.resend.com/emails"
 
-FRONTEND_URL = os.getenv(
-    "OBLIVION_FRONTEND_URL",
-    "https://obliviondoc-site.onrender.com"
-)
+IS_RENDER_ENV = bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
+if IS_RENDER_ENV:
+    FRONTEND_URL = os.getenv(
+        "OBLIVION_FRONTEND_URL",
+        "https://obliviondoc-site.onrender.com"
+    ).strip().rstrip("/")
+else:
+    FRONTEND_URL = os.getenv(
+        "OBLIVION_TEST_FRONTEND_URL",
+        "http://127.0.0.1:8000"
+    ).strip().rstrip("/")
 
 # СОЗДАНИЕ ТАБЛИЦ
 
@@ -2018,33 +2025,20 @@ scheduler = BackgroundScheduler()
 @app.on_event("startup")
 
 def start_scheduler():
+    if not IS_RENDER_ENV:
+        print("Планировщик отключён в локальной тестовой копии.")
+        return
 
     if not scheduler.running:
-
         scheduler.add_job(
-
             process_expired_documents,
-
             "interval",
-
             minutes=1,
-
             id="process_expired_documents",
-
-            replace_existing=True
-
+            replace_existing=True,
         )
-
         scheduler.start()
-
-        print(
-
-            "Планировщик обработки сроков "
-
-            "хранения запущен."
-
-        )
-
+        print("Планировщик обработки сроков хранения запущен.")
 @app.on_event("shutdown")
 
 def stop_scheduler():

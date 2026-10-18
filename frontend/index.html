@@ -98,7 +98,7 @@ function showAuth(form='login'){
  $('loginTab').classList.toggle('active',form==='login');
  $('registerTab').classList.toggle('active',form==='register');
  $('authTitle').textContent=form==='register'?'Создайте аккаунт':form==='forgotForm'?'Восстановление доступа':form==='resetForm'?'Новый пароль':'Добро пожаловать';
- $('authIntro').textContent=form==='register'?'Придумайте отдельный пароль для OblivionDoc — он не связан с паролем от Яндекс.Почты.':form==='forgotForm'?'Укажите email аккаунта, и мы проверим возможность отправить ссылку восстановления.':form==='resetForm'?'Задайте новый пароль для OblivionDoc.':'Введите пароль, который вы задали при регистрации в OblivionDoc. Пароль от Яндекс.Почты здесь не подходит.';
+ $('authIntro').textContent=form==='register'?'Придумайте отдельный пароль для аккаунта OblivionDoc.':form==='forgotForm'?'Укажите email аккаунта, и мы проверим возможность отправить ссылку восстановления.':form==='resetForm'?'Задайте новый пароль для OblivionDoc.':'Введите пароль аккаунта OblivionDoc.';
  $('loginPassword').setAttribute('autocomplete',form==='login'?'section-login current-password':'off');
  $('registerPassword').setAttribute('autocomplete',form==='register'?'section-register new-password':'off');
  $('resetPassword').setAttribute('autocomplete',form==='resetForm'?'section-reset new-password':'off');
