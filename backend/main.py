@@ -68,7 +68,8 @@ from .models import (
     AuditLog,
 
     PasswordResetToken,
-    OrganizationProfile
+    OrganizationProfile,
+    UserProfile
 
 )
 
@@ -93,9 +94,12 @@ from .schemas import (
     PasswordResetRequest,
 
     PasswordResetConfirm,
-    OrganizationSettingsData
+    OrganizationSettingsData,
+    UserProfileData
 
 )
+
+from .xlsx_export import build_xlsx
 
 # FASTAPI
 
@@ -195,10 +199,17 @@ RUSENDER_API_URL = "https://api.rusender.ru/api/v1/external-mails/send"
 
 RESEND_API_URL = "https://api.resend.com/emails"
 
-FRONTEND_URL = os.getenv(
-    "OBLIVION_FRONTEND_URL",
-    "https://obliviondoc-site.onrender.com"
-)
+IS_RENDER_ENV = bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
+if IS_RENDER_ENV:
+    FRONTEND_URL = os.getenv(
+        "OBLIVION_FRONTEND_URL",
+        "https://obliviondoc-site.onrender.com"
+    ).strip().rstrip("/")
+else:
+    FRONTEND_URL = os.getenv(
+        "OBLIVION_TEST_FRONTEND_URL",
+        "http://127.0.0.1:8000"
+    ).strip().rstrip("/")
 
 # СОЗДАНИЕ ТАБЛИЦ
 
@@ -207,7 +218,7 @@ Base.metadata.create_all(bind=engine)
 # МИГРАЦИЯ БАЗЫ
 
 def migrate_database():
-  
+
     from sqlalchemy import inspect
 
     inspector = inspect(engine)
@@ -780,6 +791,50 @@ def save_organization_settings(
         "subdivision": profile.subdivision,
         "responsible_person": profile.responsible_person,
         "retention_policy": profile.retention_policy
+    }
+
+
+@app.get("/profile")
+def get_user_profile(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    profile = (
+        db.query(UserProfile)
+        .filter(UserProfile.user_id == current_user.id)
+        .first()
+    )
+    if not profile:
+        return {"first_name": "", "last_name": ""}
+    return {
+        "first_name": profile.first_name,
+        "last_name": profile.last_name
+    }
+
+@app.put("/profile")
+def save_user_profile(
+    data: UserProfileData,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    first_name = data.first_name.strip()
+    last_name = data.last_name.strip()
+    profile = (
+        db.query(UserProfile)
+        .filter(UserProfile.user_id == current_user.id)
+        .first()
+    )
+    if not profile:
+        profile = UserProfile(user_id=current_user.id)
+        db.add(profile)
+    profile.first_name = first_name
+    profile.last_name = last_name
+    db.commit()
+    db.refresh(profile)
+    return {
+        "message": "Профиль сохранён.",
+        "first_name": profile.first_name,
+        "last_name": profile.last_name
     }
 
 @app.get("/")
@@ -1714,6 +1769,88 @@ def get_audit_log(
 
     return logs
 
+
+@app.get("/exports/documents.xlsx")
+def export_documents_xlsx(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    documents = (
+        db.query(Document)
+        .filter(Document.user_id == current_user.id)
+        .order_by(Document.id.desc())
+        .all()
+    )
+    status_labels = {
+        "active": "На хранении",
+        "archived": "В архиве",
+        "deleted": "Удалён"
+    }
+    action_labels = {
+        "archive": "Архивировать",
+        "delete": "Удалить по сроку"
+    }
+    rows = [["ID", "Название", "Создан", "Срок хранения", "Статус", "Действие по сроку"]]
+    for document in documents:
+        rows.append([
+            document.id,
+            document.name,
+            document.created_at.strftime("%d.%m.%Y %H:%M") if document.created_at else "",
+            document.expires_at.strftime("%d.%m.%Y %H:%M") if document.expires_at else "",
+            status_labels.get(document.status, document.status or "—"),
+            action_labels.get(document.action, document.action or "—")
+        ])
+    content = build_xlsx(
+        rows,
+        sheet_name="Документы",
+        max_widths=[10, 52, 22, 22, 18, 28]
+    )
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=obliviondoc-documents.xlsx"}
+    )
+
+@app.get("/exports/audit.xlsx")
+def export_audit_xlsx(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    logs = (
+        db.query(AuditLog)
+        .join(Document, AuditLog.document_id == Document.id)
+        .filter(Document.user_id == current_user.id)
+        .order_by(AuditLog.created_at.desc())
+        .all()
+    )
+    action_labels = {
+        "create": "Создание документа",
+        "update": "Изменение документа",
+        "delete": "Удаление документа",
+        "archive": "Архивирование",
+        "auto_archive": "Автоматическое архивирование",
+        "auto_delete": "Автоматическое удаление"
+    }
+    rows = [["Дата и время", "ID документа", "Документ", "Действие", "Результат"]]
+    for log in logs:
+        rows.append([
+            log.created_at.strftime("%d.%m.%Y %H:%M") if log.created_at else "",
+            log.document_id,
+            log.document_name,
+            action_labels.get(log.action, log.action or "Операция"),
+            "Выполнено" if log.result == "success" else (log.result or "—")
+        ])
+    content = build_xlsx(
+        rows,
+        sheet_name="Журнал действий",
+        max_widths=[22, 14, 48, 34, 22]
+    )
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=obliviondoc-audit.xlsx"}
+    )
+
 # ОБРАБОТКА ИСТЁКШИХ ДОКУМЕНТОВ
 
 def process_expired_documents():
@@ -1888,33 +2025,20 @@ scheduler = BackgroundScheduler()
 @app.on_event("startup")
 
 def start_scheduler():
+    if not IS_RENDER_ENV:
+        print("Планировщик отключён в локальной тестовой копии.")
+        return
 
     if not scheduler.running:
-
         scheduler.add_job(
-
             process_expired_documents,
-
             "interval",
-
             minutes=1,
-
             id="process_expired_documents",
-
-            replace_existing=True
-
+            replace_existing=True,
         )
-
         scheduler.start()
-
-        print(
-
-            "Планировщик обработки сроков "
-
-            "хранения запущен."
-
-        )
-
+        print("Планировщик обработки сроков хранения запущен.")
 @app.on_event("shutdown")
 
 def stop_scheduler():
