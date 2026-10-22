@@ -222,6 +222,18 @@ body{font-size:15px;line-height:1.62}
 @media(max-width:760px){.auth-screen{grid-template-columns:minmax(0,1fr);min-height:100vh}.auth-side{display:flex;padding:26px 22px 28px;gap:26px;min-height:auto}.auth-brand{font-size:21px}.auth-brand-mark{width:38px;height:38px}.auth-hero{margin:0}.auth-kicker{font-size:9px;letter-spacing:1.15px;margin-bottom:13px}.auth-hero h1{font-size:clamp(31px,8.1vw,43px);line-height:1.08;letter-spacing:-1.45px;margin-bottom:14px}.auth-hero>p{font-size:13px;line-height:1.7;margin-bottom:20px}.auth-points{gap:10px;margin-bottom:0}.auth-point>span{width:31px;height:31px}.auth-point strong{font-size:12px}.auth-point small{font-size:11px}.auth-footer{font-size:10px;margin-top:0}.auth-main{min-height:auto;padding:25px 17px 32px}.auth-main:before{width:250px;height:250px;right:-190px;top:-100px}.auth-card{width:min(460px,100%);padding:25px 21px;border-radius:20px}.auth-card h2{font-size:28px}.auth-intro{margin-bottom:21px}.auth-switch{margin-bottom:20px}.auth-bottom{margin-top:20px;padding-top:16px}}
 @media(max-width:380px){.auth-side{padding:22px 17px;gap:22px}.auth-hero h1{font-size:30px}.auth-card{padding:22px 17px}.auth-brand{font-size:20px}}
 
+
+/* Unified blue authentication backdrop with a quiet document-network motif. */
+.auth-screen{position:relative;isolation:isolate;overflow:hidden;grid-template-columns:minmax(0,1.08fr) minmax(400px,.92fr);background:radial-gradient(ellipse at 14% 0%,#2d5b88 0%,transparent 44%),radial-gradient(ellipse at 100% 100%,#1b5a76 0%,transparent 42%),linear-gradient(135deg,#102743 0%,#163b60 54%,#164565 100%)}
+.auth-screen:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.28;background-image:linear-gradient(#b8d9f20d 1px,transparent 1px),linear-gradient(90deg,#b8d9f20d 1px,transparent 1px),radial-gradient(circle at 1px 1px,#c7e4f4a8 1.15px,transparent 1.8px);background-size:44px 44px,44px 44px,44px 44px;mask-image:linear-gradient(115deg,#000 0%,#0009 56%,#0003 100%)}
+.auth-side{background:transparent}
+.auth-side:before{z-index:-1;opacity:.13;background-image:radial-gradient(ellipse at 30% 35%,#8ac8ff1a,transparent 52%);background-size:auto;mask-image:none}
+.auth-side:after{right:-170px;bottom:-270px;width:570px;height:570px;border-color:#c1e1ff24;box-shadow:0 0 0 42px #c1e1ff08,0 0 0 88px #c1e1ff06,0 0 0 136px #c1e1ff04}
+.auth-main{position:relative;z-index:0;background:transparent}
+.auth-main:before{z-index:-1;width:500px;height:500px;right:-230px;top:50%;transform:translateY(-50%);border-color:#d0e8ff1b;box-shadow:0 0 0 40px #d0e8ff08,0 0 0 85px #d0e8ff05,0 0 0 130px #d0e8ff04}
+.auth-card{border-color:#ffffffb8;background:rgba(255,255,255,.97);box-shadow:0 28px 85px rgba(3,18,36,.28)}
+@media(max-width:760px){.auth-screen{background:radial-gradient(ellipse at 100% 0%,#2d5b88 0%,transparent 46%),linear-gradient(150deg,#102743 0%,#163b60 58%,#164565 100%)}.auth-screen:before{opacity:.2;background-size:34px 34px,34px 34px,34px 34px}.auth-side{background:transparent}.auth-main{background:transparent}.auth-main:before{width:300px;height:300px;right:-190px;top:25%}}
+
 </style>
 </head>
 <body>
