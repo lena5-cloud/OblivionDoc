@@ -945,7 +945,7 @@ const API_URL = (location.hostname === '127.0.0.1' || location.hostname === 'loc
 const TOKEN_KEY = 'obliviondoc_token';
 const EMAIL_KEY = 'obliviondoc_email';
 const $ = id => document.getElementById(id);
-let currentUser = null, userProfile = {first_name:'',last_name:''}, documents = [], auditLogs = [], organizationSettings = {organization_name:'',subdivision:'',responsible_person:'',retention_policy:''}, currentPage = 'overview', saving = false, refreshing = false, resetToken = new URLSearchParams(location.search).get('reset_token');
+let currentUser = null, userProfile = {first_name:'',last_name:''}, documents = [], auditLogs = [], organizationSettings = {organization_name:'',organization_type:'company',industry:'other',subdivision:'',responsible_person:'',retention_policy:''}, currentPage = 'overview', saving = false, refreshing = false, resetToken = new URLSearchParams(location.search).get('reset_token');
 if (resetToken) history.replaceState({}, '', location.pathname);
 const pageNames = {overview:'Главная',documents:'Документы',deadlines:'Сроки хранения',archive:'Архив',analytics:'Аналитика',audit:'Журнал действий',security:'Безопасность',help:'Справка',profile:'Профиль',settings:'Настройки'};
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -980,6 +980,32 @@ function daysLeft(doc){if(!doc.expires_at)return Infinity;return Math.ceil((new 
 function statusName(status){return ({active:'На хранении',archived:'В архиве',deleted:'Удалён'})[status]||status||'—';}
 function badge(status,doc){if(doc&&status==='active'){const d=daysLeft(doc);if(d<0)return '<span class="badge expired">Срок истёк</span>';if(d<=30)return '<span class="badge soon">Скоро срок</span>'; }return `<span class="badge ${esc(status)}">${esc(statusName(status))}</span>`;}
 function actionName(action){return action==='archive'?'Архивировать':action==='delete'?'Удалить по сроку':'—';}
+const DOCUMENT_CATEGORIES=[
+ ['contracts','Договоры и соглашения'],['finance','Финансовые документы'],['hr','Кадровые документы'],
+ ['legal','Юридические документы'],['project_technical','Проектные и технические'],
+ ['construction','Строительство и исполнительная документация'],['logistics','Логистика и транспорт'],
+ ['medical','Медицинские документы'],['education','Образование'],['procurement','Закупки и поставки'],
+ ['management','Управленческие документы'],['housing_utilities','ЖКХ и обращения'],
+ ['correspondence','Переписка'],['other','Другое']
+];
+const INDUSTRIES=[
+ ['construction','Строительство и девелопмент'],['accounting_finance','Бухгалтерия и финансы'],
+ ['legal_services','Юридические услуги'],['logistics','Логистика и транспорт'],
+ ['housing_utilities','Управление недвижимостью и ЖКХ'],['education','Образование'],
+ ['manufacturing','Производство и промышленность'],['healthcare','Медицина и здравоохранение'],
+ ['retail_services','Торговля и услуги'],['agriculture','Сельское хозяйство'],
+ ['it_telecom','ИТ и телекоммуникации'],['professional_services','Профессиональные услуги'],
+ ['public_services','Государственная или муниципальная деятельность'],['other','Другая отрасль']
+];
+const ORGANIZATION_TYPES=[
+ ['company','Коммерческая организация'],['public','Государственная или муниципальная организация'],
+ ['nonprofit','Некоммерческая организация'],['individual','ИП / частный специалист'],['other','Другой тип']
+];
+function categoryName(value){return (DOCUMENT_CATEGORIES.find(item=>item[0]===value)||DOCUMENT_CATEGORIES[DOCUMENT_CATEGORIES.length-1])[1];}
+function optionsHtml(items,selected){return items.map(([value,label])=>`<option value="${value}" ${value===(selected||items[0][0])?'selected':''}>${esc(label)}</option>`).join('');}
+function categoryOptions(selected='other'){return optionsHtml(DOCUMENT_CATEGORIES,selected);}
+function industryName(value){return (INDUSTRIES.find(item=>item[0]===value)||INDUSTRIES[INDUSTRIES.length-1])[1];}
+function organizationTypeName(value){return (ORGANIZATION_TYPES.find(item=>item[0]===value)||ORGANIZATION_TYPES[ORGANIZATION_TYPES.length-1])[1];}
 function docRow(d){return `<tr><td><div class="doc-main">${esc(d.name)}</div><div class="doc-sub">ID ${esc(d.id)} · Добавлен ${esc(fmtDate(d.created_at))}</div></td><td>${esc(fmtDate(d.expires_at))}</td><td>${badge(d.status,d)}</td><td>${esc(actionName(d.action))}</td><td><div class="row-actions"><button class="action-btn" data-act="edit" data-id="${d.id}">Изменить</button>${(d.file_path||d.file_name)?`<button class="action-btn" data-act="download" data-id="${d.id}" title="Скачать копию файла">Скачать</button>`:''}<button class="action-btn" data-act="delete" data-id="${d.id}">Удалить</button></div></td></tr>`;}
 function table(docs,emptyTitle='Документов пока нет',emptyText='Добавьте первый документ, чтобы начать работу.'){return `<div class="table-wrap"><table><thead><tr><th>Документ</th><th>Срок хранения до</th><th>Статус</th><th>Действие по сроку</th><th>Операции</th></tr></thead><tbody>${docs.length?docs.map(docRow).join(''):`<tr><td colspan="5"><div class="empty"><strong>${esc(emptyTitle)}</strong>${esc(emptyText)}</div></td></tr>`}</tbody></table></div>`;}
 function panel(title,body,subtitle='',action=''){return `<section class="panel"><div class="panel-head"><div><h2 class="panel-title">${title}</h2>${subtitle?`<div class="panel-sub">${subtitle}</div>`:''}</div>${action}</div>${body}</section>`;}
