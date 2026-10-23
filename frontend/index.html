@@ -1116,8 +1116,8 @@ async function loadOrganizationSettings(){
   const customIndustry=String(organizationSettings.industry||'').startsWith('custom:');
   const fields={orgName:organizationSettings.organization_name,orgType:customType?'__custom__':organizationSettings.organization_type,orgIndustry:customIndustry?'__custom__':organizationSettings.industry,orgSubdivision:organizationSettings.subdivision,orgResponsible:organizationSettings.responsible_person,orgPolicy:organizationSettings.retention_policy};
   for(const [id,value] of Object.entries(fields)){if($(id))$(id).value=value;}
-  $('orgTypeCustom').value=customType?organizationSettings.organization_type.slice(7):'';
-  $('orgIndustryCustom').value=customIndustry?organizationSettings.industry.slice(7):'';
+   if($('orgTypeCustom'))$('orgTypeCustom').value=customType?organizationSettings.organization_type.slice(7):'';
+   if($('orgIndustryCustom'))$('orgIndustryCustom').value=customIndustry?organizationSettings.industry.slice(7):'';
   syncCustomOrganizationFields();
   updateOrganizationSummary();
  }catch(e){toast('Не удалось загрузить настройки организации: '+(e.message||'ошибка сети'),true);}
@@ -1183,8 +1183,8 @@ function renderProfile(){
     <form id="organizationForm" class="settings-card hidden profile-org-form">
      <div class="form-group"><label for="orgName">Название организации *</label><input id="orgName" maxlength="200" required placeholder="Например, ООО «Вектор» или клиника «Медика»" value="${esc(organizationSettings.organization_name||'')}"></div>
      <div class="form-grid">
-      <div class="form-group"><label for="orgType">Тип организации</label><select id="orgType">${optionsHtml(ORGANIZATION_TYPES,organizationSettings.organization_type||'company')}</select></div>
-      <div class="form-group"><label for="orgIndustry">Отрасль</label><select id="orgIndustry">${optionsHtml(INDUSTRIES,organizationSettings.industry||'other')}</select><div class="form-hint">Выберите ближайшее направление. Реестр документов остаётся универсальным.</div></div>
+       <div class="form-group"><label for="orgType">Тип организации *</label><select id="orgType" required>${optionsHtml(ORGANIZATION_TYPES.filter(item=>item[0]!=='other'),organizationSettings.organization_type||'company')}<option value="__custom__" ${String(organizationSettings.organization_type||'').startsWith('custom:')?'selected':''}>Другой тип — указать свой</option></select><input id="orgTypeCustom" class="hidden" maxlength="80" placeholder="Укажите тип организации" value="${esc(String(organizationSettings.organization_type||'').startsWith('custom:')?String(organizationSettings.organization_type).slice(7):'')}"></div>
+       <div class="form-group"><label for="orgIndustry">Отрасль *</label><select id="orgIndustry" required>${optionsHtml(INDUSTRIES.filter(item=>item[0]!=='other'),organizationSettings.industry||'other')}<option value="__custom__" ${String(organizationSettings.industry||'').startsWith('custom:')?'selected':''}>Другая отрасль — указать свою</option></select><input id="orgIndustryCustom" class="hidden" maxlength="80" placeholder="Укажите отрасль" value="${esc(String(organizationSettings.industry||'').startsWith('custom:')?String(organizationSettings.industry).slice(7):'')}"><div class="form-hint">Выберите ближайшее направление. Реестр документов остаётся универсальным.</div></div>
      </div>
      <div class="form-group"><label for="orgSubdivision">Подразделение или направление</label><input id="orgSubdivision" maxlength="200" placeholder="Например, бухгалтерия, проектный отдел, регистратура" value="${esc(organizationSettings.subdivision||'')}"></div>
      <div class="form-group"><label for="orgResponsible">Ответственный за документы</label><input id="orgResponsible" maxlength="200" placeholder="ФИО или должность ответственного" value="${esc(organizationSettings.responsible_person||'')}"></div>
