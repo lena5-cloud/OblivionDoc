@@ -801,6 +801,45 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 @media(max-width:760px){.app-shell{grid-template-columns:minmax(0,1fr)}.app-shell .sidebar{padding-top:22px}.app-shell .topbar{padding:12px 15px;gap:8px;min-height:68px}.app-shell .content{padding:22px 14px 35px}.app-shell .page-head{align-items:flex-start;gap:14px}.app-shell .page-head h1{font-size:25px}.app-shell .page-head p{font-size:13px}.app-shell .top-title{font-size:15px}.app-shell .top-actions{gap:6px}.app-shell .user-pill{padding:4px 5px}.app-shell .avatar{width:32px;height:32px}.app-shell .stats-grid{gap:10px}.app-shell .stat-card{padding:15px 13px;border-radius:13px}.app-shell .stat-top{font-size:11px}.app-shell .stat-value{font-size:25px}.app-shell .stat-note{font-size:11px}.app-shell .panel-head,.app-shell .panel-body{padding:16px}.app-shell .toolbar{padding:12px;gap:8px}.app-shell .docs-status-strip{gap:8px}.app-shell .docs-status-item{min-width:0}.app-shell .profile-hero{padding:18px!important}.app-shell .settings-card{padding:16px}.app-shell .settings-row{align-items:flex-start;flex-direction:column;gap:10px}.app-shell .settings-row>.btn{align-self:flex-start}}
 @media(prefers-reduced-motion:reduce){.app-shell *,.app-shell *:before,.app-shell *:after{transition:none!important;animation:none!important}}
 
+
+/* OblivionDoc: зелёная градиентная тема */
+:root{--navy:#087f4e;--navy2:#06a56a;--accent:#10a765;--green:#07864f;--greenbg:#e5f8ec;--bluebg:#e5f8ec;--shadow:0 12px 32px rgba(7,127,78,.09)}
+.btn-primary,.btn-primary:hover{background:linear-gradient(115deg,#07864f 0%,#19bd72 48%,#8be36d 100%);border-color:#19ad65;color:#fff}
+.nav-btn.active{background:linear-gradient(115deg,#07864f 0%,#20bc73 55%,#8be36d 100%);color:#fff;box-shadow:inset 3px 0 #b9ffca}
+.stat-icon,.quick-icon{background:linear-gradient(135deg,#e3f9eb,#c8f4d5);color:#07864f}
+.field:focus,input:focus,select:focus,textarea:focus{border-color:#27b975;box-shadow:0 0 0 3px #19ad651a}
+.quick-card:hover{border-color:#79d9a3;background:#f5fff8}
+.progress span{background:linear-gradient(90deg,#07864f 0%,#22c978 55%,#9be66e 100%)}
+.badge.archived{background:#e5f8ec;color:#07864f}
+
+</style>
+<style>
+/* Focused refinements for the universal profile and document register */
+.profile-note{margin:16px 18px 18px;padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:#f8faf8;color:var(--ink)}
+.profile-note strong{display:block;font-size:12px;font-weight:800;color:#244638}
+.profile-note p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+.doc-category-chip{display:inline-block;max-width:260px;padding:5px 9px;border-radius:8px;background:#e8f2ec;color:#2f654b;font-size:11px;font-weight:750;line-height:1.4}
+.document-table{min-width:1080px}
+.document-table td:nth-child(2){min-width:180px}
+.document-table td:nth-child(1){min-width:240px}
+.document-table td:nth-child(6){white-space:nowrap}
+.docs-toolbar .search{flex:1 1 280px}
+.docs-toolbar select{flex:0 1 auto}
+.profile-org-form{margin-top:14px;gap:14px}
+.profile-org-form .form-grid{margin-bottom:0}
+.profile-org-form .form-hint{margin-top:5px;line-height:1.5}
+.profile-form-foot span{font-size:12px;color:var(--muted)}
+.profile-org-card .org-summary{display:grid;gap:0}
+.profile-org-card .org-summary-row{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,1.2fr);gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.profile-org-card .org-summary-row:last-child{border-bottom:0}
+.profile-org-card .org-summary-value{overflow-wrap:anywhere;font-weight:650;color:var(--ink)}
+@media(max-width:760px){
+ .profile-org-card .org-summary-row{grid-template-columns:1fr;gap:3px}
+ .profile-org-form .form-grid{grid-template-columns:1fr}
+ .docs-toolbar .search{min-width:100%}
+ .document-table{min-width:1000px}
+ .profile-note{margin:14px;padding:13px}
+}
 </style>
 </head>
 <body>
@@ -945,7 +984,7 @@ const API_URL = (location.hostname === '127.0.0.1' || location.hostname === 'loc
 const TOKEN_KEY = 'obliviondoc_token';
 const EMAIL_KEY = 'obliviondoc_email';
 const $ = id => document.getElementById(id);
-let currentUser = null, userProfile = {first_name:'',last_name:''}, documents = [], auditLogs = [], organizationSettings = {organization_name:'',subdivision:'',responsible_person:'',retention_policy:''}, currentPage = 'overview', saving = false, refreshing = false, resetToken = new URLSearchParams(location.search).get('reset_token');
+let currentUser = null, userProfile = {first_name:'',last_name:''}, documents = [], auditLogs = [], organizationSettings = {organization_name:'',organization_type:'company',industry:'other',subdivision:'',responsible_person:'',retention_policy:''}, currentPage = 'overview', saving = false, refreshing = false, resetToken = new URLSearchParams(location.search).get('reset_token');
 if (resetToken) history.replaceState({}, '', location.pathname);
 const pageNames = {overview:'Главная',documents:'Документы',deadlines:'Сроки хранения',archive:'Архив',analytics:'Аналитика',audit:'Журнал действий',security:'Безопасность',help:'Справка',profile:'Профиль',settings:'Настройки'};
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -980,14 +1019,61 @@ function daysLeft(doc){if(!doc.expires_at)return Infinity;return Math.ceil((new 
 function statusName(status){return ({active:'На хранении',archived:'В архиве',deleted:'Удалён'})[status]||status||'—';}
 function badge(status,doc){if(doc&&status==='active'){const d=daysLeft(doc);if(d<0)return '<span class="badge expired">Срок истёк</span>';if(d<=30)return '<span class="badge soon">Скоро срок</span>'; }return `<span class="badge ${esc(status)}">${esc(statusName(status))}</span>`;}
 function actionName(action){return action==='archive'?'Архивировать':action==='delete'?'Удалить по сроку':'—';}
-function docRow(d){return `<tr><td><div class="doc-main">${esc(d.name)}</div><div class="doc-sub">ID ${esc(d.id)} · Добавлен ${esc(fmtDate(d.created_at))}</div></td><td>${esc(fmtDate(d.expires_at))}</td><td>${badge(d.status,d)}</td><td>${esc(actionName(d.action))}</td><td><div class="row-actions"><button class="action-btn" data-act="edit" data-id="${d.id}">Изменить</button>${(d.file_path||d.file_name)?`<button class="action-btn" data-act="download" data-id="${d.id}" title="Скачать копию файла">Скачать</button>`:''}<button class="action-btn" data-act="delete" data-id="${d.id}">Удалить</button></div></td></tr>`;}
-function table(docs,emptyTitle='Документов пока нет',emptyText='Добавьте первый документ, чтобы начать работу.'){return `<div class="table-wrap"><table><thead><tr><th>Документ</th><th>Срок хранения до</th><th>Статус</th><th>Действие по сроку</th><th>Операции</th></tr></thead><tbody>${docs.length?docs.map(docRow).join(''):`<tr><td colspan="5"><div class="empty"><strong>${esc(emptyTitle)}</strong>${esc(emptyText)}</div></td></tr>`}</tbody></table></div>`;}
+const DOCUMENT_CATEGORIES=[
+ ['contracts','Договоры и соглашения'],['finance','Финансовые документы'],['hr','Кадровые документы'],
+ ['legal','Юридические документы'],['project_technical','Проектные и технические'],
+ ['construction','Строительство и исполнительная документация'],['logistics','Логистика и транспорт'],
+ ['medical','Медицинские документы'],['education','Образование'],['procurement','Закупки и поставки'],
+ ['management','Управленческие документы'],['housing_utilities','ЖКХ и обращения'],
+ ['correspondence','Переписка'],['other','Другое']
+];
+const INDUSTRIES=[
+ ['construction','Строительство и девелопмент'],['accounting_finance','Бухгалтерия и финансы'],
+ ['legal_services','Юридические услуги'],['logistics','Логистика и транспорт'],
+ ['housing_utilities','Управление недвижимостью и ЖКХ'],['education','Образование'],
+ ['manufacturing','Производство и промышленность'],['healthcare','Медицина и здравоохранение'],
+ ['retail_services','Торговля и услуги'],['agriculture','Сельское хозяйство'],
+ ['it_telecom','ИТ и телекоммуникации'],['professional_services','Профессиональные услуги'],
+ ['public_services','Государственная или муниципальная деятельность'],['other','Другая отрасль']
+];
+const ORGANIZATION_TYPES=[
+ ['company','Коммерческая организация'],['public','Государственная или муниципальная организация'],
+ ['nonprofit','Некоммерческая организация'],['individual','ИП / частный специалист'],['other','Другой тип']
+];
+function categoryName(value){return (DOCUMENT_CATEGORIES.find(item=>item[0]===value)||DOCUMENT_CATEGORIES[DOCUMENT_CATEGORIES.length-1])[1];}
+function optionsHtml(items,selected){return items.map(([value,label])=>`<option value="${value}" ${value===(selected||items[0][0])?'selected':''}>${esc(label)}</option>`).join('');}
+function categoryOptions(selected='other'){return optionsHtml(DOCUMENT_CATEGORIES,selected);}
+function industryName(value){return (INDUSTRIES.find(item=>item[0]===value)||INDUSTRIES[INDUSTRIES.length-1])[1];}
+function organizationTypeName(value){return (ORGANIZATION_TYPES.find(item=>item[0]===value)||ORGANIZATION_TYPES[ORGANIZATION_TYPES.length-1])[1];}
+function docRow(d){
+ const detail=[d.document_number?'№ '+d.document_number:'',d.counterparty||''].filter(Boolean).join(' · ');
+ return `<tr>
+  <td><div class="doc-main">${esc(d.name)}</div><div class="doc-sub">ID ${esc(d.id)} · Добавлен ${esc(fmtDate(d.created_at))}${detail?' · '+esc(detail):''}</div></td>
+  <td><span class="doc-category-chip">${esc(categoryName(d.category||'other'))}</span><div class="doc-sub">${esc(d.department||'')}</div></td>
+  <td>${esc(fmtDate(d.expires_at))}</td>
+  <td>${badge(d.status,d)}</td>
+  <td>${esc(actionName(d.action))}</td>
+  <td><div class="row-actions"><button class="action-btn" data-act="edit" data-id="${d.id}">Изменить</button>${(d.file_path||d.file_name)?`<button class="action-btn" data-act="download" data-id="${d.id}" title="Скачать копию файла">Скачать</button>`:''}<button class="action-btn" data-act="delete" data-id="${d.id}">Удалить</button></div></td>
+ </tr>`;
+}
+function table(docs,emptyTitle='Документов пока нет',emptyText='Добавьте первый документ, чтобы начать работу.'){
+ return `<div class="table-wrap"><table class="document-table"><thead><tr><th>Документ</th><th>Категория / отдел</th><th>Хранить до</th><th>Статус</th><th>Действие по сроку</th><th>Операции</th></tr></thead><tbody>${docs.length?docs.map(docRow).join(''):`<tr><td colspan="6"><div class="empty"><strong>${esc(emptyTitle)}</strong>${esc(emptyText)}</div></td></tr>`}</tbody></table></div>`;
+}
 function panel(title,body,subtitle='',action=''){return `<section class="panel"><div class="panel-head"><div><h2 class="panel-title">${title}</h2>${subtitle?`<div class="panel-sub">${subtitle}</div>`:''}</div>${action}</div>${body}</section>`;}
 function pageHead(title,desc,action=''){return `<div class="page-head"><div><div class="eyebrow">Управление документами</div><h1>${title}</h1><p>${desc}</p></div>${action}</div>`;}
 function stat(title,value,note,icon){return `<div class="stat-card"><div class="stat-top"><span>${title}</span><span class="stat-icon">${icon}</span></div><div class="stat-value">${value}</div><div class="stat-note">${note}</div></div>`;}
 function activeDocs(){return documents.filter(d=>d.status==='active');}function upcoming(){return activeDocs().filter(d=>daysLeft(d)>=0&&daysLeft(d)<=30).sort((a,b)=>daysLeft(a)-daysLeft(b));}function expired(){return activeDocs().filter(d=>daysLeft(d)<0);}
 function renderOverview(){const active=activeDocs().length, soon=upcoming().length, arch=documents.filter(d=>d.status==='archived').length, deleted=documents.filter(d=>d.status==='deleted').length;const urgent=[...expired(),...upcoming()].sort((a,b)=>daysLeft(a)-daysLeft(b)).slice(0,6);return `${pageHead('Главная','Сводка по документам, срокам хранения и последним действиям.',`<button class="btn btn-primary" data-act="add">＋ Добавить документ</button>`)}<div class="stats-grid">${stat('Всего документов',documents.length,'В реестре','▤')}${stat('На хранении',active,'Активные записи','◷')}${stat('Срок в ближайшие 30 дней',soon,'Требуют внимания','!')}${stat('В архиве',arch,'Удалено по действию: '+deleted,'▣')}</div><div class="grid-two"><div>${panel('Требуют внимания',`<div class="table-wrap"><table style="min-width:560px"><thead><tr><th>Документ</th><th>Срок</th><th>Статус срока</th></tr></thead><tbody>${urgent.length?urgent.map(d=>`<tr><td><div class="doc-main">${esc(d.name)}</div><div class="doc-sub">ID ${d.id}</div></td><td>${esc(fmtDate(d.expires_at))}</td><td>${daysLeft(d)<0?'<span class="badge expired">Просрочен</span>':`<span class="badge soon">${daysLeft(d)} дн.</span>`}</td></tr>`).join(''):`<tr><td colspan="3"><div class="empty"><strong>Нет ближайших сроков</strong>Сейчас всё спокойно.</div></td></tr>`}</tbody></table></div>`,'Документы с истёкшим или приближающимся сроком',`<button class="btn btn-sm" data-page="deadlines">Все сроки →</button>`)}${panel('Последние действия',renderAuditTable(auditLogs.slice(0,5),true),'История работы с документами',`<button class="btn btn-sm" data-page="audit">Весь журнал →</button>`)}</div><div>${panel('Быстрые действия',`<div class="panel-body"><div class="quick-grid"><button class="quick-card" data-act="add"><span class="quick-icon">＋</span><span><span class="quick-title">Новый документ</span><span class="quick-desc" style="display:block">Добавить запись в реестр</span></span></button><button class="quick-card" data-page="deadlines"><span class="quick-icon">◷</span><span><span class="quick-title">Проверить сроки</span><span class="quick-desc" style="display:block">Ближайшие даты</span></span></button><button class="quick-card" data-page="archive"><span class="quick-icon">▣</span><span><span class="quick-title">Открыть архив</span><span class="quick-desc" style="display:block">Архивные документы</span></span></button><button class="quick-card" data-page="audit"><span class="quick-icon">≡</span><span><span class="quick-title">Журнал действий</span><span class="quick-desc" style="display:block">История изменений</span></span></button></div></div>`)}${panel('Состояние реестра',`<div class="panel-body"><div class="metric-line" style="margin-top:0"><span>На хранении</span><strong>${active}</strong></div><div class="progress"><span style="width:${documents.length?active/documents.length*100:0}%"></span></div><div class="metric-line"><span>В архиве</span><strong>${arch}</strong></div><div class="progress"><span style="width:${documents.length?arch/documents.length*100:0}%;background:#7fae9b"></span></div><div class="metric-line"><span>Удалено</span><strong>${deleted}</strong></div><div class="progress"><span style="width:${documents.length?deleted/documents.length*100:0}%;background:#b7bec9"></span></div><p class="small muted" style="margin:18px 0 0">Статистика рассчитана по текущему реестру вашего аккаунта.</p></div>`)} </div></div>`;}
-function renderDocumentsPage(){const active=activeDocs().length,soon=upcoming().length,archived=documents.filter(d=>d.status==='archived').length,deleted=documents.filter(d=>d.status==='deleted').length;return `${pageHead('Документы','Единый реестр файлов, сроков хранения и действий по каждому документу.',`<button class="btn btn-primary" data-act="add">＋ Добавить документ</button>`)}<section class="docs-intro"><div class="docs-intro-icon" aria-hidden="true">▤</div><div class="docs-intro-copy"><div class="eyebrow">РАБОЧИЙ РЕЕСТР</div><h2>Все документы — в одном месте</h2><p>Найдите нужную запись, проверьте статус и срок хранения или добавьте новый документ. Изменения отражаются в журнале действий.</p></div><div class="docs-total"><strong>${documents.length}</strong><span>всего записей</span></div></section><div class="docs-status-strip"><div class="docs-status-item"><span class="docs-status-dot docs-dot-active"></span><div><strong>${active}</strong><span>На хранении</span></div></div><div class="docs-status-item"><span class="docs-status-dot docs-dot-soon"></span><div><strong>${soon}</strong><span>Срок до 30 дней</span></div></div><div class="docs-status-item"><span class="docs-status-dot docs-dot-archived"></span><div><strong>${archived}</strong><span>В архиве</span></div></div><div class="docs-status-item"><span class="docs-status-dot docs-dot-deleted"></span><div><strong>${deleted}</strong><span>Удалённые</span></div></div></div><section class="panel docs-table-panel"><div class="docs-table-heading"><div><h2>Реестр документов</h2><p>Поиск и фильтры помогают быстро найти нужную запись</p></div><span class="docs-secure-label"><span>✓</span> Ваше рабочее пространство</span></div><div class="toolbar docs-toolbar"><div class="search"><input id="docSearch" placeholder="Поиск по названию или ID…" aria-label="Поиск по документам"></div><select id="statusFilter" aria-label="Фильтр по статусу" style="max-width:190px"><option value="all">Все статусы</option><option value="active">На хранении</option><option value="archived">В архиве</option><option value="deleted">Удалённые</option></select><button class="btn" id="exportBtn" type="button">Экспорт Excel</button></div><div id="docsTable">${table(documents)}</div></section>`;}
+function renderDocumentsPage(){
+ const active=activeDocs().length,soon=upcoming().length,archived=documents.filter(d=>d.status==='archived').length,deleted=documents.filter(d=>d.status==='deleted').length;
+ const categories=`<option value="all">Все категории</option>`+DOCUMENT_CATEGORIES.map(([value,label])=>`<option value="${value}">${esc(label)}</option>`).join('');
+ return `${pageHead('Документы','Единый реестр документов для любой отрасли: от договоров и счетов до проектной, медицинской и исполнительной документации.',`<button class="btn btn-primary" data-act="add">＋ Добавить документ</button>`)}
+ <section class="docs-intro"><div class="docs-intro-icon" aria-hidden="true">▤</div><div class="docs-intro-copy"><div class="eyebrow">ЕДИНЫЙ РЕЕСТР</div><h2>Все документы — в одном месте</h2><p>Храните файлы, находите их по реквизитам и контролируйте сроки. Категория помогает организовать документы, но не ограничивает отрасль компании.</p></div><div class="docs-total"><strong>${documents.length}</strong><span>всего записей</span></div></section>
+ <div class="docs-status-strip"><div class="docs-status-item"><span class="docs-status-dot docs-dot-active"></span><div><strong>${active}</strong><span>На хранении</span></div></div><div class="docs-status-item"><span class="docs-status-dot docs-dot-soon"></span><div><strong>${soon}</strong><span>Срок до 30 дней</span></div></div><div class="docs-status-item"><span class="docs-status-dot docs-dot-archived"></span><div><strong>${archived}</strong><span>В архиве</span></div></div><div class="docs-status-item"><span class="docs-status-dot docs-dot-deleted"></span><div><strong>${deleted}</strong><span>Удалённые записи</span></div></div></div>
+ <section class="panel docs-table-panel"><div class="docs-table-heading"><div><h2>Реестр документов</h2><p>Используйте поиск по названию, номеру, контрагенту или подразделению</p></div><span class="docs-secure-label"><span>✓</span> Ваше рабочее пространство</span></div>
+ <div class="toolbar docs-toolbar"><div class="search"><input id="docSearch" placeholder="Название, ID, номер, контрагент…" aria-label="Поиск по документам"></div><select id="docCategoryFilter" aria-label="Фильтр по категории" style="max-width:250px">${categories}</select><select id="statusFilter" aria-label="Фильтр по статусу" style="max-width:190px"><option value="all">Все статусы</option><option value="active">На хранении</option><option value="archived">В архиве</option><option value="deleted">Удалённые</option></select><button class="btn" id="exportBtn" type="button">Экспорт Excel</button></div>
+ <div id="docsTable">${table(documents)}</div></section>`;
+}
 function renderDeadlines(){const ds=[...activeDocs()].sort((a,b)=>new Date(a.expires_at)-new Date(b.expires_at));const soon=ds.filter(d=>daysLeft(d)>=0&&daysLeft(d)<=30), overdue=ds.filter(d=>daysLeft(d)<0), later=ds.filter(d=>daysLeft(d)>30);return `${pageHead('Сроки хранения','Контроль приближающихся и прошедших дат по активным документам.')}<div class="stats-grid">${stat('Просрочено',overdue.length,'Срок уже наступил','!')}${stat('До 7 дней',ds.filter(d=>daysLeft(d)>=0&&daysLeft(d)<=7).length,'Срочные задачи','◷')}${stat('До 30 дней',soon.length,'Нужно проверить','◷')}${stat('Более 30 дней',later.length,'В плановом порядке','✓')}</div>${panel('Календарь контроля',`<div class="toolbar"><div class="search"><input id="deadlineSearch" placeholder="Поиск по документам…"></div></div><div id="deadlineTable">${table(ds,'Нет активных документов','Добавьте документы, чтобы отслеживать их сроки.')}</div>`,'Сортировка по ближайшему сроку')}`;}
 function renderArchive(){const ds=documents.filter(d=>d.status==='archived'||d.status==='deleted');return `${pageHead('Архив','Просматривайте архивные записи и проверяйте, какие файлы всё ещё доступны для скачивания.')}<div class="stats-grid">${stat('Всего записей',ds.length,'В архивном разделе','▣')}${stat('Архивировано',ds.filter(d=>d.status==='archived').length,'Доступны для просмотра','✓')}${stat('Удалено',ds.filter(d=>d.status==='deleted').length,'Запись сохранена в журнале','≡')}${stat('На хранении',activeDocs().length,'Не входят в архив','◷')}</div>${panel('Архивные записи',`<div class="toolbar"><div class="search"><input id="archiveSearch" placeholder="Поиск в архиве…"></div><select id="archiveFilter" style="max-width:180px"><option value="all">Все записи</option><option value="archived">В архиве</option><option value="deleted">Удалённые</option></select></div><div id="archiveTable">${table(ds,'Архив пока пуст','Документы появятся здесь после архивирования.')}</div>`)}`;}
 function renderAnalytics(){const total=documents.length,active=activeDocs().length,arch=documents.filter(d=>d.status==='archived').length,del=documents.filter(d=>d.status==='deleted').length;const vals=[active,arch,del],max=Math.max(1,...vals);return `${pageHead('Аналитика','Общая картина по документам и срокам хранения.')}<div class="stats-grid">${stat('Всего документов',total,'Все статусы','▤')}${stat('Активные',active,total?Math.round(active/total*100)+'% реестра':'Нет данных','◷')}${stat('В архиве',arch,total?Math.round(arch/total*100)+'% реестра':'Нет данных','▣')}${stat('С истёкшим сроком',expired().length,'Среди активных','!')}</div><div class="grid-two">${panel('Распределение по статусам',`<div class="panel-body"><div class="chart-bars">${[['На хранении',active],['В архиве',arch],['Удалено',del]].map(([l,v])=>`<div class="bar-col"><div class="bar" style="height:${Math.max(4,v/max*100)}%" title="${v}"></div><div class="bar-label">${l}</div></div>`).join('')}</div><div class="metric-line"><span>Всего записей</span><strong>${total}</strong></div></div>`)}${panel('Планирование сроков',`<div class="panel-body">${[['Истекли',expired().length,'#bd545b'],['В ближайшие 7 дней',upcoming().filter(d=>daysLeft(d)<=7).length,'#c18a27'],['В ближайшие 30 дней',upcoming().length,'#6e8fc6']].map(([label,val,color])=>`<div class="metric-line" style="margin-top:12px"><span>${label}</span><strong>${val}</strong></div><div class="progress"><span style="width:${active?Math.min(100,val/active*100):0}%;background:${color}"></span></div>`).join('')}<p class="small muted">Показатели отражают актуальное состояние реестра документов и обновляются при загрузке данных.</p></div>`)}</div>`;}
@@ -996,31 +1082,252 @@ function renderAuditTable(logs,compact=false){if(!logs.length)return `<div class
 function renderAudit(){return `${pageHead('Журнал действий','История операций, связанных с документами.',`<button class="btn" id="auditRefresh">↻ Обновить</button>`)}${panel('Все события',`<div class="toolbar"><div class="search"><input id="auditSearch" placeholder="Поиск по документу или действию…"></div><button class="btn" id="auditExport" type="button">Экспорт Excel</button></div><div id="auditTable">${renderAuditTable(auditLogs)}</div>`,'Записи доступны для просмотра и аудита')}`;}
 function renderSecurity(){return `${pageHead('Безопасность','Проверяйте состояние входа и соблюдайте правила безопасной работы с документами.')}<div class="grid-two">${panel('Текущий сеанс',`<div class="panel-body"><div class="settings-row"><div><strong>Вход выполнен для аккаунта</strong><p>${esc(currentUser?.email||'—')}</p><p>Этот аккаунт определяет, какие документы и записи журнала доступны в системе.</p></div><span class="badge active">Активен</span></div><div class="settings-row"><div><strong>Завершить работу</strong><p>Выйдите из аккаунта, если работаете на общем или чужом компьютере. После выхода для просмотра документов потребуется войти снова.</p></div><button class="btn btn-sm" data-act="logout">Выйти</button></div></div>`)}${panel('Практика безопасной работы',`<div class="panel-body"><div class="notice-list"><div class="notice"><div class="notice-mark">✓</div><div><div class="notice-title">Проверяйте действие по сроку</div><div class="notice-text">Перед сохранением проверьте дату и выбранное действие. Архивирование сохраняет файл в системе; автоматическое удаление очищает серверную копию после наступления срока. Учитывайте регламент организации.</div></div></div><div class="notice"><div class="notice-mark">!</div><div><div class="notice-title">Удаление требует внимания</div><div class="notice-text">Перед ручным удалением скачайте файл, если он ещё может понадобиться. Не загружайте в тестовую систему реальные персональные данные студентов и сотрудников без разрешения организации и утверждённых мер защиты.</div></div></div><div class="notice"><div class="notice-mark">≡</div><div><div class="notice-title">Используйте журнал действий</div><div class="notice-text">Проверяйте дату, название документа и результат операции, если требуется восстановить последовательность изменений. Журнал помогает разбирать работу системы, но сам по себе не заменяет резервное копирование.</div></div></div></div></div>`)}</div>`;}
 async function loadUserProfile(showMessage=false){try{const response=await apiFetch('/profile');if(!response.ok)throw new Error(await readError(response));userProfile=await response.json();updateHeaderUser();if($('firstName'))$('firstName').value=userProfile.first_name||'';if($('lastName'))$('lastName').value=userProfile.last_name||'';}catch(error){if(showMessage)toast(error.message||'Не удалось загрузить профиль.',true);}}
-async function saveUserProfile(event){event.preventDefault();const button=$('saveProfileBtn');if(!button)return;const data={first_name:$('firstName').value.trim(),last_name:$('lastName').value.trim()};button.disabled=true;button.textContent='Сохранение…';try{const response=await apiFetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!response.ok)throw new Error(await readError(response));const saved=await response.json();userProfile={first_name:saved.first_name||'',last_name:saved.last_name||''};updateHeaderUser();toast('Профиль сохранён.');}catch(error){toast(error.message||'Не удалось сохранить профиль.',true);}finally{button.disabled=false;button.textContent='Сохранить профиль';}}
-function updateOrganizationSummary(){const values={orgSummaryName:organizationSettings.organization_name,orgSummarySubdivision:organizationSettings.subdivision,orgSummaryResponsible:organizationSettings.responsible_person,orgSummaryPolicy:organizationSettings.retention_policy};for(const [id,value] of Object.entries(values)){const node=$(id);if(node)node.textContent=value||'Не указано';}const filled=Boolean(organizationSettings.organization_name||organizationSettings.subdivision||organizationSettings.responsible_person||organizationSettings.retention_policy);$('orgSummaryEmpty')?.classList.toggle('hidden',filled);const chip=$('orgChipTitle');if(chip)chip.textContent=organizationSettings.organization_name||'Рабочее пространство';}
-async function loadOrganizationSettings(){try{const r=await apiFetch('/settings/organization');if(!r.ok)throw new Error(await readError(r));organizationSettings=await r.json();const fields={orgName:organizationSettings.organization_name||'',orgSubdivision:organizationSettings.subdivision||'',orgResponsible:organizationSettings.responsible_person||'',orgPolicy:organizationSettings.retention_policy||''};for(const [id,value] of Object.entries(fields)){if($(id))$(id).value=value;}updateOrganizationSummary();}catch(e){toast('Не удалось загрузить настройки организации: '+(e.message||'ошибка сети'),true);}}
-async function saveOrganizationSettings(event){event.preventDefault();const btn=$('saveOrganizationBtn');if(!btn)return;btn.disabled=true;btn.textContent='Сохранение…';const data={organization_name:$('orgName').value.trim(),subdivision:$('orgSubdivision').value.trim(),responsible_person:$('orgResponsible').value.trim(),retention_policy:$('orgPolicy').value.trim()};if(!data.organization_name||!data.subdivision||!data.responsible_person){toast('Заполните название организации, подразделение и ответственного за документы.',true);btn.disabled=false;btn.textContent='Сохранить настройки организации';return;}try{const r=await apiFetch('/settings/organization',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(await readError(r));organizationSettings=await r.json();updateOrganizationSummary();toast('Настройки организации сохранены.');}catch(e){toast(e.message||'Не удалось сохранить настройки организации.',true);}finally{btn.disabled=false;btn.textContent='Сохранить настройки организации';}}
-function renderProfile(){const fullName=[userProfile.first_name,userProfile.last_name].map(value=>(value||'').trim()).filter(Boolean).join(' ');const initials=fullName?fullName.split(/\s+/).map(part=>part[0]).join('').slice(0,2).toUpperCase():'П';return `${pageHead('Профиль','Личные данные и информация об организации — в одном месте.')}<section class="profile-hero"><div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarLarge">${esc(initials)}</div><div class="profile-identity-copy"><div class="eyebrow">ВАШ АККАУНТ OBLIVIONDOC</div><h2 id="profileDisplayName">${esc(fullName||'Заполните профиль')}</h2><p>${esc(currentUser?.email||'Email не указан')}</p></div></div><div class="profile-tip"><span class="profile-tip-icon">✓</span><div><strong>Ваши данные под рукой</strong><p>Заполните профиль один раз — имя будет отображаться в рабочем пространстве.</p></div></div></section><div class="profile-layout"><section class="panel profile-panel"><div class="panel-head"><div><h2 class="panel-title">Личные данные</h2><div class="panel-sub">Информация о пользователе аккаунта</div></div><span class="profile-section-icon">◉</span></div><form id="userProfileForm" class="settings-card profile-form"><div class="profile-email-row"><span class="profile-field-icon">✉</span><div class="profile-email-copy"><strong>Email аккаунта</strong><span>Используется для входа и восстановления доступа</span></div><div class="profile-email-value">${esc(currentUser?.email||'—')}</div></div><div class="profile-fields"><div class="form-group"><label for="firstName">Имя и отчество</label><input id="firstName" maxlength="100" autocomplete="given-name" value="${esc(userProfile.first_name||'')}" placeholder="Например, Анна Сергеевна"><div class="form-hint">Можно указать имя и отчество в одном поле.</div></div><div class="form-group"><label for="lastName">Фамилия</label><input id="lastName" maxlength="100" autocomplete="family-name" value="${esc(userProfile.last_name||'')}" placeholder="Введите фамилию"></div></div><div class="profile-form-foot"><span>Данные доступны в вашем аккаунте</span><button class="btn btn-primary" type="submit" id="saveProfileBtn">Сохранить профиль <span aria-hidden="true">→</span></button></div></form></section><section class="panel profile-panel"><div class="panel-head"><div><h2 class="panel-title">Организация</h2><div class="panel-sub">Настройте рабочее пространство под свою команду</div></div><span class="profile-section-icon">▦</span></div><div class="settings-card profile-org-card"><p id="orgSummaryEmpty" class="org-summary-empty">Добавьте сведения об организации, чтобы рабочее пространство отражало вашу команду.</p><div class="org-summary"><div class="org-summary-row"><div class="org-summary-label">Компания / организация</div><div class="org-summary-value" id="orgSummaryName">${esc(organizationSettings.organization_name||'Не указано')}</div></div><div class="org-summary-row"><div class="org-summary-label">Отдел / подразделение</div><div class="org-summary-value" id="orgSummarySubdivision">${esc(organizationSettings.subdivision||'Не указано')}</div></div><div class="org-summary-row"><div class="org-summary-label">Ответственный за документы</div><div class="org-summary-value" id="orgSummaryResponsible">${esc(organizationSettings.responsible_person||'Не указано')}</div></div><div class="org-summary-row"><div class="org-summary-label">Правила хранения</div><div class="org-summary-value" id="orgSummaryPolicy">${esc(organizationSettings.retention_policy||'Не указано')}</div></div></div><button class="btn profile-edit-org-btn" type="button" id="organizationToggle"><span aria-hidden="true">＋</span> Настроить организацию</button><form id="organizationForm" class="settings-card hidden profile-org-form"><div class="form-group"><label for="orgName">Компания / организация *</label><input id="orgName" maxlength="200" required placeholder="Например, ООО «Пример» или название учреждения" value="${esc(organizationSettings.organization_name)}"></div><div class="form-group"><label for="orgSubdivision">Отдел / подразделение *</label><input id="orgSubdivision" maxlength="200" required placeholder="Например, отдел логистики, кадров или ИТ" value="${esc(organizationSettings.subdivision)}"></div><div class="form-group"><label for="orgResponsible">Ответственный за документы *</label><input id="orgResponsible" maxlength="200" required placeholder="ФИО ответственного сотрудника" value="${esc(organizationSettings.responsible_person)}"></div><div class="form-group"><label for="orgPolicy">Правила и регламент хранения</label><textarea id="orgPolicy" maxlength="1000" rows="4" placeholder="Укажите внутренние правила, сроки или название регламента">${esc(organizationSettings.retention_policy)}</textarea><div class="form-hint">Не указывайте здесь пароли или другую секретную информацию.</div></div><button class="btn btn-primary" type="submit" id="saveOrganizationBtn">Сохранить сведения</button></form></div></section></div>`;}
+async function saveUserProfile(event){
+ event.preventDefault();const button=$('saveProfileBtn');if(!button)return;
+ const data={first_name:$('firstName').value.trim(),last_name:$('lastName').value.trim()};
+ button.disabled=true;button.textContent='Сохранение…';
+ try{
+  const response=await apiFetch('/profile',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  if(!response.ok)throw new Error(await readError(response));
+  const saved=await response.json();
+  userProfile={first_name:saved.first_name||'',last_name:saved.last_name||''};
+  updateHeaderUser();toast('Личные данные сохранены.');
+ }catch(error){toast(error.message||'Не удалось сохранить профиль.',true);}
+ finally{button.disabled=false;button.innerHTML='Сохранить данные <span aria-hidden="true">→</span>';}
+}
+function syncCustomOrganizationFields(){
+ const typeCustom=$('orgType')?.value==='__custom__';
+ const industryCustom=$('orgIndustry')?.value==='__custom__';
+ $('orgTypeCustom')?.classList.toggle('hidden',!typeCustom);
+ $('orgIndustryCustom')?.classList.toggle('hidden',!industryCustom);
+ if($('orgTypeCustom'))$('orgTypeCustom').required=typeCustom;
+ if($('orgIndustryCustom'))$('orgIndustryCustom').required=industryCustom;
+}
+function updateOrganizationSummary(){
+ const values={
+  orgSummaryName:organizationSettings.organization_name,
+  orgSummaryType:organizationTypeName(organizationSettings.organization_type||'company'),
+  orgSummaryIndustry:industryName(organizationSettings.industry||'other'),
+  orgSummarySubdivision:organizationSettings.subdivision,
+  orgSummaryResponsible:organizationSettings.responsible_person,
+  orgSummaryPolicy:organizationSettings.retention_policy
+ };
+ for(const [id,value] of Object.entries(values)){const node=$(id);if(node)node.textContent=value||'Не указано';}
+ const filled=Boolean(organizationSettings.organization_name||organizationSettings.subdivision||organizationSettings.responsible_person||organizationSettings.retention_policy);
+ $('orgSummaryEmpty')?.classList.toggle('hidden',filled);
+ const chip=$('orgChipTitle');if(chip)chip.textContent=organizationSettings.organization_name||'Рабочее пространство';
+}
+async function loadOrganizationSettings(){
+ try{
+  const r=await apiFetch('/settings/organization');
+  if(!r.ok)throw new Error(await readError(r));
+  const loaded=await r.json();
+  organizationSettings={organization_name:loaded.organization_name||'',organization_type:loaded.organization_type||'company',industry:loaded.industry||'other',subdivision:loaded.subdivision||'',responsible_person:loaded.responsible_person||'',retention_policy:loaded.retention_policy||''};
+  const customType=String(organizationSettings.organization_type||'').startsWith('custom:');
+  const customIndustry=String(organizationSettings.industry||'').startsWith('custom:');
+  const fields={orgName:organizationSettings.organization_name,orgType:customType?'__custom__':organizationSettings.organization_type,orgIndustry:customIndustry?'__custom__':organizationSettings.industry,orgSubdivision:organizationSettings.subdivision,orgResponsible:organizationSettings.responsible_person,orgPolicy:organizationSettings.retention_policy};
+  for(const [id,value] of Object.entries(fields)){if($(id))$(id).value=value;}
+   if($('orgTypeCustom'))$('orgTypeCustom').value=customType?organizationSettings.organization_type.slice(7):'';
+   if($('orgIndustryCustom'))$('orgIndustryCustom').value=customIndustry?organizationSettings.industry.slice(7):'';
+  syncCustomOrganizationFields();
+  updateOrganizationSummary();
+ }catch(e){toast('Не удалось загрузить настройки организации: '+(e.message||'ошибка сети'),true);}
+}
+async function saveOrganizationSettings(event){
+ event.preventDefault();
+ const btn=$('saveOrganizationBtn');if(!btn)return;
+ btn.disabled=true;btn.textContent='Сохранение…';
+ const data={
+  organization_name:$('orgName').value.trim(),
+  organization_type:$('orgType').value==='__custom__'?'custom:'+ $('orgTypeCustom').value.trim():$('orgType').value,
+  industry:$('orgIndustry').value==='__custom__'?'custom:'+ $('orgIndustryCustom').value.trim():$('orgIndustry').value,
+  subdivision:$('orgSubdivision').value.trim(),
+  responsible_person:$('orgResponsible').value.trim(),
+  retention_policy:$('orgPolicy').value.trim()
+ };
+ if(!data.organization_name){toast('Укажите название организации.',true);btn.disabled=false;btn.textContent='Сохранить сведения';return;}
+ if(data.organization_type==='custom:'){toast('Укажите свой тип организации.',true);btn.disabled=false;btn.textContent='Сохранить сведения';return;}
+ if(data.industry==='custom:'){toast('Укажите свою отрасль.',true);btn.disabled=false;btn.textContent='Сохранить сведения';return;}
+ try{
+  const r=await apiFetch('/settings/organization',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  if(!r.ok)throw new Error(await readError(r));
+  const saved=await r.json();
+  organizationSettings={organization_name:saved.organization_name||data.organization_name,organization_type:saved.organization_type||data.organization_type,industry:saved.industry||data.industry,subdivision:saved.subdivision||'',responsible_person:saved.responsible_person||'',retention_policy:saved.retention_policy||''};
+  updateOrganizationSummary();toast('Профиль организации сохранён.');
+ }catch(e){toast(e.message||'Не удалось сохранить настройки организации.',true);}
+ finally{btn.disabled=false;btn.textContent='Сохранить сведения';}
+}
+function renderProfile(){
+ const fullName=[userProfile.first_name,userProfile.last_name].map(value=>(value||'').trim()).filter(Boolean).join(' ');
+ const initials=fullName?fullName.split(/\s+/).map(part=>part[0]).join('').slice(0,2).toUpperCase():'П';
+ return `${pageHead('Профиль','Личные данные и настройки организации для вашего рабочего пространства.')}
+ <section class="profile-hero">
+  <div class="profile-identity"><div class="profile-avatar-large" id="profileAvatarLarge">${esc(initials)}</div><div class="profile-identity-copy"><div class="eyebrow">АККАУНТ OBLIVIONDOC</div><h2 id="profileDisplayName">${esc(fullName||'Заполните профиль')}</h2><p>${esc(currentUser?.email||'Email не указан')}</p></div></div>
+  <div class="profile-tip"><span class="profile-tip-icon">✓</span><div><strong>Общие настройки для любой отрасли</strong><p>Тип и направление организации помогают настроить рабочее пространство. Категории документов доступны всем организациям.</p></div></div>
+ </section>
+ <div class="profile-layout">
+  <section class="panel profile-panel">
+   <div class="panel-head"><div><h2 class="panel-title">Личные данные</h2><div class="panel-sub">Как отображать вас в рабочем пространстве</div></div><span class="profile-section-icon">◉</span></div>
+   <form id="userProfileForm" class="settings-card profile-form">
+    <div class="profile-email-row"><span class="profile-field-icon">✉</span><div class="profile-email-copy"><strong>Email аккаунта</strong><span>Используется для входа и восстановления доступа</span></div><div class="profile-email-value">${esc(currentUser?.email||'—')}</div></div>
+    <div class="profile-fields">
+     <div class="form-group"><label for="firstName">Имя и отчество</label><input id="firstName" maxlength="100" autocomplete="given-name" value="${esc(userProfile.first_name||'')}" placeholder="Например, Анна Сергеевна"></div>
+     <div class="form-group"><label for="lastName">Фамилия</label><input id="lastName" maxlength="100" autocomplete="family-name" value="${esc(userProfile.last_name||'')}" placeholder="Введите фамилию"></div>
+    </div>
+    <div class="profile-form-foot"><span>Личные данные можно изменить позже</span><button class="btn btn-primary" type="submit" id="saveProfileBtn">Сохранить данные <span aria-hidden="true">→</span></button></div>
+   </form>
+   <div class="profile-note"><strong>Важное о доступе</strong><p>Email используется для входа. Не добавляйте пароли, ключи доступа или секретные сведения в поля профиля.</p></div>
+  </section>
+  <section class="panel profile-panel">
+   <div class="panel-head"><div><h2 class="panel-title">Профиль организации</h2><div class="panel-sub">Компания, учреждение или частная практика</div></div><span class="profile-section-icon">▦</span></div>
+   <div class="settings-card profile-org-card">
+    <p id="orgSummaryEmpty" class="org-summary-empty">Укажите название, тип и отрасль организации. Остальные поля можно заполнить позже.</p>
+    <div class="org-summary">
+     <div class="org-summary-row"><div class="org-summary-label">Организация</div><div class="org-summary-value" id="orgSummaryName">${esc(organizationSettings.organization_name||'Не указано')}</div></div>
+     <div class="org-summary-row"><div class="org-summary-label">Тип организации</div><div class="org-summary-value" id="orgSummaryType">${esc(organizationTypeName(organizationSettings.organization_type||'company'))}</div></div>
+     <div class="org-summary-row"><div class="org-summary-label">Отрасль</div><div class="org-summary-value" id="orgSummaryIndustry">${esc(industryName(organizationSettings.industry||'other'))}</div></div>
+     <div class="org-summary-row"><div class="org-summary-label">Подразделение</div><div class="org-summary-value" id="orgSummarySubdivision">${esc(organizationSettings.subdivision||'Не указано')}</div></div>
+     <div class="org-summary-row"><div class="org-summary-label">Ответственный за документы</div><div class="org-summary-value" id="orgSummaryResponsible">${esc(organizationSettings.responsible_person||'Не указано')}</div></div>
+     <div class="org-summary-row"><div class="org-summary-label">Правила хранения</div><div class="org-summary-value" id="orgSummaryPolicy">${esc(organizationSettings.retention_policy||'Не указано')}</div></div>
+    </div>
+    <button class="btn profile-edit-org-btn" type="button" id="organizationToggle"><span aria-hidden="true">＋</span> Редактировать организацию</button>
+    <form id="organizationForm" class="settings-card hidden profile-org-form">
+     <div class="form-group"><label for="orgName">Название организации *</label><input id="orgName" maxlength="200" required placeholder="Например, ООО «Вектор» или клиника «Медика»" value="${esc(organizationSettings.organization_name||'')}"></div>
+     <div class="form-grid">
+       <div class="form-group"><label for="orgType">Тип организации *</label><select id="orgType" required>${optionsHtml(ORGANIZATION_TYPES.filter(item=>item[0]!=='other'),organizationSettings.organization_type||'company')}<option value="__custom__" ${String(organizationSettings.organization_type||'').startsWith('custom:')?'selected':''}>Другой тип — указать свой</option></select><input id="orgTypeCustom" class="hidden" maxlength="80" placeholder="Укажите тип организации" value="${esc(String(organizationSettings.organization_type||'').startsWith('custom:')?String(organizationSettings.organization_type).slice(7):'')}"></div>
+       <div class="form-group"><label for="orgIndustry">Отрасль *</label><select id="orgIndustry" required>${optionsHtml(INDUSTRIES.filter(item=>item[0]!=='other'),organizationSettings.industry||'other')}<option value="__custom__" ${String(organizationSettings.industry||'').startsWith('custom:')?'selected':''}>Другая отрасль — указать свою</option></select><input id="orgIndustryCustom" class="hidden" maxlength="80" placeholder="Укажите отрасль" value="${esc(String(organizationSettings.industry||'').startsWith('custom:')?String(organizationSettings.industry).slice(7):'')}"><div class="form-hint">Выберите ближайшее направление. Реестр документов остаётся универсальным.</div></div>
+     </div>
+     <div class="form-group"><label for="orgSubdivision">Подразделение или направление</label><input id="orgSubdivision" maxlength="200" placeholder="Например, бухгалтерия, проектный отдел, регистратура" value="${esc(organizationSettings.subdivision||'')}"></div>
+     <div class="form-group"><label for="orgResponsible">Ответственный за документы</label><input id="orgResponsible" maxlength="200" placeholder="ФИО или должность ответственного" value="${esc(organizationSettings.responsible_person||'')}"></div>
+     <div class="form-group"><label for="orgPolicy">Внутренние правила хранения</label><textarea id="orgPolicy" maxlength="1000" rows="4" placeholder="Например, внутренний регламент или ссылка на утверждённый перечень сроков хранения">${esc(organizationSettings.retention_policy||'')}</textarea><div class="form-hint">Выбирайте сроки для каждого документа по применимым требованиям и регламентам; это поле не определяет сроки автоматически.</div></div>
+     <div class="profile-form-foot"><span>Обязательное поле отмечено *</span><button class="btn btn-primary" type="submit" id="saveOrganizationBtn">Сохранить сведения</button></div>
+    </form>
+   </div>
+  </section>
+ </div>`;
+}
 function renderSettings(){return `${pageHead('Настройки','Параметры работы с данными в OblivionDoc.')}<div class="grid-two">${panel('Учётная запись',`<div class="settings-card"><div class="settings-row"><div><strong>Email аккаунта</strong><p>Адрес для входа и восстановления доступа.</p></div><div style="font-weight:700;max-width:240px;overflow-wrap:anywhere">${esc(currentUser?.email||'—')}</div></div><div class="settings-row"><div><strong>Личные данные и организация</strong><p>Имя, фамилия и сведения об организации находятся в профиле.</p></div><button class="btn btn-sm" type="button" data-page="profile">Открыть профиль</button></div></div>`)}${panel('Экспорт и обновление',`<div class="settings-card"><div class="settings-row"><div><strong>Реестр документов</strong><p>Скачать Excel-файл с фильтрами, переносом длинного текста и отдельными столбцами.</p></div><button class="btn btn-sm" id="settingsExport" type="button">Экспорт Excel</button></div><div class="settings-row"><div><strong>Обновление данных</strong><p>Загрузить актуальный список документов и журнал действий с сервера.</p></div><button class="btn btn-sm" id="settingsRefresh" type="button">Обновить</button></div></div>`)}</div>`;}
-function renderHelp(){return `${pageHead('Справка','Практические инструкции: от загрузки файла до контроля сроков и безопасного удаления.')}<div class="help-grid"><div class="help-item"><h3>01 · Добавление документа</h3><p>Откройте раздел «Документы» и нажмите «Добавить документ». Укажите понятное название, срок хранения и действие по его окончании. Прикрепите файл и проверьте дату перед сохранением. Поддерживаются PDF, DOC, DOCX, TXT, PNG, JPG и JPEG размером до 10 МБ.</p></div><div class="help-item"><h3>02 · Контроль сроков</h3><p>Раздел «Сроки хранения» помогает заранее увидеть документы с приближающейся датой и уже истёкшим сроком. Проверяйте список регулярно и сверяйте выбранное действие с внутренним регламентом организации.</p></div><div class="help-item"><h3>03 · Архив</h3><p>Если для документа выбрано архивирование, после наступления срока запись получает статус «В архиве». Файл остаётся доступным для скачивания, пока он не удалён отдельно. Записи, для которых файл удалён, сохраняются в реестре и журнале, но само содержимое восстановить из системы нельзя.</p></div><div class="help-item"><h3>04 · Журнал действий</h3><p>Журнал фиксирует добавление, изменение и удаление документов, а также автоматическое архивирование и удаление. Повторное сохранение без изменений не создаёт новое событие. Используйте журнал для проверки последовательности операций, но помните, что он не заменяет резервную копию.</p></div><div class="help-item"><h3>05 · Хранение и скачивание файлов</h3><p>После успешной загрузки копия файла хранится в базе данных приложения. Если удалить только локальный файл с компьютера, серверная копия останется и её можно будет скачать из OblivionDoc. Кнопка «Скачать» создаёт копию на компьютер и сама по себе не удаляет файл с сервера.</p></div><div class="help-item"><h3>06 · Скачивание перед удалением</h3><p>Перед ручным удалением система предлагает скачать файл, если он доступен. При автоматическом действии «Удалить файл по сроку» содержимое удаляется после наступления указанной даты. Если файл может понадобиться позднее, выберите архивирование или заранее сохраните резервную копию.</p></div><div class="help-item"><h3>07 · Ограничения и защита данных</h3><p>OblivionDoc — учебный прототип. Перед использованием с реальными документами организации нужно проверить права доступа, резервное копирование, правила хранения, защиту персональных данных и восстановление доступа. Не размещайте секреты и реальные персональные данные в публичном репозитории.</p></div></div>`;}
+function renderHelp(){return `${pageHead('Справка','Практические инструкции: от загрузки файла до контроля сроков и безопасного удаления.')}<div class="help-grid"><div class="help-item"><h3>01 · Добавление документа</h3><p>Откройте раздел «Документы» и нажмите «Добавить документ». Укажите название, категорию, срок хранения и действие по его окончании. По необходимости добавьте номер, подразделение, контрагента или объект, ответственного и примечание. Прикрепите файл и проверьте дату перед сохранением. Поддерживаются PDF, DOC, DOCX, TXT, PNG, JPG и JPEG размером до 10 МБ.</p></div><div class="help-item"><h3>02 · Контроль сроков</h3><p>Раздел «Сроки хранения» помогает заранее увидеть документы с приближающейся датой и уже истёкшим сроком. Проверяйте список регулярно и сверяйте выбранное действие с внутренним регламентом организации.</p></div><div class="help-item"><h3>03 · Архив</h3><p>Если для документа выбрано архивирование, после наступления срока запись получает статус «В архиве». Файл остаётся доступным для скачивания, пока он не удалён отдельно. Записи, для которых файл удалён, сохраняются в реестре и журнале, но само содержимое восстановить из системы нельзя.</p></div><div class="help-item"><h3>04 · Журнал действий</h3><p>Журнал фиксирует добавление, изменение и удаление документов, а также автоматическое архивирование и удаление. Повторное сохранение без изменений не создаёт новое событие. Используйте журнал для проверки последовательности операций, но помните, что он не заменяет резервную копию.</p></div><div class="help-item"><h3>05 · Хранение и скачивание файлов</h3><p>После успешной загрузки копия файла хранится в базе данных приложения. Если удалить только локальный файл с компьютера, серверная копия останется и её можно будет скачать из OblivionDoc. Кнопка «Скачать» создаёт копию на компьютер и сама по себе не удаляет файл с сервера.</p></div><div class="help-item"><h3>06 · Скачивание перед удалением</h3><p>Перед ручным удалением система предлагает скачать файл, если он доступен. При автоматическом действии «Удалить файл по сроку» содержимое удаляется после наступления указанной даты. Если файл может понадобиться позднее, выберите архивирование или заранее сохраните резервную копию.</p></div><div class="help-item"><h3>07 · Ограничения и защита данных</h3><p>OblivionDoc — учебный прототип. Перед использованием с реальными документами организации нужно проверить права доступа, резервное копирование, правила хранения, защиту персональных данных и восстановление доступа. Не размещайте секреты и реальные персональные данные в публичном репозитории.</p></div></div>`;}
 function renderPage(){if(!$('pageContent'))return;const renderers={overview:renderOverview,documents:renderDocumentsPage,deadlines:renderDeadlines,archive:renderArchive,analytics:renderAnalytics,audit:renderAudit,security:renderSecurity,help:renderHelp,profile:renderProfile,settings:renderSettings};$('pageContent').innerHTML=(renderers[currentPage]||renderOverview)();wirePageControls();}
 async function refreshData(showMessage=false){if(refreshing)return;refreshing=true;const button=$('refreshBtn');if(button){button.disabled=true;button.classList.add('is-loading');}try{const [documentsResponse,auditResponse]=await Promise.all([apiFetch('/documents'),apiFetch('/audit-log')]);if(documentsResponse.status===401||auditResponse.status===401){localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);showAuth();return;}if(!documentsResponse.ok)throw new Error(await readError(documentsResponse));documents=await documentsResponse.json();if(auditResponse.ok)auditLogs=await auditResponse.json();renderPage();if(currentPage==='profile'){await loadUserProfile(false);await loadOrganizationSettings();}if(showMessage)toast('Данные обновлены.');}catch(error){toast('Не удалось обновить данные: '+(error.message||'ошибка сети'),true);}finally{refreshing=false;if(button){button.disabled=false;button.classList.remove('is-loading');}}}
-function wirePageControls(){$('userProfileForm')?.addEventListener('submit',saveUserProfile);$('organizationForm')?.addEventListener('submit',saveOrganizationSettings);$('organizationToggle')?.addEventListener('click',()=>{const form=$('organizationForm');if(!form)return;const opening=form.classList.contains('hidden');form.classList.toggle('hidden');$('organizationToggle').textContent=opening?'Скрыть форму':'Настроить организацию';});const ds=$('docSearch');if(ds)ds.addEventListener('input',()=>filterDocs('docsTable',documents,ds.value,$('statusFilter')?.value||'all'));$('statusFilter')?.addEventListener('change',()=>filterDocs('docsTable',documents,$('docSearch')?.value||'',$('statusFilter').value));const dl=$('deadlineSearch');if(dl)dl.addEventListener('input',()=>{const list=activeDocs().sort((a,b)=>new Date(a.expires_at)-new Date(b.expires_at)).filter(d=>d.name.toLowerCase().includes(dl.value.toLowerCase())||String(d.id).includes(dl.value));$('deadlineTable').innerHTML=table(list);});const as=$('archiveSearch');if(as)as.addEventListener('input',()=>filterDocs('archiveTable',documents.filter(d=>d.status==='archived'||d.status==='deleted'),as.value,$('archiveFilter')?.value||'all'));$('archiveFilter')?.addEventListener('change',()=>filterDocs('archiveTable',documents.filter(d=>d.status==='archived'||d.status==='deleted'),$('archiveSearch')?.value||'',$('archiveFilter').value));const au=$('auditSearch');if(au)au.addEventListener('input',()=>{$('auditTable').innerHTML=renderAuditTable(auditLogs.filter(l=>(l.document_name||'').toLowerCase().includes(au.value.toLowerCase())||auditActionText(l.action).toLowerCase().includes(au.value.toLowerCase())));});$('exportBtn')?.addEventListener('click',exportDocumentsExcel);$('settingsExport')?.addEventListener('click',exportDocumentsExcel);$('auditExport')?.addEventListener('click',exportAuditExcel);$('auditRefresh')?.addEventListener('click',()=>refreshData(true));$('settingsRefresh')?.addEventListener('click',()=>refreshData(true));}
-function filterDocs(hostId,source,query,status){const list=source.filter(d=>(status==='all'||d.status===status)&&(d.name.toLowerCase().includes(query.toLowerCase())||String(d.id).includes(query)));$(hostId).innerHTML=table(list);}
+function wirePageControls(){
+ $('userProfileForm')?.addEventListener('submit',saveUserProfile);
+ $('organizationForm')?.addEventListener('submit',saveOrganizationSettings);
+ $('orgType')?.addEventListener('change',syncCustomOrganizationFields);
+ $('orgIndustry')?.addEventListener('change',syncCustomOrganizationFields);
+ $('organizationToggle')?.addEventListener('click',()=>{
+  const form=$('organizationForm');if(!form)return;
+  const opening=form.classList.contains('hidden');
+  form.classList.toggle('hidden');
+  $('organizationToggle').textContent=opening?'Скрыть форму':'Редактировать организацию';
+ });
+ const ds=$('docSearch');
+ if(ds)ds.addEventListener('input',()=>filterDocs('docsTable',documents,ds.value,$('statusFilter')?.value||'all',$('docCategoryFilter')?.value||'all'));
+ $('statusFilter')?.addEventListener('change',()=>filterDocs('docsTable',documents,$('docSearch')?.value||'',$('statusFilter').value,$('docCategoryFilter')?.value||'all'));
+ $('docCategoryFilter')?.addEventListener('change',()=>filterDocs('docsTable',documents,$('docSearch')?.value||'',$('statusFilter')?.value||'all',$('docCategoryFilter').value));
+ const dl=$('deadlineSearch');
+ if(dl)dl.addEventListener('input',()=>{
+  const query=dl.value.trim().toLocaleLowerCase('ru');
+  const list=activeDocs().sort((a,b)=>new Date(a.expires_at)-new Date(b.expires_at)).filter(d=>(d.name||'').toLocaleLowerCase('ru').includes(query)||String(d.id).includes(query)||(d.document_number||'').toLocaleLowerCase('ru').includes(query));
+  $('deadlineTable').innerHTML=table(list);
+ });
+ const as=$('archiveSearch');
+ if(as)as.addEventListener('input',()=>filterDocs('archiveTable',documents.filter(d=>d.status==='archived'||d.status==='deleted'),as.value,$('archiveFilter')?.value||'all'));
+ $('archiveFilter')?.addEventListener('change',()=>filterDocs('archiveTable',documents.filter(d=>d.status==='archived'||d.status==='deleted'),$('archiveSearch')?.value||'',$('archiveFilter').value));
+ const au=$('auditSearch');
+ if(au)au.addEventListener('input',()=>{$('auditTable').innerHTML=renderAuditTable(auditLogs.filter(l=>(l.document_name||'').toLowerCase().includes(au.value.toLowerCase())||auditActionText(l.action).toLowerCase().includes(au.value.toLowerCase())));});
+ $('exportBtn')?.addEventListener('click',exportDocumentsExcel);
+ $('settingsExport')?.addEventListener('click',exportDocumentsExcel);
+ $('auditExport')?.addEventListener('click',exportAuditExcel);
+ $('auditRefresh')?.addEventListener('click',()=>refreshData(true));
+ $('settingsRefresh')?.addEventListener('click',()=>refreshData(true));
+}
+function filterDocs(hostId,source,query,status,category='all'){
+ const normalized=(query||'').trim().toLocaleLowerCase('ru');
+ const list=source.filter(d=>{
+  if(status!=='all'&&d.status!==status)return false;
+  if(category!=='all'&&(d.category||'other')!==category)return false;
+  const searchable=[d.name,d.id,d.document_number,d.counterparty,d.department,d.responsible_person,d.notes,categoryName(d.category||'other'),d.file_name].map(value=>String(value??'').toLocaleLowerCase('ru'));
+  return !normalized||searchable.some(value=>value.includes(normalized));
+ });
+ const host=$(hostId);if(host)host.innerHTML=table(list);
+}
 function exportDocumentsExcel(){downloadExcel('/exports/documents.xlsx','obliviondoc-documents.xlsx');}
 function exportAuditExcel(){downloadExcel('/exports/audit.xlsx','obliviondoc-audit.xlsx');}
 async function downloadExcel(path,name){try{const response=await apiFetch(path);if(!response.ok)throw new Error(await readError(response));const file=await response.blob();const url=URL.createObjectURL(file);const link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Файл Excel подготовлен.');}catch(error){toast(error.message||'Не удалось подготовить файл Excel.',true);}}
 function openModal(title,content,submitText='Сохранить'){ $('modalHost').innerHTML=`<div class="modal-overlay" id="modalOverlay"><section class="modal"><div class="modal-head"><h2>${title}</h2><button class="close-btn" id="modalClose" type="button">×</button></div><form id="documentForm"><div class="modal-content">${content}</div><div class="modal-foot"><button class="btn" type="button" id="modalCancel">Отмена</button><button class="btn btn-primary" id="saveDocBtn" type="submit">${submitText}</button></div></form></section></div>`;$('modalClose').onclick=closeModal;$('modalCancel').onclick=closeModal;$('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')closeModal();});$('documentForm').addEventListener('submit',saveDocument);}
 function closeModal(){if(saving)return;$('modalHost').innerHTML='';}
-function openAdd(){openModal('Добавить документ',`<div class="modal-hint">Добавьте запись в реестр. Укажите дату, к которой документ должен храниться в соответствии с регламентом.</div><div class="form-grid"><div class="form-group full"><label for="docName">Название документа *</label><input id="docName" required maxlength="240" placeholder="Например, Приказ о зачислении № 124"></div><div class="form-group"><label for="docDate">Хранить до *</label><input id="docDate" type="date" min="0001-01-01" max="9999-12-31" required></div><div class="form-group"><label for="docAction">Действие по сроку *</label><select id="docAction"><option value="archive">Переместить в архив</option><option value="delete">Удалить файл по сроку</option></select></div><div class="form-group full"><label for="docFile">Файл документа *</label><input id="docFile" type="file" required accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"><div class="small muted" style="margin-top:5px">До 10 МБ · PDF, DOC, DOCX, TXT, PNG, JPG, JPEG</div></div></div>`,'Добавить документ');}
-function openEdit(id){const d=documents.find(x=>x.id===Number(id));if(!d)return;if(d.status==='deleted'){toast('Файл этой записи уже удалён. Чтобы добавить новый файл, создайте новую запись.',true);return;}openModal('Редактировать документ',`<div class="modal-hint">Изменения сохраняются в реестре. Если данные не изменились, новая запись в журнале не создаётся. При выборе удаления по сроку серверная копия файла будет удалена автоматически; заранее скачайте её или выберите архивирование.</div><div class="form-grid"><div class="form-group full"><label for="docName">Название документа *</label><input id="docName" required maxlength="240" value="${esc(d.name)}"></div><div class="form-group"><label for="docDate">Хранить до *</label><input id="docDate" type="date" min="0001-01-01" max="9999-12-31" required value="${esc((d.expires_at||'').slice(0,10))}"></div><div class="form-group"><label for="docAction">Действие по сроку *</label><select id="docAction"><option value="archive" ${d.action==='archive'?'selected':''}>Переместить в архив</option><option value="delete" ${d.action==='delete'?'selected':''}>Удалить файл по сроку</option></select></div><div class="form-group full"><div class="small muted">${(d.file_name||d.file_path)?'К документу прикреплён файл.':'Файл отсутствует или уже удалён.'} ID документа: ${d.id}</div></div></div>`,'Сохранить изменения');$('documentForm').dataset.editId=d.id;}
+function documentFields(d=null,isEdit=false){
+ const current=d||{};
+ const value=key=>esc(current[key]||'');
+ return `<div class="modal-hint">${isEdit?'Измените сведения, категорию или срок хранения.':'Добавьте файл и заполните сведения, которые помогут найти документ позднее. Заполняйте только подходящие для вашей организации поля.'}</div>
+ <div class="form-grid">
+  <div class="form-group full"><label for="docName">Название документа *</label><input id="docName" required maxlength="240" value="${value('name')}" placeholder="Например, Договор подряда № 18 или Счёт на оплату"></div>
+  <div class="form-group"><label for="docCategory">Категория *</label><select id="docCategory" required>${categoryOptions(current.category||'other')}</select></div>
+  <div class="form-group"><label for="docNumber">Номер документа</label><input id="docNumber" maxlength="120" value="${value('document_number')}" placeholder="Номер или регистрационный индекс"></div>
+  <div class="form-group"><label for="docDepartment">Подразделение</label><input id="docDepartment" maxlength="200" value="${value('department')}" placeholder="Бухгалтерия, объект № 3, регистратура…"></div>
+  <div class="form-group"><label for="docCounterparty">Контрагент / объект</label><input id="docCounterparty" maxlength="200" value="${value('counterparty')}" placeholder="Компания, клиент, объект или подразделение"></div>
+  <div class="form-group"><label for="docResponsible">Ответственный</label><input id="docResponsible" maxlength="200" value="${value('responsible_person')}" placeholder="ФИО или должность"></div>
+  <div class="form-group"><label for="docDate">Хранить до *</label><input id="docDate" type="date" min="0001-01-01" max="9999-12-31" required value="${value('expires_at').slice(0,10)}"></div>
+  <div class="form-group"><label for="docAction">Действие по окончании срока *</label><select id="docAction"><option value="archive" ${(current.action||'archive')==='archive'?'selected':''}>Переместить в архив</option><option value="delete" ${current.action==='delete'?'selected':''}>Удалить файл по сроку</option></select><div class="form-hint">Удаление содержимого необратимо. Перед выбором сверьтесь с правилами хранения.</div></div>
+  <div class="form-group full"><label for="docNotes">Примечание</label><textarea id="docNotes" maxlength="2000" rows="3" placeholder="Краткое описание, проект, договорной этап или другая полезная подсказка">${value('notes')}</textarea></div>
+  ${isEdit?'':`<div class="form-group full"><label for="docFile">Файл документа *</label><input id="docFile" type="file" required accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"><div class="small muted" style="margin-top:5px">До 10 МБ · PDF, DOC, DOCX, TXT, PNG, JPG, JPEG</div></div>`}
+ </div>`;
+}
+function openAdd(){openModal('Новый документ',documentFields(null,false),'Добавить документ');}
+function openEdit(id){
+ const d=documents.find(x=>x.id===Number(id));if(!d)return;
+ if(d.status==='deleted'){toast('Файл этой записи уже удалён. Чтобы добавить новый файл, создайте новую запись.',true);return;}
+ openModal('Редактировать документ',documentFields(d,true),'Сохранить изменения');
+ $('documentForm').dataset.editId=d.id;
+}
 function isFourDigitDate(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const parsed=new Date(value+'T00:00:00Z');return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,10)===value;}
-async function saveDocument(event){event.preventDefault();if(saving)return;const btn=$('saveDocBtn'),id=$('documentForm').dataset.editId,name=$('docName').value.trim(),date=$('docDate').value,action=$('docAction').value,file=$('docFile')?.files?.[0];if(!name||!date){toast('Заполните название и срок хранения.',true);return;}if(!isFourDigitDate(date)){toast('Укажите корректную дату с четырёхзначным годом.',true);return;}if(!id&&!file){toast('При создании документа прикрепите файл.',true);return;}if(file&&file.size>10*1024*1024){toast('Размер файла не должен превышать 10 МБ.',true);return;}saving=true;btn.disabled=true;btn.textContent='Сохранение…';try{let response;if(id){response=await apiFetch(`/documents/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,expires_at:new Date(date+'T23:59:00').toISOString(),action})});}else if(file){const fd=new FormData();fd.append('name',name);fd.append('expires_at',new Date(date+'T23:59:00').toISOString());fd.append('action',action);fd.append('file',file);response=await apiFetch('/documents/upload',{method:'POST',body:fd});}else{response=await apiFetch('/documents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,expires_at:new Date(date+'T23:59:00').toISOString(),action})});}if(!response.ok)throw new Error(await readError(response));$('modalHost').innerHTML='';toast(id?'Изменения сохранены.':'Документ добавлен.');await refreshData();}catch(e){toast(e.message||'Не удалось сохранить документ.',true);}finally{saving=false;if($('saveDocBtn')){$('saveDocBtn').disabled=false;$('saveDocBtn').textContent=id?'Сохранить изменения':'Добавить документ';}}}
+async function saveDocument(event){
+ event.preventDefault();if(saving)return;
+ const form=$('documentForm'),btn=$('saveDocBtn'),id=form.dataset.editId;
+ const name=$('docName').value.trim(),date=$('docDate').value,action=$('docAction').value;
+ const file=$('docFile')?.files?.[0];
+ const payload={
+  name,
+  expires_at:date?new Date(date+'T23:59:00').toISOString():'',
+  action,
+  category:$('docCategory').value,
+  document_number:$('docNumber').value.trim(),
+  department:$('docDepartment').value.trim(),
+  counterparty:$('docCounterparty').value.trim(),
+  responsible_person:$('docResponsible').value.trim(),
+  notes:$('docNotes').value.trim()
+ };
+ if(!name||!date){toast('Укажите название документа и срок хранения.',true);return;}
+ if(!isFourDigitDate(date)){toast('Укажите корректную дату с четырёхзначным годом.',true);return;}
+ if(!id&&!file){toast('При создании документа прикрепите файл.',true);return;}
+ if(file&&file.size>10*1024*1024){toast('Размер файла не должен превышать 10 МБ.',true);return;}
+ saving=true;btn.disabled=true;btn.textContent='Сохранение…';
+ try{
+  let response;
+  if(id){
+   response=await apiFetch(`/documents/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }else if(file){
+   const fd=new FormData();
+   for(const [key,value] of Object.entries(payload))fd.append(key,String(value));
+   fd.append('file',file);
+   response=await apiFetch('/documents/upload',{method:'POST',body:fd});
+  }else{
+   response=await apiFetch('/documents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }
+  if(!response.ok)throw new Error(await readError(response));
+  $('modalHost').innerHTML='';toast(id?'Изменения сохранены.':'Документ добавлен.');await refreshData();
+ }catch(e){toast(e.message||'Не удалось сохранить документ.',true);}
+ finally{
+  saving=false;
+  if($('saveDocBtn')){$('saveDocBtn').disabled=false;$('saveDocBtn').textContent=id?'Сохранить изменения':'Добавить документ';}
+ }
+}
 function confirmDelete(id){const d=documents.find(x=>x.id===Number(id));if(!d)return;$('confirmHost').innerHTML=`<div class="confirm-overlay" id="confirmOverlay"><div class="confirm-dialog"><div class="confirm-icon">!</div><h3>Удалить документ?</h3><p>Вы собираетесь удалить «${esc(d.name)}».</p><p class="confirm-warning">Будет удалена серверная копия файла. Запись сохранится в журнале со статусом «Удалён», но восстановить содержимое из OblivionDoc уже не получится. Перед удалением скачайте файл, если он может понадобиться.</p><div class="confirm-actions"><button class="btn" id="cancelDelete" type="button">Отмена</button>${(d.file_path||d.file_name)?`<button class="btn" id="downloadBeforeDelete" data-act="download" data-id="${d.id}" type="button">Скачать файл</button>`:''}<button class="btn btn-danger" id="acceptDelete" type="button">Удалить документ</button></div></div></div>`;$('cancelDelete').onclick=()=>{$('confirmHost').innerHTML='';};$('confirmOverlay').addEventListener('click',e=>{if(e.target.id==='confirmOverlay')$('confirmHost').innerHTML='';});$('acceptDelete').onclick=()=>deleteDocument(id);}
 async function deleteDocument(id){const btn=$('acceptDelete');if(saving)return;saving=true;btn.disabled=true;btn.textContent='Удаление…';try{const r=await apiFetch(`/documents/${id}`,{method:'DELETE'});if(!r.ok)throw new Error(await readError(r));$('confirmHost').innerHTML='';toast('Документ удалён.');await refreshData();}catch(e){toast(e.message||'Не удалось удалить документ.',true);btn.disabled=false;btn.textContent='Удалить документ';}finally{saving=false;}}
 async function downloadDocument(id){try{const r=await apiFetch(`/documents/${id}/download`);if(!r.ok)throw new Error(await readError(r));const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const doc=documents.find(d=>d.id===Number(id));a.download=(doc?.file_name||doc?.name||'document');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){toast(e.message||'Не удалось скачать файл.',true);}}
 async function handleRowAction(e){const b=e.target.closest('[data-act]');if(!b)return;const {act,id}=b.dataset;if(act==='add')openAdd();if(act==='edit')openEdit(id);if(act==='delete')confirmDelete(id);if(act==='download')downloadDocument(id);if(act==='logout')logout();}
-async function logout(){try{if(token())await apiFetch('/auth/logout',{method:'POST'});}catch{}localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);currentUser=null;userProfile={first_name:'',last_name:''};documents=[];auditLogs=[];organizationSettings={organization_name:'',subdivision:'',responsible_person:'',retention_policy:''};showAuth('login');toast('Вы вышли из аккаунта.');}
+async function logout(){try{if(token())await apiFetch('/auth/logout',{method:'POST'});}catch{}localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);currentUser=null;userProfile={first_name:'',last_name:''};documents=[];auditLogs=[];organizationSettings={organization_name:'',organization_type:'company',industry:'other',subdivision:'',responsible_person:'',retention_policy:''};showAuth('login');toast('Вы вышли из аккаунта.');}
 async function checkSession(){if(resetToken){showAuth('resetForm');return;}const t=token();if(!t){showLanding();return;}try{const r=await apiFetch('/auth/me');if(r.status===401){localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);showAuth();return;}if(!r.ok){showAuth('login');$('loginError').textContent='Сервер временно недоступен (ошибка '+r.status+'). Ваши данные не удалены. Попробуйте обновить страницу позже.';return;}currentUser=await r.json();if(currentUser.email)localStorage.setItem(EMAIL_KEY,currentUser.email);showApp();}catch(e){showLanding();}}
 $('footerYear').textContent=new Date().getFullYear();
 $('siteMenuToggle').addEventListener('click',()=>{const opened=$('siteNavLinks').classList.toggle('open');$('siteMenuToggle').setAttribute('aria-expanded',String(opened));});

@@ -1,0 +1,46 @@
+name: Validate OblivionDoc workspace
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/workspace-ui-refresh]
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check Python syntax
+        run: python -m py_compile backend/main.py backend/models.py backend/schemas.py backend/database.py backend/xlsx_export.py
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Extract inline JavaScript
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          html = Path("frontend/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script\b[^>]*>([\s\S]*?)</script>", html, flags=re.IGNORECASE)
+          if len(scripts) != 1:
+              raise SystemExit(f"Expected one inline application script, found {len(scripts)}")
+          Path("/tmp/obliviondoc-frontend-check.js").write_text(scripts[0], encoding="utf-8")
+          PY
+
+      - name: Check JavaScript syntax
+        run: node --check /tmp/obliviondoc-frontend-check.js

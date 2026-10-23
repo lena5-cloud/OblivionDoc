@@ -251,6 +251,37 @@ def migrate_database():
             )
             print("База данных обновлена: добавлено имя файла.")
 
+        document_columns = {
+            "category": "VARCHAR(80) NOT NULL DEFAULT 'other'",
+            "department": "VARCHAR(200) NOT NULL DEFAULT ''",
+            "document_number": "VARCHAR(120) NOT NULL DEFAULT ''",
+            "counterparty": "VARCHAR(200) NOT NULL DEFAULT ''",
+            "responsible_person": "VARCHAR(200) NOT NULL DEFAULT ''",
+            "notes": "TEXT NOT NULL DEFAULT ''",
+        }
+        for column_name, column_type in document_columns.items():
+            if column_name not in columns:
+                connection.execute(text(
+                    f"ALTER TABLE documents ADD COLUMN {column_name} {column_type}"
+                ))
+                print(f"База данных обновлена: добавлено поле {column_name}.")
+
+        table_names = set(inspector.get_table_names())
+        if "organization_profiles" in table_names:
+            organization_columns = {
+                column["name"]
+                for column in inspector.get_columns("organization_profiles")
+            }
+            for column_name, column_type in {
+                "organization_type": "VARCHAR(80) NOT NULL DEFAULT 'company'",
+                "industry": "VARCHAR(80) NOT NULL DEFAULT 'other'",
+            }.items():
+                if column_name not in organization_columns:
+                    connection.execute(text(
+                        f"ALTER TABLE organization_profiles ADD COLUMN {column_name} {column_type}"
+                    ))
+                    print(f"База данных обновлена: добавлено поле организации {column_name}.")
+
         user_count = connection.execute(
             text("SELECT COUNT(*) FROM users")
         ).scalar_one()
@@ -744,12 +775,16 @@ def get_organization_settings(
     if not profile:
         return {
             "organization_name": "",
+            "organization_type": "company",
+            "industry": "other",
             "subdivision": "",
             "responsible_person": "",
             "retention_policy": ""
         }
     return {
         "organization_name": profile.organization_name,
+        "organization_type": profile.organization_type or "company",
+        "industry": profile.industry or "other",
         "subdivision": profile.subdivision,
         "responsible_person": profile.responsible_person,
         "retention_policy": profile.retention_policy
@@ -762,14 +797,27 @@ def save_organization_settings(
     db: Session = Depends(get_db)
 ):
     organization_name = settings.organization_name.strip()
+    organization_type = settings.organization_type.strip()
+    industry = settings.industry.strip()
     subdivision = settings.subdivision.strip()
     responsible_person = settings.responsible_person.strip()
     retention_policy = settings.retention_policy.strip()
-    if not organization_name or not subdivision or not responsible_person:
+    allowed_organization_types = {"company", "public", "nonprofit", "individual", "other"}
+    allowed_industries = {
+        "construction", "accounting_finance", "legal_services", "logistics",
+        "housing_utilities", "education", "manufacturing", "healthcare",
+        "retail_services", "agriculture", "it_telecom", "professional_services",
+        "public_services", "other"
+    }
+    if not organization_name:
         raise HTTPException(
             status_code=422,
-            detail="Укажите название организации, подразделение и ответственного за документы.",
+            detail="Укажите название организации.",
         )
+    if organization_type not in allowed_organization_types:
+        raise HTTPException(status_code=422, detail="Выберите тип организации из списка.")
+    if industry not in allowed_industries:
+        raise HTTPException(status_code=422, detail="Выберите отрасль из списка.")
 
     profile = (
         db.query(OrganizationProfile)
@@ -781,6 +829,8 @@ def save_organization_settings(
         db.add(profile)
 
     profile.organization_name = organization_name
+    profile.organization_type = organization_type
+    profile.industry = industry
     profile.subdivision = subdivision
     profile.responsible_person = responsible_person
     profile.retention_policy = retention_policy
@@ -790,6 +840,8 @@ def save_organization_settings(
     return {
         "message": "Настройки организации сохранены.",
         "organization_name": profile.organization_name,
+        "organization_type": profile.organization_type or "company",
+        "industry": profile.industry or "other",
         "subdivision": profile.subdivision,
         "responsible_person": profile.responsible_person,
         "retention_policy": profile.retention_policy
@@ -1312,6 +1364,12 @@ async def create_document_upload(
     expires_at: datetime = Form(...),
 
     action: str = Form("archive"),
+    category: str = Form("other"),
+    department: str = Form(""),
+    document_number: str = Form(""),
+    counterparty: str = Form(""),
+    responsible_person: str = Form(""),
+    notes: str = Form(""),
 
     file: UploadFile = File(...),
 
@@ -1341,6 +1399,13 @@ async def create_document_upload(
 
         )
 
+    allowed_categories = {
+        "contracts", "finance", "hr", "legal", "project_technical",
+        "construction", "logistics", "medical", "education", "procurement",
+        "management", "housing_utilities", "correspondence", "other"
+    }
+    if category not in allowed_categories:
+        raise HTTPException(status_code=400, detail="Выберите категорию документа из списка.")
     if file is None or not file.filename:
         raise HTTPException(
             status_code=400,
@@ -1468,17 +1533,18 @@ async def create_document_upload(
 
         user_id=current_user.id,
 
-        name=name,
-
+        name=name.strip(),
         file_path=file_path,
-
         file_content=bytes(file_content),
         file_name=original_name,
-
+        category=category,
+        department=department.strip(),
+        document_number=document_number.strip(),
+        counterparty=counterparty.strip(),
+        responsible_person=responsible_person.strip(),
+        notes=notes.strip(),
         expires_at=expires_at,
-
         status="active",
-
         action=action
 
     )
@@ -1563,11 +1629,28 @@ def update_document(
     new_name = document_data.name.strip()
     new_expires_at = normalize_datetime(document_data.expires_at)
     new_action = document_data.action
+    new_category = document_data.category
+    allowed_categories = {
+        "contracts", "finance", "hr", "legal", "project_technical",
+        "construction", "logistics", "medical", "education", "procurement",
+        "management", "housing_utilities", "correspondence", "other"
+    }
+    if new_category not in allowed_categories:
+        raise HTTPException(status_code=422, detail="Выберите категорию документа из списка.")
+    new_metadata = {
+        "department": document_data.department.strip(),
+        "document_number": document_data.document_number.strip(),
+        "counterparty": document_data.counterparty.strip(),
+        "responsible_person": document_data.responsible_person.strip(),
+        "notes": document_data.notes.strip(),
+    }
 
     changed = (
         document.name != new_name
         or document.expires_at != new_expires_at
         or document.action != new_action
+        or (document.category or "other") != new_category
+        or any(getattr(document, key, "") != value for key, value in new_metadata.items())
     )
 
     if not changed:
@@ -1576,6 +1659,9 @@ def update_document(
     document.name = new_name
     document.expires_at = new_expires_at
     document.action = new_action
+    document.category = new_category
+    for key, value in new_metadata.items():
+        setattr(document, key, value)
 
     if document.expires_at > utc_now():
         document.status = "active"
@@ -1792,20 +1878,45 @@ def export_documents_xlsx(
         "archive": "Архивировать",
         "delete": "Удалить по сроку"
     }
-    rows = [["ID", "Название", "Создан", "Срок хранения", "Статус", "Действие по сроку"]]
+    category_labels = {
+        "contracts": "Договоры и соглашения",
+        "finance": "Финансовые документы",
+        "hr": "Кадровые документы",
+        "legal": "Юридические документы",
+        "project_technical": "Проектные и технические",
+        "construction": "Строительство и исполнительная документация",
+        "logistics": "Логистика и транспорт",
+        "medical": "Медицинские документы",
+        "education": "Образование",
+        "procurement": "Закупки и поставки",
+        "management": "Управленческие документы",
+        "housing_utilities": "ЖКХ и обращения",
+        "correspondence": "Переписка",
+        "other": "Другое",
+    }
+    rows = [[
+        "ID", "Название", "Категория", "Номер", "Контрагент", "Подразделение",
+        "Ответственный", "Создан", "Срок хранения", "Статус", "Действие по сроку", "Примечание"
+    ]]
     for document in documents:
         rows.append([
             document.id,
             document.name,
+            category_labels.get(document.category or "other", "Другое"),
+            document.document_number or "",
+            document.counterparty or "",
+            document.department or "",
+            document.responsible_person or "",
             document.created_at.strftime("%d.%m.%Y %H:%M") if document.created_at else "",
             document.expires_at.strftime("%d.%m.%Y %H:%M") if document.expires_at else "",
             status_labels.get(document.status, document.status or "—"),
-            action_labels.get(document.action, document.action or "—")
+            action_labels.get(document.action, document.action or "—"),
+            document.notes or "",
         ])
     content = build_xlsx(
         rows,
         sheet_name="Документы",
-        max_widths=[10, 52, 22, 22, 18, 28]
+        max_widths=[10, 52, 34, 18, 30, 25, 28, 22, 22, 18, 28, 55]
     )
     return Response(
         content=content,
