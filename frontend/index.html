@@ -1176,7 +1176,47 @@ function openEdit(id){
  $('documentForm').dataset.editId=d.id;
 }
 function isFourDigitDate(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const parsed=new Date(value+'T00:00:00Z');return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,10)===value;}
-async function saveDocument(event){event.preventDefault();if(saving)return;const btn=$('saveDocBtn'),id=$('documentForm').dataset.editId,name=$('docName').value.trim(),date=$('docDate').value,action=$('docAction').value,file=$('docFile')?.files?.[0];if(!name||!date){toast('Заполните название и срок хранения.',true);return;}if(!isFourDigitDate(date)){toast('Укажите корректную дату с четырёхзначным годом.',true);return;}if(!id&&!file){toast('При создании документа прикрепите файл.',true);return;}if(file&&file.size>10*1024*1024){toast('Размер файла не должен превышать 10 МБ.',true);return;}saving=true;btn.disabled=true;btn.textContent='Сохранение…';try{let response;if(id){response=await apiFetch(`/documents/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,expires_at:new Date(date+'T23:59:00').toISOString(),action})});}else if(file){const fd=new FormData();fd.append('name',name);fd.append('expires_at',new Date(date+'T23:59:00').toISOString());fd.append('action',action);fd.append('file',file);response=await apiFetch('/documents/upload',{method:'POST',body:fd});}else{response=await apiFetch('/documents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,expires_at:new Date(date+'T23:59:00').toISOString(),action})});}if(!response.ok)throw new Error(await readError(response));$('modalHost').innerHTML='';toast(id?'Изменения сохранены.':'Документ добавлен.');await refreshData();}catch(e){toast(e.message||'Не удалось сохранить документ.',true);}finally{saving=false;if($('saveDocBtn')){$('saveDocBtn').disabled=false;$('saveDocBtn').textContent=id?'Сохранить изменения':'Добавить документ';}}}
+async function saveDocument(event){
+ event.preventDefault();if(saving)return;
+ const form=$('documentForm'),btn=$('saveDocBtn'),id=form.dataset.editId;
+ const name=$('docName').value.trim(),date=$('docDate').value,action=$('docAction').value;
+ const file=$('docFile')?.files?.[0];
+ const payload={
+  name,
+  expires_at:date?new Date(date+'T23:59:00').toISOString():'',
+  action,
+  category:$('docCategory').value,
+  document_number:$('docNumber').value.trim(),
+  department:$('docDepartment').value.trim(),
+  counterparty:$('docCounterparty').value.trim(),
+  responsible_person:$('docResponsible').value.trim(),
+  notes:$('docNotes').value.trim()
+ };
+ if(!name||!date){toast('Укажите название документа и срок хранения.',true);return;}
+ if(!isFourDigitDate(date)){toast('Укажите корректную дату с четырёхзначным годом.',true);return;}
+ if(!id&&!file){toast('При создании документа прикрепите файл.',true);return;}
+ if(file&&file.size>10*1024*1024){toast('Размер файла не должен превышать 10 МБ.',true);return;}
+ saving=true;btn.disabled=true;btn.textContent='Сохранение…';
+ try{
+  let response;
+  if(id){
+   response=await apiFetch(`/documents/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }else if(file){
+   const fd=new FormData();
+   for(const [key,value] of Object.entries(payload))fd.append(key,String(value));
+   fd.append('file',file);
+   response=await apiFetch('/documents/upload',{method:'POST',body:fd});
+  }else{
+   response=await apiFetch('/documents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }
+  if(!response.ok)throw new Error(await readError(response));
+  $('modalHost').innerHTML='';toast(id?'Изменения сохранены.':'Документ добавлен.');await refreshData();
+ }catch(e){toast(e.message||'Не удалось сохранить документ.',true);}
+ finally{
+  saving=false;
+  if($('saveDocBtn')){$('saveDocBtn').disabled=false;$('saveDocBtn').textContent=id?'Сохранить изменения':'Добавить документ';}
+ }
+}
 function confirmDelete(id){const d=documents.find(x=>x.id===Number(id));if(!d)return;$('confirmHost').innerHTML=`<div class="confirm-overlay" id="confirmOverlay"><div class="confirm-dialog"><div class="confirm-icon">!</div><h3>Удалить документ?</h3><p>Вы собираетесь удалить «${esc(d.name)}».</p><p class="confirm-warning">Будет удалена серверная копия файла. Запись сохранится в журнале со статусом «Удалён», но восстановить содержимое из OblivionDoc уже не получится. Перед удалением скачайте файл, если он может понадобиться.</p><div class="confirm-actions"><button class="btn" id="cancelDelete" type="button">Отмена</button>${(d.file_path||d.file_name)?`<button class="btn" id="downloadBeforeDelete" data-act="download" data-id="${d.id}" type="button">Скачать файл</button>`:''}<button class="btn btn-danger" id="acceptDelete" type="button">Удалить документ</button></div></div></div>`;$('cancelDelete').onclick=()=>{$('confirmHost').innerHTML='';};$('confirmOverlay').addEventListener('click',e=>{if(e.target.id==='confirmOverlay')$('confirmHost').innerHTML='';});$('acceptDelete').onclick=()=>deleteDocument(id);}
 async function deleteDocument(id){const btn=$('acceptDelete');if(saving)return;saving=true;btn.disabled=true;btn.textContent='Удаление…';try{const r=await apiFetch(`/documents/${id}`,{method:'DELETE'});if(!r.ok)throw new Error(await readError(r));$('confirmHost').innerHTML='';toast('Документ удалён.');await refreshData();}catch(e){toast(e.message||'Не удалось удалить документ.',true);btn.disabled=false;btn.textContent='Удалить документ';}finally{saving=false;}}
 async function downloadDocument(id){try{const r=await apiFetch(`/documents/${id}/download`);if(!r.ok)throw new Error(await readError(r));const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const doc=documents.find(d=>d.id===Number(id));a.download=(doc?.file_name||doc?.name||'document');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){toast(e.message||'Не удалось скачать файл.',true);}}
