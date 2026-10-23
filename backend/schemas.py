@@ -39,26 +39,26 @@ class LoginResponse(BaseModel):
     user: UserResponse
 
 class DocumentCreate(BaseModel):
-
-    name: str
-
+    name: str = Field(min_length=1, max_length=240)
     expires_at: datetime
-
-    action: Literal[
-        "archive",
-        "delete"
-    ] = "archive"
+    action: Literal["archive", "delete"] = "archive"
+    category: str = Field(default="other", max_length=80)
+    department: str = Field(default="", max_length=200)
+    document_number: str = Field(default="", max_length=120)
+    counterparty: str = Field(default="", max_length=200)
+    responsible_person: str = Field(default="", max_length=200)
+    notes: str = Field(default="", max_length=2000)
 
 class DocumentUpdate(BaseModel):
-
-    name: str
-
+    name: str = Field(min_length=1, max_length=240)
     expires_at: datetime
-
-    action: Literal[
-        "archive",
-        "delete"
-    ]
+    action: Literal["archive", "delete"]
+    category: str = Field(default="other", max_length=80)
+    department: str = Field(default="", max_length=200)
+    document_number: str = Field(default="", max_length=120)
+    counterparty: str = Field(default="", max_length=200)
+    responsible_person: str = Field(default="", max_length=200)
+    notes: str = Field(default="", max_length=2000)
 
 class DocumentResponse(BaseModel):
 
@@ -67,11 +67,14 @@ class DocumentResponse(BaseModel):
     user_id: int | None
 
     name: str
-
     file_path: str | None
-
     file_name: str | None = None
-
+    category: str = "other"
+    department: str = ""
+    document_number: str = ""
+    counterparty: str = ""
+    responsible_person: str = ""
+    notes: str = ""
     created_at: datetime
 
     expires_at: datetime
@@ -117,6 +120,8 @@ class PasswordResetConfirm(BaseModel):
 
 class OrganizationSettingsData(BaseModel):
     organization_name: str = Field(default="", max_length=200)
+    organization_type: str = Field(default="company", max_length=80)
+    industry: str = Field(default="other", max_length=80)
     subdivision: str = Field(default="", max_length=200)
     responsible_person: str = Field(default="", max_length=200)
     retention_policy: str = Field(default="", max_length=1000)
