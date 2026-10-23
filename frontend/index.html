@@ -812,6 +812,39 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 .progress span{background:linear-gradient(90deg,#07864f 0%,#22c978 55%,#9be66e 100%)}
 .badge.archived{background:#e5f8ec;color:#07864f}
 
+
+/* Public landing + authentication: match the existing evergreen workspace palette. */
+:root{--navy:#183b35;--navy2:#24584d;--accent:#4e8a73;--ink:#24352f;--muted:#687a71;--line:#e1e5dc;--bg:#f5f4ed;--bluebg:#e8f1e9;--green:#287451;--greenbg:#e7f3e9}
+.site-nav{background:rgba(255,254,250,.94)!important;border-bottom-color:#e1e7dc!important}
+.site-brand,.site-brand:hover{color:#1d4437!important}
+.site-mark{background:linear-gradient(135deg,#183b35,#287451)!important;color:#fff!important;box-shadow:0 6px 18px #183b3520!important}
+.site-nav-links a:hover,.site-login:hover{color:#287451!important}
+.site-login{color:#285b48!important}
+.site-register,.site-register:hover,.hero-actions .site-register,.site-register.large{background:linear-gradient(115deg,#087f4e 0%,#19ad65 58%,#78d65e 100%)!important;border-color:#16995e!important;color:#fff!important;box-shadow:0 8px 22px rgba(7,127,78,.18)!important}
+.site-register:focus-visible,.site-login:focus-visible,.site-menu-toggle:focus-visible{outline:3px solid #69b68a!important;outline-offset:3px!important}
+.site-hero{background:radial-gradient(ellipse at 82% 15%,rgba(117,203,135,.16),transparent 35%),linear-gradient(180deg,#fbfcf7 0%,#f5f4ed 100%)!important}
+.site-eyebrow,.site-hero .site-eyebrow{color:#287451!important}
+.site-eyebrow:before,.site-eyebrow:after{border-color:#9cc9a9!important}
+.hero-visual,.site-ribbon{border-color:#dce8d9!important}
+.site-section{background:#fffefa!important}
+.site-section:nth-of-type(even){background:#f5f7ef!important}
+.site-section h2,.site-section h3{color:#214334!important}
+.site-section p,.hero-lead{color:#5f7266!important}
+.site-section a:not(.site-register){color:#287451!important}
+.site-footer{background:#183b35!important;color:#eaf2e9!important;border-top-color:#315b4c!important}
+.site-footer a{color:#bde4c8!important}
+#authScreen.auth-screen{background:#f5f4ed!important}
+#authScreen .auth-side{background:radial-gradient(ellipse at 12% 12%,rgba(117,203,135,.22),transparent 42%),radial-gradient(ellipse at 88% 78%,rgba(63,198,145,.16),transparent 34%),linear-gradient(145deg,#183b35 0%,#204b3e 55%,#28634b 100%)!important}
+#authScreen .auth-brand-mark,#authScreen .auth-brand span{background:#e8eee2!important;color:#1a4439!important}
+#authScreen .auth-kicker,#authScreen .auth-point span{color:#a9e7c1!important}
+#authScreen .auth-switch{background:#edf2e9!important}
+#authScreen .auth-switch button.active{color:#245844!important}
+#authScreen .auth-card .btn-primary,#authScreen .auth-card button[type=submit],#authScreen .auth-form button[type=submit]{background:linear-gradient(115deg,#087f4e 0%,#19ad65 58%,#78d65e 100%)!important;border-color:#16995e!important;color:#fff!important;box-shadow:0 7px 18px rgba(7,127,78,.15)!important}
+#authScreen .auth-card .text-btn,#authScreen .auth-card a{color:#287451!important}
+#authScreen .auth-card input:focus,#authScreen .auth-card input:focus-visible{border-color:#58a77b!important;box-shadow:0 0 0 4px rgba(39,137,84,.13)!important}
+#authScreen .auth-card .auth-switch button:focus-visible{outline:3px solid #69b68a!important;outline-offset:2px!important}
+@media(max-width:760px){.site-nav{background:#fffefa!important}.site-nav-links{background:#fffefa!important;border-color:#e1e7dc!important}.site-hero{background:linear-gradient(180deg,#fbfcf7,#f5f4ed)!important}}
+
 </style>
 <style>
 /* Focused refinements for the universal profile and document register */
