@@ -403,9 +403,230 @@ body{font-size:15px;line-height:1.62}
 @media(min-width:701px){#authScreen .auth-main{width:100%!important;max-width:510px!important}}
 @media(max-width:700px){#authScreen .auth-main{width:100%!important;max-width:none!important;justify-self:stretch!important;padding:22px 18px!important;border-radius:18px!important}#authScreen .auth-card .auth-form input{font-size:16px!important}#authScreen .auth-card .auth-switch button{font-size:13px!important}}
 
+
+/* Public product website */
+:root{--site-ink:#17263a;--site-muted:#65758a;--site-navy:#101e30;--site-blue:#b8d4ed;--site-paper:#f6f5f0;--site-line:#dfe4e8;--site-mint:#bfe4d7}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#publicSite{background:var(--site-paper);color:var(--site-ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:15px;line-height:1.6;overflow:hidden}
+#publicSite *{box-sizing:border-box}
+.site-nav{height:84px;max-width:1320px;padding:0 42px;margin:auto;display:flex;align-items:center;gap:34px;position:relative;z-index:5}
+.site-brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--site-ink);font-weight:850;letter-spacing:-.5px;font-size:19px;line-height:1.15;flex-shrink:0}
+.site-brand small{display:block;font-size:10px;font-weight:550;letter-spacing:.1px;color:#7b8795;margin-top:5px}
+.site-mark{width:40px;height:40px;border-radius:13px;background:var(--site-navy);color:#eaf3fb;display:grid;place-items:center;font-size:21px;position:relative;box-shadow:inset 0 0 0 1px #ffffff1c}
+.site-mark>span{position:absolute;right:7px;top:0;color:#9bd8c5;font-size:24px}
+.site-nav-links{display:flex;align-items:center;gap:clamp(14px,2.2vw,30px);margin-left:auto}
+.site-nav-links a,.footer-bottom nav a{color:#526175;text-decoration:none;font-size:13px;font-weight:650;transition:color .18s}
+.site-nav-links a:hover,.footer-bottom nav a:hover{color:#14745e}
+.site-nav-actions{display:flex;align-items:center;gap:10px}
+.site-login,.site-register,.faq-contact,.footer-entry{border:0;font:inherit;cursor:pointer}
+.site-login{background:transparent;color:var(--site-ink);font-size:13px;font-weight:750;padding:10px 12px}
+.site-register{background:var(--site-navy);color:#fff;border:1px solid var(--site-navy);border-radius:10px;padding:12px 16px;font-size:13px;font-weight:750;transition:transform .18s,background .18s}
+.site-register:hover{background:#1c3956;transform:translateY(-1px)}
+.site-register span{color:#aee2d3;margin-left:8px}
+.site-menu-toggle{display:none}
+.site-hero{max-width:1320px;margin:auto;padding:74px 42px 68px;min-height:570px;display:grid;grid-template-columns:minmax(0,1.03fr) minmax(420px,.97fr);align-items:center;gap:42px;position:relative}
+.hero-copy{position:relative;z-index:2;padding:12px 0 20px}
+.site-eyebrow{display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:1.7px;font-weight:850;color:#527167}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#399b7e;box-shadow:0 0 0 4px #399b7e1c}
+.site-hero h1{font-size:clamp(42px,5vw,70px);line-height:1.04;letter-spacing:-3.2px;font-weight:780;margin:24px 0 23px;max-width:710px}
+.site-hero h1 span,.section-heading h2 span,.formats-copy h2 span,.security-intro h2 span,.faq-heading h2 span{color:#537e75}
+.hero-lead{font-size:17px;line-height:1.8;color:#59697c;max-width:570px;margin:0}
+.hero-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:30px}
+.site-register.large{padding:15px 20px;font-size:14px}
+.hero-secondary{color:#31445a;text-decoration:none;font-size:13px;font-weight:750;border-bottom:1px solid #aab7c1;padding:8px 0}
+.hero-secondary span{color:#347f6a;margin-left:7px}
+.hero-note{display:flex;align-items:center;gap:10px;color:#778493;font-size:12px;margin-top:29px}
+.hero-note span{color:#368e75;font-size:18px}
+.hero-visual{min-height:440px;display:grid;place-items:center;position:relative;isolation:isolate}
+.hero-visual:before{content:"";position:absolute;width:380px;height:380px;border-radius:50%;background:#e4e9df;z-index:-2}
+.hero-visual:after{content:"";position:absolute;width:310px;height:310px;border-radius:50%;border:1px solid #b8c9c3;z-index:-1}
+.visual-orbit{position:absolute;border:1px solid #c8d4cf;border-radius:50%;transform:rotate(-24deg)}
+.orbit-one{width:470px;height:190px}.orbit-two{width:430px;height:245px;transform:rotate(38deg)}
+.visual-card{width:min(100%,390px);background:#fff;border:1px solid #e0e5e4;border-radius:19px;padding:24px;box-shadow:0 24px 60px #172e3020;transform:rotate(-2deg);position:relative;z-index:1}
+.visual-card-top{display:flex;justify-content:space-between;align-items:center}
+.visual-overline{font-size:9px;letter-spacing:1.5px;font-weight:850;color:#81908f}
+.visual-menu-dots{letter-spacing:3px;color:#93a0a7}
+.visual-title{font-size:25px;font-weight:800;letter-spacing:-.7px;margin-top:15px}
+.visual-subtitle{font-size:12px;color:#7b8790;margin-top:2px;margin-bottom:20px}
+.visual-file{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid #edf0ed}
+.file-symbol,.format-type{width:40px;height:43px;border-radius:9px;display:grid;place-items:center;font-size:9px;font-weight:900;flex-shrink:0}
+.file-symbol.pdf,.format-type.pdf{background:#fbe9e6;color:#b04e43}.file-symbol.doc,.format-type.word{background:#e6edf9;color:#4167a3}.file-symbol.img,.format-type.image{background:#e4f2eb;color:#3a866d}.format-type.text{background:#f4edda;color:#97792d}
+.file-lines{display:grid;gap:3px;min-width:0;flex:1}.file-lines b{font-size:12px;overflow-wrap:anywhere}.file-lines small{font-size:10px;color:#88949c}.file-check{width:21px;height:21px;border-radius:50%;background:#e2f2e9;color:#398667;display:grid;place-items:center;font-size:12px}
+.visual-rule{display:flex;align-items:center;gap:10px;font-size:9px;font-weight:800;letter-spacing:.7px;color:#84918d;margin:16px 0 12px}.visual-rule span{height:1px;background:#e7ebe7;flex:1}
+.visual-bottom{display:flex;align-items:center;gap:12px;background:#f2f6f2;border-radius:11px;padding:12px}
+.visual-clock{width:32px;height:32px;border-radius:9px;background:#dcebe1;color:#327a62;display:grid;place-items:center;font-size:20px}
+.visual-bottom b,.visual-bottom small{display:block}.visual-bottom b{font-size:11px}.visual-bottom small{font-size:10px;color:#77877f;margin-top:3px}
+.visual-stamp{position:absolute;right:-5px;bottom:36px;display:flex;align-items:center;gap:10px;padding:13px 17px;background:#14283b;color:#fff;border-radius:13px;box-shadow:0 15px 35px #14283b22;transform:rotate(5deg);z-index:2;font-size:11px;line-height:1.35}
+.visual-stamp>span{width:29px;height:29px;display:grid;place-items:center;border:1px solid #9dd7c6;border-radius:9px;color:#bce9db;font-weight:900;font-size:16px}
+.site-ribbon{background:#e9ece5;border-top:1px solid #dfe5dc;border-bottom:1px solid #dfe5dc;display:flex;align-items:center;justify-content:center;gap:clamp(18px,4vw,55px);padding:19px 20px;flex-wrap:wrap;color:#61756e;font-size:10px;letter-spacing:1.5px;font-weight:850}
+.site-ribbon i{width:5px;height:5px;border-radius:50%;background:#7ba796}
+.site-section{max-width:1320px;margin:0 auto;padding:105px 42px}
+.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:40px;margin-bottom:43px}
+.section-heading h2,.formats-copy h2,.security-intro h2,.faq-heading h2{font-size:clamp(34px,4vw,52px);line-height:1.08;letter-spacing:-2px;margin:15px 0 0}
+.section-heading>p{max-width:400px;color:#687789;font-size:15px;line-height:1.8;margin:0 0 3px}
+.feature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.feature-card{background:#fff;border:1px solid #e2e6e1;border-radius:15px;padding:24px 22px 27px;min-height:260px;display:flex;flex-direction:column;align-items:flex-start;transition:transform .2s,border-color .2s}
+.feature-card:hover{transform:translateY(-4px);border-color:#b3c9bd}
+.feature-primary{background:#172c3c;color:#fff;border-color:#172c3c}
+.feature-icon{width:43px;height:43px;display:grid;place-items:center;background:#e7f1e9;color:#397a65;border-radius:12px;font-size:23px;margin-bottom:26px}
+.feature-primary .feature-icon{background:#2b4b56;color:#bce4d5}
+.feature-index{font-size:9px;letter-spacing:1.3px;color:#7d9389;font-weight:850}
+.feature-primary .feature-index{color:#9bc9bb}
+.feature-card h3{font-size:18px;letter-spacing:-.4px;margin:8px 0 10px}
+.feature-card p{font-size:13px;line-height:1.75;color:#6b7988;margin:0}
+.feature-primary p{color:#c3d0d7}
+.feature-line{width:36px;height:3px;background:#81b5a0;border-radius:4px;margin-top:auto;padding-top:0;transform:translateY(14px)}
+.formats-section{padding-top:40px;padding-bottom:105px}
+.formats-panel{background:#e9eee7;border:1px solid #dfe5dc;border-radius:24px;padding:clamp(25px,4.5vw,58px);display:grid;grid-template-columns:.9fr 1.1fr;gap:55px;align-items:center}
+.formats-copy h2{font-size:clamp(34px,3.5vw,47px)}
+.formats-copy>p{font-size:15px;line-height:1.85;color:#617167;margin:23px 0 0}
+.formats-copy>p strong{color:#1e5748}
+.format-footnote{display:flex;gap:10px;align-items:flex-start;font-size:11px;line-height:1.65;color:#718078;margin-top:24px}
+.format-footnote>span:first-child{flex-shrink:0;width:18px;height:18px;border:1px solid #8fa79a;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800}
+.format-list{background:#fff;border:1px solid #dfe5df;border-radius:16px;padding:8px 20px}
+.format-row{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid #edf0eb}.format-row:last-child{border-bottom:0}
+.format-type{width:42px;height:42px}
+.format-row>span:nth-child(2){display:grid;gap:2px;min-width:0;flex:1}.format-row b{font-size:13px}.format-row small{font-size:11px;color:#839087}
+.format-allowed{font-size:10px;font-weight:800;color:#43836c;background:#e8f4ec;border-radius:99px;padding:5px 9px;white-space:nowrap}
+.security-section{max-width:none;background:#132638;color:#fff;padding-left:max(42px,calc((100vw - 1236px)/2));padding-right:max(42px,calc((100vw - 1236px)/2));display:grid;grid-template-columns:.8fr 1.2fr;gap:80px;align-items:start}
+.security-intro .site-eyebrow{color:#a3cbbb}.security-intro h2{font-size:clamp(36px,4vw,51px)}.security-intro h2 span{color:#a8d8c7}
+.security-intro>p{color:#c3d0d9;font-size:15px;line-height:1.9;max-width:400px;margin-top:23px}
+.security-detail{display:grid;grid-template-columns:35px minmax(0,1fr) 20px;gap:15px;padding:22px 0;border-bottom:1px solid #ffffff20;align-items:start}
+.security-number{font-size:10px;font-weight:850;color:#8fcab4;padding-top:5px}
+.security-detail h3{font-size:16px;margin:0 0 6px}.security-detail p{font-size:13px;line-height:1.8;color:#bdcbd5;margin:0}
+.security-mark{color:#a7d8c6;font-size:16px}
+.security-disclaimer{display:flex;gap:12px;margin-top:20px;background:#203747;border:1px solid #3c5661;border-radius:12px;padding:15px}
+.security-disclaimer>span{width:22px;height:22px;display:grid;place-items:center;border:1px solid #a6d5c5;border-radius:50%;color:#a6d5c5;font-weight:850;flex-shrink:0}
+.security-disclaimer p{margin:0;color:#d0dbe1;font-size:11px;line-height:1.75}
+.how-section{padding-top:105px;padding-bottom:110px}
+.steps-track{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid #d8dfd9}
+.step{padding:22px 23px 0 0;position:relative}
+.step:before{content:"";position:absolute;top:-4px;left:0;width:7px;height:7px;border-radius:50%;background:#5a9c84}
+.step-num{font-size:10px;font-weight:850;letter-spacing:1.3px;color:#81978c}
+.step-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#e3eee5;color:#3f806b;font-size:21px;margin:23px 0 18px}
+.step h3{font-size:17px;margin:0 0 9px}.step p{font-size:13px;line-height:1.8;color:#697889;margin:0;max-width:240px}
+.faq-section{display:grid;grid-template-columns:.72fr 1.28fr;gap:85px;padding-top:85px;padding-bottom:100px;border-top:1px solid #e2e6e0}
+.faq-heading h2{font-size:clamp(36px,4vw,49px)}
+.faq-heading>p{color:#687789;line-height:1.8;font-size:14px;margin-top:20px;max-width:300px}
+.faq-contact{margin-top:17px;padding:12px 0;background:transparent;color:#1e5849;font-weight:800;font-size:13px}.faq-contact span{margin-left:8px}
+.faq-list{border-top:1px solid #dbe1dc}
+.faq-item{border-bottom:1px solid #dbe1dc}
+.faq-item summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 0;font-size:14px;font-weight:750;color:#26384b}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-plus{width:23px;height:23px;border:1px solid #cbd6cf;border-radius:50%;flex-shrink:0;position:relative}
+.faq-plus:before,.faq-plus:after{content:"";position:absolute;left:6px;right:6px;top:10px;height:1px;background:#477b68}
+.faq-plus:after{transform:rotate(90deg);transition:transform .15s}
+.faq-item[open] .faq-plus:after{transform:rotate(0)}
+.faq-item p{margin:-3px 38px 20px 0;color:#657588;font-size:13px;line-height:1.85}
+#publicSite a:focus-visible,#publicSite button:focus-visible,#publicSite summary:focus-visible{outline:3px solid #4d9b81;outline-offset:4px;border-radius:5px}
+.site-footer{background:#101e30;color:#fff;padding:42px max(42px,calc((100vw - 1236px)/2)) 23px}
+.footer-top{display:flex;align-items:center;gap:30px;padding-bottom:31px;border-bottom:1px solid #ffffff20}
+.footer-brand{color:#fff}.footer-brand small{color:#a7b5c2}.footer-brand .site-mark{background:#e3eee8;color:#15283a}
+.footer-top>p{color:#b8c6d0;font-size:13px;margin:0 auto 0 0}
+.footer-entry{background:transparent;color:#d5e7df;font-size:12px;font-weight:750;padding:9px 0}
+.footer-bottom{display:flex;align-items:center;gap:25px;padding-top:22px;color:#9eafbd;font-size:10px}
+.footer-bottom nav{display:flex;gap:20px;flex-wrap:wrap;margin:0 auto}
+.footer-bottom nav a{font-size:10px;color:#b9c7d1}.footer-note{text-align:right}
+@media(max-width:1050px){.site-nav{padding:0 25px;gap:20px}.site-nav-links{gap:15px}.site-nav-links a{font-size:12px}.site-hero{padding:58px 25px;grid-template-columns:minmax(0,1fr) minmax(340px,.9fr);gap:18px}.site-hero h1{letter-spacing:-2.3px}.hero-visual{transform:scale(.94)}.site-section{padding-left:25px;padding-right:25px}.feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.security-section{padding-left:25px;padding-right:25px;gap:40px}.faq-section{gap:45px}.site-footer{padding-left:25px;padding-right:25px}.footer-note{display:none}}
+@media(max-width:760px){.site-nav{height:72px;padding:0 18px;gap:10px}.site-brand{font-size:17px}.site-brand small{font-size:9px}.site-mark{width:36px;height:36px}.site-menu-toggle{display:inline-flex;align-items:center;justify-content:center;gap:5px;margin-left:auto;background:transparent;border:1px solid #d6ded8;border-radius:9px;color:#25394b;width:40px;height:38px;font-size:16px}.site-menu-toggle .sr-only{font-size:1px}.site-nav-links{display:none;position:absolute;top:65px;left:12px;right:12px;background:#fff;border:1px solid #dce4de;border-radius:13px;padding:13px;box-shadow:0 15px 35px #172e301a;align-items:stretch;gap:0}.site-nav-links.open{display:grid}.site-nav-links a{padding:12px 10px;font-size:14px;border-bottom:1px solid #edf0ec}.site-nav-links a:last-child{border-bottom:0}.site-nav-actions{gap:3px}.site-login{font-size:12px;padding:8px}.site-nav-actions .site-register{font-size:11px;padding:10px 11px}.site-hero{padding:48px 21px 40px;display:flex;flex-direction:column;align-items:stretch;gap:20px}.site-hero h1{font-size:clamp(39px,10vw,56px);letter-spacing:-2.2px;margin:19px 0}.hero-lead{font-size:15px}.hero-actions{gap:15px;margin-top:24px}.hero-secondary{font-size:12px}.hero-visual{min-height:390px;transform:none;margin:0 auto;width:100%;max-width:460px}.hero-visual:before{width:300px;height:300px}.hero-visual:after{width:260px;height:260px}.visual-card{width:min(88%,370px);padding:19px;transform:rotate(-1deg)}.visual-stamp{right:0;bottom:10px}.orbit-one{width:360px;height:160px}.orbit-two{width:330px;height:200px}.site-ribbon{gap:12px 17px;padding:17px 13px;font-size:9px;letter-spacing:1px}.site-ribbon i{width:4px;height:4px}.site-section{padding:70px 21px}.section-heading{display:block;margin-bottom:28px}.section-heading h2,.formats-copy h2,.security-intro h2,.faq-heading h2{font-size:38px}.section-heading>p{margin-top:18px;font-size:14px}.feature-grid{grid-template-columns:1fr;gap:11px}.feature-card{min-height:220px;padding:22px}.feature-icon{margin-bottom:20px}.formats-section{padding-top:10px;padding-bottom:70px}.formats-panel{padding:24px 17px;border-radius:18px;grid-template-columns:1fr;gap:26px}.formats-copy>p{font-size:14px;margin-top:16px}.format-list{padding:5px 12px}.format-row{gap:9px}.format-type{width:37px;height:38px}.format-allowed{font-size:9px;padding:5px 7px}.security-section{display:block;padding:70px 21px}.security-intro>p{font-size:14px;margin-top:18px}.security-details{margin-top:30px}.security-detail{grid-template-columns:27px minmax(0,1fr) 15px;gap:10px;padding:19px 0}.security-detail h3{font-size:15px}.security-detail p{font-size:12px}.security-disclaimer{padding:12px}.how-section{padding-top:70px;padding-bottom:75px}.steps-track{grid-template-columns:1fr 1fr;row-gap:28px}.step{padding-right:16px}.step-icon{margin:19px 0 13px}.step h3{font-size:15px}.step p{font-size:12px}.faq-section{display:block;padding-top:68px;padding-bottom:75px}.faq-heading>p{margin-top:14px}.faq-list{margin-top:30px}.faq-item summary{font-size:13px;padding:17px 0}.faq-item p{font-size:12px;margin-right:5px}.site-footer{padding:32px 21px 22px}.footer-top{display:grid;grid-template-columns:1fr;gap:15px;align-items:start}.footer-top>p{margin:0}.footer-entry{justify-self:start;padding:4px 0}.footer-bottom{display:grid;gap:15px;align-items:start}.footer-bottom nav{margin:0;gap:12px 17px}.footer-note{display:block;text-align:left;line-height:1.5}}
+@media(max-width:390px){.site-brand{gap:7px;font-size:15px}.site-brand small{font-size:8px}.site-nav{padding:0 12px}.site-nav-actions .site-register{padding:9px 8px;font-size:10px}.site-hero{padding-left:17px;padding-right:17px}.site-hero h1{font-size:38px}.hero-actions{align-items:flex-start;flex-direction:column}.hero-visual{min-height:355px}.visual-card{padding:15px}.visual-stamp{right:2px;bottom:0}.site-section,.security-section{padding-left:17px;padding-right:17px}.formats-panel{padding:21px 13px}.format-row{gap:7px}.format-row b{font-size:12px}.format-allowed{font-size:8px}.site-footer{padding-left:17px;padding-right:17px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}#publicSite *,#publicSite *:before,#publicSite *:after{transition:none!important;animation:none!important}}
+
 </style>
 </head>
 <body>
+
+<div id="publicSite">
+ <header class="site-nav">
+  <a class="site-brand" href="#home" aria-label="OblivionDoc — главная"><span class="site-mark" aria-hidden="true">O<span>·</span></span><span>OblivionDoc<small>Документы под контролем</small></span></a>
+  <button class="site-menu-toggle" id="siteMenuToggle" type="button" aria-expanded="false" aria-controls="siteNavLinks">☰ <span class="sr-only">Открыть меню</span></button>
+  <nav id="siteNavLinks" class="site-nav-links" aria-label="Основная навигация">
+   <a href="#features">Возможности</a><a href="#formats">Форматы</a><a href="#security">Безопасность</a><a href="#how">Как работает</a><a href="#faq">FAQ</a>
+  </nav>
+  <div class="site-nav-actions"><button class="site-login" type="button" data-open-auth="login">Войти</button><button class="site-register" type="button" data-open-auth="register">Создать аккаунт <span aria-hidden="true">↗</span></button></div>
+ </header>
+ <main id="home">
+  <section class="site-hero">
+   <div class="hero-copy">
+    <div class="site-eyebrow"><span class="eyebrow-dot"></span> УПРАВЛЕНИЕ ДОКУМЕНТАМИ И СРОКАМИ</div>
+    <h1>Документы в порядке.<br><span>Сроки под контролем.</span></h1>
+    <p class="hero-lead">Храните электронные документы в одном месте, следите за сроками и держите историю работы под рукой — без лишней суеты.</p>
+    <div class="hero-actions"><button class="site-register large" type="button" data-open-auth="register">Начать работу <span aria-hidden="true">→</span></button><a class="hero-secondary" href="#how">Посмотреть, как это устроено <span aria-hidden="true">↓</span></a></div>
+    <div class="hero-note"><span aria-hidden="true">◈</span> Понятный порядок для файлов и сроков хранения</div>
+   </div>
+   <div class="hero-visual" aria-label="Схематичное представление управления документами">
+    <div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div>
+    <div class="visual-card">
+     <div class="visual-card-top"><span class="visual-overline">ВАШЕ ПРОСТРАНСТВО</span><span class="visual-menu-dots">•••</span></div>
+     <div class="visual-title">Документы</div>
+     <div class="visual-subtitle">Файлы и сроки — в одном месте</div>
+     <div class="visual-file"><span class="file-symbol pdf">PDF</span><span class="file-lines"><b>Документ.pdf</b><small>PDF · до 10 МБ</small></span><span class="file-check">✓</span></div>
+     <div class="visual-file"><span class="file-symbol doc">DOC</span><span class="file-lines"><b>Текстовый файл.docx</b><small>DOCX · до 10 МБ</small></span><span class="file-check">✓</span></div>
+     <div class="visual-file"><span class="file-symbol img">IMG</span><span class="file-lines"><b>Изображение.jpg</b><small>JPG · до 10 МБ</small></span><span class="file-check">✓</span></div>
+     <div class="visual-rule"><span></span><span>Сроки хранения</span><span></span></div>
+     <div class="visual-bottom"><span class="visual-clock">◷</span><span><b>Не упускайте важное</b><small>Отслеживайте жизненный цикл документов</small></span></div>
+    </div>
+    <div class="visual-stamp"><span>O</span><b>Порядок<br>в деталях</b></div>
+   </div>
+  </section>
+  <div class="site-ribbon"><span>ЕДИНЫЙ РЕЕСТР</span><i></i><span>СРОКИ ХРАНЕНИЯ</span><i></i><span>АРХИВ</span><i></i><span>ИСТОРИЯ ДЕЙСТВИЙ</span></div>
+  <section class="site-section feature-section" id="features">
+   <div class="section-heading"><div><div class="site-eyebrow">ЧТО ВНУТРИ</div><h2>Меньше хаоса.<br><span>Больше ясности.</span></h2></div><p>OblivionDoc помогает держать документы и их жизненный цикл в одном рабочем пространстве.</p></div>
+   <div class="feature-grid">
+    <article class="feature-card feature-primary"><span class="feature-icon">▤</span><div class="feature-index">01 / УЧЁТ</div><h3>Единый реестр</h3><p>Храните файлы и сведения о них в структурированном списке. Находить нужное проще, когда всё собрано в одном месте.</p><span class="feature-line"></span></article>
+    <article class="feature-card"><span class="feature-icon">◷</span><div class="feature-index">02 / СРОКИ</div><h3>Контроль дат</h3><p>Указывайте сроки хранения и отслеживайте состояние документов, которым требуется внимание.</p><span class="feature-line"></span></article>
+    <article class="feature-card"><span class="feature-icon">▣</span><div class="feature-index">03 / ПОРЯДОК</div><h3>Архивирование</h3><p>Разделяйте актуальные и архивные записи, чтобы рабочий список оставался понятным.</p><span class="feature-line"></span></article>
+    <article class="feature-card"><span class="feature-icon">≡</span><div class="feature-index">04 / ПРОЗРАЧНОСТЬ</div><h3>История действий</h3><p>Журнал помогает разобраться в событиях, связанных с работой с документами.</p><span class="feature-line"></span></article>
+   </div>
+  </section>
+  <section class="site-section formats-section" id="formats">
+   <div class="formats-panel"><div class="formats-copy"><div class="site-eyebrow">ПОДДЕРЖИВАЕМЫЕ ФАЙЛЫ</div><h2>Нужный формат.<br><span>Понятные ограничения.</span></h2><p>Для загрузки доступны распространённые документы, текстовые файлы и изображения. Максимальный размер одного файла — <strong>10 МБ</strong>.</p><div class="format-footnote"><span>i</span><span>Формат определяется расширением файла. Если тип не указан в списке, загрузка не поддерживается.</span></div></div>
+    <div class="format-list" aria-label="Разрешённые форматы файлов">
+     <div class="format-row"><span class="format-type pdf">PDF</span><span><b>.pdf</b><small>Документ PDF</small></span><span class="format-allowed">Разрешён</span></div>
+     <div class="format-row"><span class="format-type word">DOC</span><span><b>.doc</b><small>Документ Word</small></span><span class="format-allowed">Разрешён</span></div>
+     <div class="format-row"><span class="format-type word">DOCX</span><span><b>.docx</b><small>Документ Word</small></span><span class="format-allowed">Разрешён</span></div>
+     <div class="format-row"><span class="format-type text">TXT</span><span><b>.txt</b><small>Текстовый файл</small></span><span class="format-allowed">Разрешён</span></div>
+     <div class="format-row"><span class="format-type image">PNG</span><span><b>.png</b><small>Изображение</small></span><span class="format-allowed">Разрешён</span></div>
+     <div class="format-row"><span class="format-type image">JPG</span><span><b>.jpg · .jpeg</b><small>Изображение</small></span><span class="format-allowed">Разрешён</span></div>
+    </div>
+   </div>
+  </section>
+  <section class="site-section security-section" id="security">
+   <div class="security-intro"><div class="site-eyebrow">БЕЗОПАСНОСТЬ БЕЗ ГРОМКИХ ОБЕЩАНИЙ</div><h2>Доверие начинается<br><span>с честности.</span></h2><p>Защита документов — это не одна надпись «безопасно», а конкретные технические меры, их проверка и понятные правила работы с данными.</p></div>
+   <div class="security-details">
+    <div class="security-detail"><span class="security-number">01</span><div><h3>Защищённое соединение</h3><p>Публичный сервис открывается по HTTPS. Это помогает защищать данные при передаче между браузером и сервером.</p></div><span class="security-mark">↗</span></div>
+    <div class="security-detail"><span class="security-number">02</span><div><h3>Защита аккаунта</h3><p>Вход выполняется по учётным данным, а пароли хранятся в виде криптографических хешей, а не в открытом виде.</p></div><span class="security-mark">↗</span></div>
+    <div class="security-detail"><span class="security-number">03</span><div><h3>Контроль доступа</h3><p>Работа с документами доступна после входа в аккаунт. Проверка доступа к отдельным операциям остаётся важной частью защиты.</p></div><span class="security-mark">↗</span></div>
+    <div class="security-disclaimer"><span>!</span><p>Мы не заявляем о сквозном шифровании или шифровании файлов на сервере без отдельного подтверждения реализации. Безопасность должна подтверждаться механизмами, а не только текстом на сайте.</p></div>
+   </div>
+  </section>
+  <section class="site-section how-section" id="how">
+   <div class="section-heading"><div><div class="site-eyebrow">ПОНЯТНЫЙ ПРОЦЕСС</div><h2>От загрузки<br><span>до архива.</span></h2></div><p>Основные этапы работы с документами — в простой последовательности.</p></div>
+   <div class="steps-track">
+    <article class="step"><span class="step-num">01</span><span class="step-icon">↥</span><h3>Добавьте файл</h3><p>Загрузите файл поддерживаемого формата размером до 10 МБ.</p></article>
+    <article class="step"><span class="step-num">02</span><span class="step-icon">▤</span><h3>Заполните сведения</h3><p>Добавьте название и необходимые данные для учёта и поиска.</p></article>
+    <article class="step"><span class="step-num">03</span><span class="step-icon">◷</span><h3>Следите за сроком</h3><p>Используйте раздел сроков, чтобы видеть состояние записей.</p></article>
+    <article class="step"><span class="step-num">04</span><span class="step-icon">▣</span><h3>Управляйте архивом</h3><p>Переводите документы в архив или удаляйте их в соответствии с рабочими правилами.</p></article>
+   </div>
+  </section>
+  <section class="site-section faq-section" id="faq">
+   <div class="faq-heading"><div class="site-eyebrow">FAQ / ЧАСТЫЕ ВОПРОСЫ</div><h2>Коротко<br><span>о главном.</span></h2><p>Ответы о работе сервиса, форматах, сроках и защите данных.</p><button class="faq-contact" type="button" data-open-auth="login">Перейти к входу <span>→</span></button></div>
+   <div class="faq-list">
+    <details class="faq-item"><summary>Какие форматы файлов можно загрузить?<span class="faq-plus"></span></summary><p>PDF, DOC, DOCX, TXT, PNG, JPG и JPEG. Максимальный размер одного файла — 10 МБ.</p></details>
+    <details class="faq-item"><summary>Можно загрузить файл больше 10 МБ?<span class="faq-plus"></span></summary><p>Нет. Ограничение для одного файла — 10 МБ. Перед загрузкой проверьте размер файла.</p></details>
+    <details class="faq-item"><summary>Для чего нужны сроки хранения?<span class="faq-plus"></span></summary><p>Они помогают отслеживать, как долго документ должен оставаться в рабочем учёте, и не терять из виду даты, требующие внимания. Сам срок следует задавать по правилам вашей организации и применимым требованиям.</p></details>
+    <details class="faq-item"><summary>Архивирование означает автоматическое юридическое хранение?<span class="faq-plus"></span></summary><p>Нет. Функции управления документами и сроками не заменяют юридическую экспертизу, утверждённую номенклатуру дел или требования к официальному архиву. Проверяйте применимые правила самостоятельно.</p></details>
+    <details class="faq-item"><summary>Что делать, если файл не загружается?<span class="faq-plus"></span></summary><p>Убедитесь, что расширение входит в список поддерживаемых форматов, файл не превышает 10 МБ и вы вошли в аккаунт. Если проблема остаётся, попробуйте позже.</p></details>
+    <details class="faq-item"><summary>Как защищаются мои данные?<span class="faq-plus"></span></summary><p>Сервис использует HTTPS для передачи данных и хеширование паролей. Эти меры не означают автоматически, что содержимое файлов зашифровано в базе данных или что реализовано сквозное шифрование. Не загружайте сведения, для которых требуется подтверждённый уровень защиты, пока он не установлен.</p></details>
+    <details class="faq-item"><summary>Можно ли восстановить удалённый документ?<span class="faq-plus"></span></summary><p>После удаления серверная копия файла удаляется, а запись о событии остаётся в журнале. Содержимое из OblivionDoc восстановить нельзя, поэтому при необходимости заранее скачайте файл.</p></details>
+    <details class="faq-item"><summary>Как начать пользоваться OblivionDoc?<span class="faq-plus"></span></summary><p>Создайте аккаунт или войдите в существующий. После входа откроется рабочее пространство с документами, сроками, архивом и другими разделами.</p></details>
+   </div>
+  </section>
+ </main>
+ <footer class="site-footer"><div class="footer-top"><a class="site-brand footer-brand" href="#home"><span class="site-mark" aria-hidden="true">O<span>·</span></span><span>OblivionDoc<small>Документы под контролем</small></span></a><p>Порядок в документах начинается с ясных правил.</p><button class="footer-entry" type="button" data-open-auth="login">Войти в рабочее пространство ↗</button></div><div class="footer-bottom"><span>© <span id="footerYear"></span> OblivionDoc</span><nav aria-label="Навигация в подвале"><a href="#features">Возможности</a><a href="#formats">Форматы файлов</a><a href="#security">Безопасность</a><a href="#faq">Частые вопросы</a></nav><span class="footer-note">Сервис управления документами и сроками хранения</span></div></footer>
+</div>
+
 <div id="authScreen" class="auth-screen hidden">
  <section class="auth-side" aria-label="О сервисе OblivionDoc">
   <div class="auth-brand">
@@ -463,7 +684,9 @@ function authHeaders(extra={}) { return {...extra,...(token()?{Authorization:`Be
 async function apiFetch(path, options={}) { const response = await fetch(API_URL+path,{...options,headers:authHeaders(options.headers||{})}); return response; }
 async function readError(response) { try { const d=await response.json(); return d.detail||d.message||`Ошибка ${response.status}`; } catch { return `Ошибка ${response.status}`; } }
 function toast(message, error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');el.textContent=message;$('toastWrap').append(el);setTimeout(()=>el.remove(),4200);}
+function showLanding(){ $('authScreen').classList.add('hidden'); $('appShell').classList.add('hidden'); $('publicSite').classList.remove('hidden'); document.title='OblivionDoc — документы и сроки под контролем'; }
 function showAuth(form='login'){
+ $('publicSite').classList.add('hidden');
  const forms={login:'loginForm',register:'registerForm',forgotForm:'forgotForm',resetForm:'resetForm'};
  const activeForm=forms[form]||'loginForm';
  $('appShell').classList.add('hidden');
@@ -528,7 +751,11 @@ async function deleteDocument(id){const btn=$('acceptDelete');if(saving)return;s
 async function downloadDocument(id){try{const r=await apiFetch(`/documents/${id}/download`);if(!r.ok)throw new Error(await readError(r));const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const doc=documents.find(d=>d.id===Number(id));a.download=(doc?.file_name||doc?.name||'document');document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){toast(e.message||'Не удалось скачать файл.',true);}}
 async function handleRowAction(e){const b=e.target.closest('[data-act]');if(!b)return;const {act,id}=b.dataset;if(act==='add')openAdd();if(act==='edit')openEdit(id);if(act==='delete')confirmDelete(id);if(act==='download')downloadDocument(id);if(act==='logout')logout();}
 async function logout(){try{if(token())await apiFetch('/auth/logout',{method:'POST'});}catch{}localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);currentUser=null;userProfile={first_name:'',last_name:''};documents=[];auditLogs=[];organizationSettings={organization_name:'',subdivision:'',responsible_person:'',retention_policy:''};showAuth('login');toast('Вы вышли из аккаунта.');}
-async function checkSession(){if(resetToken){showAuth('resetForm');return;}const t=token();if(!t){showAuth();return;}try{const r=await apiFetch('/auth/me');if(r.status===401){localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);showAuth();return;}if(!r.ok){showAuth('login');$('loginError').textContent='Сервер временно недоступен (ошибка '+r.status+'). Ваши данные не удалены. Попробуйте обновить страницу позже.';return;}currentUser=await r.json();if(currentUser.email)localStorage.setItem(EMAIL_KEY,currentUser.email);showApp();}catch(e){showAuth('login');$('loginError').textContent='Не удалось связаться с сервером. Ваши данные не удалены. Подождите и попробуйте снова.';}}
+async function checkSession(){if(resetToken){showAuth('resetForm');return;}const t=token();if(!t){showLanding();return;}try{const r=await apiFetch('/auth/me');if(r.status===401){localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);showAuth();return;}if(!r.ok){showAuth('login');$('loginError').textContent='Сервер временно недоступен (ошибка '+r.status+'). Ваши данные не удалены. Попробуйте обновить страницу позже.';return;}currentUser=await r.json();if(currentUser.email)localStorage.setItem(EMAIL_KEY,currentUser.email);showApp();}catch(e){showLanding();}}
+$('footerYear').textContent=new Date().getFullYear();
+$('siteMenuToggle').addEventListener('click',()=>{const opened=$('siteNavLinks').classList.toggle('open');$('siteMenuToggle').setAttribute('aria-expanded',String(opened));});
+$('siteNavLinks').addEventListener('click',e=>{if(e.target.closest('a')){$('siteNavLinks').classList.remove('open');$('siteMenuToggle').setAttribute('aria-expanded','false');}});
+document.addEventListener('click',e=>{const entry=e.target.closest('[data-open-auth]');if(entry){showAuth(entry.dataset.openAuth||'login');window.scrollTo({top:0,behavior:'auto'});}});
 $('loginTab').onclick=()=>showAuth('login');$('registerTab').onclick=()=>showAuth('register');$('forgotLink').onclick=()=>showAuth('forgotForm');$('backLogin').onclick=()=>showAuth('login');$('refreshBtn').onclick=()=>refreshData(true);$('logoutBtn').onclick=logout;$('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
 document.addEventListener('click',e=>{const nav=e.target.closest('[data-page]');if(nav)showPage(nav.dataset.page);handleRowAction(e);});
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('loginForm').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Вход…';$('loginError').textContent='';try{const r=await fetch(API_URL+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('loginEmail').value.trim().toLowerCase(),password:$('loginPassword').value})});if(!r.ok)throw new Error(await readError(r));const d=await r.json();localStorage.setItem(TOKEN_KEY,d.session_token);localStorage.setItem(EMAIL_KEY,d.user?.email||$('loginEmail').value.trim().toLowerCase());currentUser=d.user;showApp();}catch(err){$('loginError').textContent=err.message||'Не удалось войти. Проверьте подключение.';}finally{btn.disabled=false;btn.innerHTML='Войти в систему <span>→</span>';}});
