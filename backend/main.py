@@ -773,12 +773,16 @@ def get_organization_settings(
     if not profile:
         return {
             "organization_name": "",
+            "organization_type": "company",
+            "industry": "other",
             "subdivision": "",
             "responsible_person": "",
             "retention_policy": ""
         }
     return {
         "organization_name": profile.organization_name,
+        "organization_type": profile.organization_type or "company",
+        "industry": profile.industry or "other",
         "subdivision": profile.subdivision,
         "responsible_person": profile.responsible_person,
         "retention_policy": profile.retention_policy
@@ -791,14 +795,27 @@ def save_organization_settings(
     db: Session = Depends(get_db)
 ):
     organization_name = settings.organization_name.strip()
+    organization_type = settings.organization_type.strip()
+    industry = settings.industry.strip()
     subdivision = settings.subdivision.strip()
     responsible_person = settings.responsible_person.strip()
     retention_policy = settings.retention_policy.strip()
-    if not organization_name or not subdivision or not responsible_person:
+    allowed_organization_types = {"company", "public", "nonprofit", "individual", "other"}
+    allowed_industries = {
+        "construction", "accounting_finance", "legal_services", "logistics",
+        "housing_utilities", "education", "manufacturing", "healthcare",
+        "retail_services", "agriculture", "it_telecom", "professional_services",
+        "public_services", "other"
+    }
+    if not organization_name:
         raise HTTPException(
             status_code=422,
-            detail="Укажите название организации, подразделение и ответственного за документы.",
+            detail="Укажите название организации.",
         )
+    if organization_type not in allowed_organization_types:
+        raise HTTPException(status_code=422, detail="Выберите тип организации из списка.")
+    if industry not in allowed_industries:
+        raise HTTPException(status_code=422, detail="Выберите отрасль из списка.")
 
     profile = (
         db.query(OrganizationProfile)
@@ -810,6 +827,8 @@ def save_organization_settings(
         db.add(profile)
 
     profile.organization_name = organization_name
+    profile.organization_type = organization_type
+    profile.industry = industry
     profile.subdivision = subdivision
     profile.responsible_person = responsible_person
     profile.retention_policy = retention_policy
@@ -819,6 +838,8 @@ def save_organization_settings(
     return {
         "message": "Настройки организации сохранены.",
         "organization_name": profile.organization_name,
+        "organization_type": profile.organization_type or "company",
+        "industry": profile.industry or "other",
         "subdivision": profile.subdivision,
         "responsible_person": profile.responsible_person,
         "retention_policy": profile.retention_policy
