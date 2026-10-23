@@ -802,6 +802,34 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 @media(prefers-reduced-motion:reduce){.app-shell *,.app-shell *:before,.app-shell *:after{transition:none!important;animation:none!important}}
 
 </style>
+<style>
+/* Focused refinements for the universal profile and document register */
+.profile-note{margin:16px 18px 18px;padding:15px 16px;border:1px solid var(--line);border-radius:12px;background:#f8faf8;color:var(--ink)}
+.profile-note strong{display:block;font-size:12px;font-weight:800;color:#244638}
+.profile-note p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+.doc-category-chip{display:inline-block;max-width:260px;padding:5px 9px;border-radius:8px;background:#e8f2ec;color:#2f654b;font-size:11px;font-weight:750;line-height:1.4}
+.document-table{min-width:1080px}
+.document-table td:nth-child(2){min-width:180px}
+.document-table td:nth-child(1){min-width:240px}
+.document-table td:nth-child(6){white-space:nowrap}
+.docs-toolbar .search{flex:1 1 280px}
+.docs-toolbar select{flex:0 1 auto}
+.profile-org-form{margin-top:14px;gap:14px}
+.profile-org-form .form-grid{margin-bottom:0}
+.profile-org-form .form-hint{margin-top:5px;line-height:1.5}
+.profile-form-foot span{font-size:12px;color:var(--muted)}
+.profile-org-card .org-summary{display:grid;gap:0}
+.profile-org-card .org-summary-row{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,1.2fr);gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.profile-org-card .org-summary-row:last-child{border-bottom:0}
+.profile-org-card .org-summary-value{overflow-wrap:anywhere;font-weight:650;color:var(--ink)}
+@media(max-width:760px){
+ .profile-org-card .org-summary-row{grid-template-columns:1fr;gap:3px}
+ .profile-org-form .form-grid{grid-template-columns:1fr}
+ .docs-toolbar .search{min-width:100%}
+ .document-table{min-width:1000px}
+ .profile-note{margin:14px;padding:13px}
+}
+</style>
 </head>
 <body>
 
