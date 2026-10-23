@@ -1362,6 +1362,12 @@ async def create_document_upload(
     expires_at: datetime = Form(...),
 
     action: str = Form("archive"),
+    category: str = Form("other"),
+    department: str = Form(""),
+    document_number: str = Form(""),
+    counterparty: str = Form(""),
+    responsible_person: str = Form(""),
+    notes: str = Form(""),
 
     file: UploadFile = File(...),
 
@@ -1391,6 +1397,13 @@ async def create_document_upload(
 
         )
 
+    allowed_categories = {
+        "contracts", "finance", "hr", "legal", "project_technical",
+        "construction", "logistics", "medical", "education", "procurement",
+        "management", "housing_utilities", "correspondence", "other"
+    }
+    if category not in allowed_categories:
+        raise HTTPException(status_code=400, detail="Выберите категорию документа из списка.")
     if file is None or not file.filename:
         raise HTTPException(
             status_code=400,
@@ -1518,17 +1531,18 @@ async def create_document_upload(
 
         user_id=current_user.id,
 
-        name=name,
-
+        name=name.strip(),
         file_path=file_path,
-
         file_content=bytes(file_content),
         file_name=original_name,
-
+        category=category,
+        department=department.strip(),
+        document_number=document_number.strip(),
+        counterparty=counterparty.strip(),
+        responsible_person=responsible_person.strip(),
+        notes=notes.strip(),
         expires_at=expires_at,
-
         status="active",
-
         action=action
 
     )
@@ -1613,11 +1627,28 @@ def update_document(
     new_name = document_data.name.strip()
     new_expires_at = normalize_datetime(document_data.expires_at)
     new_action = document_data.action
+    new_category = document_data.category
+    allowed_categories = {
+        "contracts", "finance", "hr", "legal", "project_technical",
+        "construction", "logistics", "medical", "education", "procurement",
+        "management", "housing_utilities", "correspondence", "other"
+    }
+    if new_category not in allowed_categories:
+        raise HTTPException(status_code=422, detail="Выберите категорию документа из списка.")
+    new_metadata = {
+        "department": document_data.department.strip(),
+        "document_number": document_data.document_number.strip(),
+        "counterparty": document_data.counterparty.strip(),
+        "responsible_person": document_data.responsible_person.strip(),
+        "notes": document_data.notes.strip(),
+    }
 
     changed = (
         document.name != new_name
         or document.expires_at != new_expires_at
         or document.action != new_action
+        or (document.category or "other") != new_category
+        or any(getattr(document, key, "") != value for key, value in new_metadata.items())
     )
 
     if not changed:
@@ -1626,6 +1657,9 @@ def update_document(
     document.name = new_name
     document.expires_at = new_expires_at
     document.action = new_action
+    document.category = new_category
+    for key, value in new_metadata.items():
+        setattr(document, key, value)
 
     if document.expires_at > utc_now():
         document.status = "active"
