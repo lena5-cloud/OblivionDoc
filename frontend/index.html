@@ -281,6 +281,19 @@ body{font-size:15px;line-height:1.62}
 @media(max-width:700px){.auth-screen{grid-template-columns:1fr;gap:28px;padding:24px 18px 22px;align-items:start}.auth-side{min-height:0}.auth-side:after{width:250px;height:250px;right:-150px;top:70px;box-shadow:0 0 0 30px #a9c1df08,0 0 0 60px #a9c1df05}.auth-brand{font-size:21px}.auth-hero{margin:43px 0 0;max-width:560px}.auth-kicker{font-size:10px;margin-bottom:17px}.auth-hero h1{font-size:clamp(36px,9.4vw,49px);line-height:1.07;letter-spacing:-1.7px;margin-bottom:17px}.auth-hero p{font-size:14px;line-height:1.75}.auth-points{margin-top:23px}.auth-point{padding:11px 0}.auth-footer{display:none}.auth-main{padding:24px 20px;border-radius:19px}.auth-card h2{font-size:28px}.auth-intro{margin-bottom:22px}.auth-switch{margin-bottom:22px}.auth-bottom{margin-top:21px;padding-top:16px}}
 @media(prefers-reduced-motion:reduce){.auth-screen *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+
+/* Keep every auth mode aligned, including the taller registration state. */
+.auth-main{align-self:center;min-width:0}
+.auth-card{min-width:0;margin-inline:auto}
+.auth-form>div:not(.auth-error):not(.auth-success){display:flex;flex-direction:column;align-items:stretch;gap:7px;min-width:0;width:100%}
+.auth-form>div:not(.auth-error):not(.auth-success)>label{display:block;margin:0;line-height:1.45}
+.auth-form input,.auth-form select,.auth-form textarea{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin:0;font:inherit;font-size:14px;line-height:1.4}
+.auth-form .form-hint{margin-top:1px;font-size:11px;line-height:1.45}
+.auth-form>.auth-error,.auth-form>.auth-success{min-width:0;overflow-wrap:anywhere;margin:0;line-height:1.45}
+.auth-form>.btn-primary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;white-space:normal}
+.auth-form>.text-btn{display:inline-flex;align-items:center;min-height:28px;padding:2px 0}
+@media(max-width:700px){.auth-main{width:100%;box-sizing:border-box}.auth-card{width:100%}}
+
 </style>
 </head>
 <body>
@@ -292,7 +305,7 @@ body{font-size:15px;line-height:1.62}
   </div>
   <div class="auth-hero">
    <div class="auth-kicker"><span></span> ДОКУМЕНТЫ · СРОКИ · ПОРЯДОК</div>
-   <h1>Сроки хранения<br><span>не должны держаться в памяти.</span></h1>
+   <h1>Документы в порядке.<br><span>Сроки под контролем.</span></h1>
    <p>OblivionDoc собирает документы в единый реестр, помогает отслеживать даты хранения и сохраняет историю действий — чтобы важное не терялось в потоке файлов и задач.</p>
    <div class="auth-points">
     <div class="auth-point"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4.2 4.2L19 6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong>Единый реестр документов</strong><small>Файлы и сведения собраны в одном месте.</small></div></div>
