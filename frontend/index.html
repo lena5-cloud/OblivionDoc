@@ -1084,6 +1084,14 @@ async function saveUserProfile(event){
  }catch(error){toast(error.message||'Не удалось сохранить профиль.',true);}
  finally{button.disabled=false;button.innerHTML='Сохранить данные <span aria-hidden="true">→</span>';}
 }
+function syncCustomOrganizationFields(){
+ const typeCustom=$('orgType')?.value==='__custom__';
+ const industryCustom=$('orgIndustry')?.value==='__custom__';
+ $('orgTypeCustom')?.classList.toggle('hidden',!typeCustom);
+ $('orgIndustryCustom')?.classList.toggle('hidden',!industryCustom);
+ if($('orgTypeCustom'))$('orgTypeCustom').required=typeCustom;
+ if($('orgIndustryCustom'))$('orgIndustryCustom').required=industryCustom;
+}
 function updateOrganizationSummary(){
  const values={
   orgSummaryName:organizationSettings.organization_name,
@@ -1104,8 +1112,13 @@ async function loadOrganizationSettings(){
   if(!r.ok)throw new Error(await readError(r));
   const loaded=await r.json();
   organizationSettings={organization_name:loaded.organization_name||'',organization_type:loaded.organization_type||'company',industry:loaded.industry||'other',subdivision:loaded.subdivision||'',responsible_person:loaded.responsible_person||'',retention_policy:loaded.retention_policy||''};
-  const fields={orgName:organizationSettings.organization_name,orgType:organizationSettings.organization_type,orgIndustry:organizationSettings.industry,orgSubdivision:organizationSettings.subdivision,orgResponsible:organizationSettings.responsible_person,orgPolicy:organizationSettings.retention_policy};
+  const customType=String(organizationSettings.organization_type||'').startsWith('custom:');
+  const customIndustry=String(organizationSettings.industry||'').startsWith('custom:');
+  const fields={orgName:organizationSettings.organization_name,orgType:customType?'__custom__':organizationSettings.organization_type,orgIndustry:customIndustry?'__custom__':organizationSettings.industry,orgSubdivision:organizationSettings.subdivision,orgResponsible:organizationSettings.responsible_person,orgPolicy:organizationSettings.retention_policy};
   for(const [id,value] of Object.entries(fields)){if($(id))$(id).value=value;}
+  $('orgTypeCustom').value=customType?organizationSettings.organization_type.slice(7):'';
+  $('orgIndustryCustom').value=customIndustry?organizationSettings.industry.slice(7):'';
+  syncCustomOrganizationFields();
   updateOrganizationSummary();
  }catch(e){toast('Не удалось загрузить настройки организации: '+(e.message||'ошибка сети'),true);}
 }
@@ -1115,13 +1128,15 @@ async function saveOrganizationSettings(event){
  btn.disabled=true;btn.textContent='Сохранение…';
  const data={
   organization_name:$('orgName').value.trim(),
-  organization_type:$('orgType').value,
-  industry:$('orgIndustry').value,
+  organization_type:$('orgType').value==='__custom__'?'custom:'+ $('orgTypeCustom').value.trim():$('orgType').value,
+  industry:$('orgIndustry').value==='__custom__'?'custom:'+ $('orgIndustryCustom').value.trim():$('orgIndustry').value,
   subdivision:$('orgSubdivision').value.trim(),
   responsible_person:$('orgResponsible').value.trim(),
   retention_policy:$('orgPolicy').value.trim()
  };
  if(!data.organization_name){toast('Укажите название организации.',true);btn.disabled=false;btn.textContent='Сохранить сведения';return;}
+ if(data.organization_type==='custom:'){toast('Укажите свой тип организации.',true);btn.disabled=false;btn.textContent='Сохранить сведения';return;}
+ if(data.industry==='custom:'){toast('Укажите свою отрасль.',true);btn.disabled=false;btn.textContent='Сохранить сведения';return;}
  try{
   const r=await apiFetch('/settings/organization',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
   if(!r.ok)throw new Error(await readError(r));
@@ -1187,6 +1202,8 @@ async function refreshData(showMessage=false){if(refreshing)return;refreshing=tr
 function wirePageControls(){
  $('userProfileForm')?.addEventListener('submit',saveUserProfile);
  $('organizationForm')?.addEventListener('submit',saveOrganizationSettings);
+ $('orgType')?.addEventListener('change',syncCustomOrganizationFields);
+ $('orgIndustry')?.addEventListener('change',syncCustomOrganizationFields);
  $('organizationToggle')?.addEventListener('click',()=>{
   const form=$('organizationForm');if(!form)return;
   const opening=form.classList.contains('hidden');
