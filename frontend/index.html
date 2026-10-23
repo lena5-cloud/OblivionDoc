@@ -801,6 +801,17 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 @media(max-width:760px){.app-shell{grid-template-columns:minmax(0,1fr)}.app-shell .sidebar{padding-top:22px}.app-shell .topbar{padding:12px 15px;gap:8px;min-height:68px}.app-shell .content{padding:22px 14px 35px}.app-shell .page-head{align-items:flex-start;gap:14px}.app-shell .page-head h1{font-size:25px}.app-shell .page-head p{font-size:13px}.app-shell .top-title{font-size:15px}.app-shell .top-actions{gap:6px}.app-shell .user-pill{padding:4px 5px}.app-shell .avatar{width:32px;height:32px}.app-shell .stats-grid{gap:10px}.app-shell .stat-card{padding:15px 13px;border-radius:13px}.app-shell .stat-top{font-size:11px}.app-shell .stat-value{font-size:25px}.app-shell .stat-note{font-size:11px}.app-shell .panel-head,.app-shell .panel-body{padding:16px}.app-shell .toolbar{padding:12px;gap:8px}.app-shell .docs-status-strip{gap:8px}.app-shell .docs-status-item{min-width:0}.app-shell .profile-hero{padding:18px!important}.app-shell .settings-card{padding:16px}.app-shell .settings-row{align-items:flex-start;flex-direction:column;gap:10px}.app-shell .settings-row>.btn{align-self:flex-start}}
 @media(prefers-reduced-motion:reduce){.app-shell *,.app-shell *:before,.app-shell *:after{transition:none!important;animation:none!important}}
 
+
+/* OblivionDoc: зелёная градиентная тема */
+:root{--navy:#087f4e;--navy2:#06a56a;--accent:#10a765;--green:#07864f;--greenbg:#e5f8ec;--bluebg:#e5f8ec;--shadow:0 12px 32px rgba(7,127,78,.09)}
+.btn-primary,.btn-primary:hover{background:linear-gradient(115deg,#07864f 0%,#19bd72 48%,#8be36d 100%);border-color:#19ad65;color:#fff}
+.nav-btn.active{background:linear-gradient(115deg,#07864f 0%,#20bc73 55%,#8be36d 100%);color:#fff;box-shadow:inset 3px 0 #b9ffca}
+.stat-icon,.quick-icon{background:linear-gradient(135deg,#e3f9eb,#c8f4d5);color:#07864f}
+.field:focus,input:focus,select:focus,textarea:focus{border-color:#27b975;box-shadow:0 0 0 3px #19ad651a}
+.quick-card:hover{border-color:#79d9a3;background:#f5fff8}
+.progress span{background:linear-gradient(90deg,#07864f 0%,#22c978 55%,#9be66e 100%)}
+.badge.archived{background:#e5f8ec;color:#07864f}
+
 </style>
 <style>
 /* Focused refinements for the universal profile and document register */
