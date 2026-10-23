@@ -249,6 +249,37 @@ def migrate_database():
             )
             print("База данных обновлена: добавлено имя файла.")
 
+        document_columns = {
+            "category": "VARCHAR(80) NOT NULL DEFAULT 'other'",
+            "department": "VARCHAR(200) NOT NULL DEFAULT ''",
+            "document_number": "VARCHAR(120) NOT NULL DEFAULT ''",
+            "counterparty": "VARCHAR(200) NOT NULL DEFAULT ''",
+            "responsible_person": "VARCHAR(200) NOT NULL DEFAULT ''",
+            "notes": "TEXT NOT NULL DEFAULT ''",
+        }
+        for column_name, column_type in document_columns.items():
+            if column_name not in columns:
+                connection.execute(text(
+                    f"ALTER TABLE documents ADD COLUMN {column_name} {column_type}"
+                ))
+                print(f"База данных обновлена: добавлено поле {column_name}.")
+
+        table_names = set(inspector.get_table_names())
+        if "organization_profiles" in table_names:
+            organization_columns = {
+                column["name"]
+                for column in inspector.get_columns("organization_profiles")
+            }
+            for column_name, column_type in {
+                "organization_type": "VARCHAR(80) NOT NULL DEFAULT 'company'",
+                "industry": "VARCHAR(80) NOT NULL DEFAULT 'other'",
+            }.items():
+                if column_name not in organization_columns:
+                    connection.execute(text(
+                        f"ALTER TABLE organization_profiles ADD COLUMN {column_name} {column_type}"
+                    ))
+                    print(f"База данных обновлена: добавлено поле организации {column_name}.")
+
         user_count = connection.execute(
             text("SELECT COUNT(*) FROM users")
         ).scalar_one()
