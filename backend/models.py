@@ -76,6 +76,7 @@ class Document(Base):
     document_number = Column(String, nullable=False, default="")
     counterparty = Column(String, nullable=False, default="")
     responsible_person = Column(String, nullable=False, default="")
+    notes = Column(String, nullable=False, default="")
 
     created_at = Column(
         DateTime,
@@ -187,6 +188,7 @@ class OrganizationProfile(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, unique=True, nullable=False, index=True)
     organization_name = Column(String, nullable=False, default="")
+    organization_type = Column(String, nullable=False, default="company")
     industry = Column(String, nullable=False, default="other")
     subdivision = Column(String, nullable=False, default="")
     responsible_person = Column(String, nullable=False, default="")
