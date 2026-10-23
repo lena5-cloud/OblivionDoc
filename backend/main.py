@@ -1876,20 +1876,45 @@ def export_documents_xlsx(
         "archive": "Архивировать",
         "delete": "Удалить по сроку"
     }
-    rows = [["ID", "Название", "Создан", "Срок хранения", "Статус", "Действие по сроку"]]
+    category_labels = {
+        "contracts": "Договоры и соглашения",
+        "finance": "Финансовые документы",
+        "hr": "Кадровые документы",
+        "legal": "Юридические документы",
+        "project_technical": "Проектные и технические",
+        "construction": "Строительство и исполнительная документация",
+        "logistics": "Логистика и транспорт",
+        "medical": "Медицинские документы",
+        "education": "Образование",
+        "procurement": "Закупки и поставки",
+        "management": "Управленческие документы",
+        "housing_utilities": "ЖКХ и обращения",
+        "correspondence": "Переписка",
+        "other": "Другое",
+    }
+    rows = [[
+        "ID", "Название", "Категория", "Номер", "Контрагент", "Подразделение",
+        "Ответственный", "Создан", "Срок хранения", "Статус", "Действие по сроку", "Примечание"
+    ]]
     for document in documents:
         rows.append([
             document.id,
             document.name,
+            category_labels.get(document.category or "other", "Другое"),
+            document.document_number or "",
+            document.counterparty or "",
+            document.department or "",
+            document.responsible_person or "",
             document.created_at.strftime("%d.%m.%Y %H:%M") if document.created_at else "",
             document.expires_at.strftime("%d.%m.%Y %H:%M") if document.expires_at else "",
             status_labels.get(document.status, document.status or "—"),
-            action_labels.get(document.action, document.action or "—")
+            action_labels.get(document.action, document.action or "—"),
+            document.notes or "",
         ])
     content = build_xlsx(
         rows,
         sheet_name="Документы",
-        max_widths=[10, 52, 22, 22, 18, 28]
+        max_widths=[10, 52, 34, 18, 30, 25, 28, 22, 22, 18, 28, 55]
     )
     return Response(
         content=content,
