@@ -1058,7 +1058,7 @@ function updateOrganizationSummary(){
  $('orgSummaryEmpty')?.classList.toggle('hidden',filled);
  const chip=$('orgChipTitle');if(chip)chip.textContent=organizationSettings.organization_name||'Рабочее пространство';
 }
-async async function loadOrganizationSettings(){
+async function loadOrganizationSettings(){
  try{
   const r=await apiFetch('/settings/organization');
   if(!r.ok)throw new Error(await readError(r));
@@ -1069,7 +1069,7 @@ async async function loadOrganizationSettings(){
   updateOrganizationSummary();
  }catch(e){toast('Не удалось загрузить настройки организации: '+(e.message||'ошибка сети'),true);}
 }
-async async function saveOrganizationSettings(event){
+async function saveOrganizationSettings(event){
  event.preventDefault();
  const btn=$('saveOrganizationBtn');if(!btn)return;
  btn.disabled=true;btn.textContent='Сохранение…';
