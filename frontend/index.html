@@ -841,6 +841,28 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
  .profile-note{margin:14px;padding:13px}
 }
 </style>
+
+<style id="document-form-refinements">
+.modal{width:min(760px,100%);max-width:760px}
+.modal .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;row-gap:16px}
+.modal .form-group{min-width:0}
+.modal .form-group input,.modal .form-group select,.modal .form-group textarea{display:block;width:100%;min-width:0;max-width:100%;font-size:13px}
+.modal .form-group input,.modal .form-group select{min-height:42px;padding:10px 12px}
+.modal .form-group input::placeholder,.modal .form-group textarea::placeholder{color:#7b8980;opacity:1}
+.modal .form-hint{line-height:1.55;overflow-wrap:anywhere}
+#docCategoryOtherGroup{grid-column:1/-1}
+#docCategoryOtherGroup input{background:#fffefa}
+#saveDocBtn{background:#1b483d!important;border-color:#1b483d!important;color:#fff!important;box-shadow:none!important}
+#saveDocBtn:hover{background:#275d4e!important;border-color:#275d4e!important}
+@media(max-width:640px){
+ .modal-overlay{padding:10px}
+ .modal{width:100%;max-width:100%;max-height:94vh}
+ .modal-head,.modal-content,.modal-foot{padding-left:17px;padding-right:17px}
+ .modal .form-grid{grid-template-columns:minmax(0,1fr)}
+ #docCategoryOtherGroup{grid-column:auto}
+}
+</style>
+
 </head>
 <body>
 
@@ -1040,7 +1062,7 @@ const ORGANIZATION_TYPES=[
  ['company','Коммерческая организация'],['public','Государственная или муниципальная организация'],
  ['nonprofit','Некоммерческая организация'],['individual','ИП / частный специалист'],['other','Другой тип']
 ];
-function categoryName(value){return (DOCUMENT_CATEGORIES.find(item=>item[0]===value)||DOCUMENT_CATEGORIES[DOCUMENT_CATEGORIES.length-1])[1];}
+function categoryName(value){if(String(value||'').startsWith('custom:'))return String(value).slice(7)||'Другое';return (DOCUMENT_CATEGORIES.find(item=>item[0]===value)||DOCUMENT_CATEGORIES[DOCUMENT_CATEGORIES.length-1])[1];}
 function optionsHtml(items,selected){return items.map(([value,label])=>`<option value="${value}" ${value===(selected||items[0][0])?'selected':''}>${esc(label)}</option>`).join('');}
 function categoryOptions(selected='other'){return optionsHtml(DOCUMENT_CATEGORIES,selected);}
 function industryName(value){return (INDUSTRIES.find(item=>item[0]===value)||INDUSTRIES[INDUSTRIES.length-1])[1];}
@@ -1246,7 +1268,11 @@ function filterDocs(hostId,source,query,status,category='all'){
  const normalized=(query||'').trim().toLocaleLowerCase('ru');
  const list=source.filter(d=>{
   if(status!=='all'&&d.status!==status)return false;
-  if(category!=='all'&&(d.category||'other')!==category)return false;
+  if(category!=='all'){
+   const docCategory=d.category||'other';
+   if(category==='other'&&docCategory!=='other'&&!String(docCategory).startsWith('custom:'))return false;
+   if(category!=='other'&&docCategory!==category)return false;
+  }
   const searchable=[d.name,d.id,d.document_number,d.counterparty,d.department,d.responsible_person,d.notes,categoryName(d.category||'other'),d.file_name].map(value=>String(value??'').toLocaleLowerCase('ru'));
   return !normalized||searchable.some(value=>value.includes(normalized));
  });
@@ -1255,7 +1281,7 @@ function filterDocs(hostId,source,query,status,category='all'){
 function exportDocumentsExcel(){downloadExcel('/exports/documents.xlsx','obliviondoc-documents.xlsx');}
 function exportAuditExcel(){downloadExcel('/exports/audit.xlsx','obliviondoc-audit.xlsx');}
 async function downloadExcel(path,name){try{const response=await apiFetch(path);if(!response.ok)throw new Error(await readError(response));const file=await response.blob();const url=URL.createObjectURL(file);const link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Файл Excel подготовлен.');}catch(error){toast(error.message||'Не удалось подготовить файл Excel.',true);}}
-function openModal(title,content,submitText='Сохранить'){ $('modalHost').innerHTML=`<div class="modal-overlay" id="modalOverlay"><section class="modal"><div class="modal-head"><h2>${title}</h2><button class="close-btn" id="modalClose" type="button">×</button></div><form id="documentForm"><div class="modal-content">${content}</div><div class="modal-foot"><button class="btn" type="button" id="modalCancel">Отмена</button><button class="btn btn-primary" id="saveDocBtn" type="submit">${submitText}</button></div></form></section></div>`;$('modalClose').onclick=closeModal;$('modalCancel').onclick=closeModal;$('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')closeModal();});$('documentForm').addEventListener('submit',saveDocument);}
+function openModal(title,content,submitText='Сохранить'){ $('modalHost').innerHTML=`<div class="modal-overlay" id="modalOverlay"><section class="modal"><div class="modal-head"><h2>${title}</h2><button class="close-btn" id="modalClose" type="button">×</button></div><form id="documentForm"><div class="modal-content">${content}</div><div class="modal-foot"><button class="btn" type="button" id="modalCancel">Отмена</button><button class="btn btn-primary" id="saveDocBtn" type="submit">${submitText}</button></div></form></section></div>`;$('modalClose').onclick=closeModal;$('modalCancel').onclick=closeModal;$('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')closeModal();});$('documentForm').addEventListener('submit',saveDocument);const category=$('docCategory'),otherGroup=$('docCategoryOtherGroup'),otherInput=$('docCategoryOther');const syncOther=()=>{const visible=category?.value==='other';otherGroup?.classList.toggle('hidden',!visible);if(otherInput)otherInput.required=visible;};category?.addEventListener('change',syncOther);syncOther();}
 function closeModal(){if(saving)return;$('modalHost').innerHTML='';}
 function documentFields(d=null,isEdit=false){
  const current=d||{};
@@ -1263,7 +1289,8 @@ function documentFields(d=null,isEdit=false){
  return `<div class="modal-hint">${isEdit?'Измените сведения, категорию или срок хранения.':'Добавьте файл и заполните сведения, которые помогут найти документ позднее. Заполняйте только подходящие для вашей организации поля.'}</div>
  <div class="form-grid">
   <div class="form-group full"><label for="docName">Название документа *</label><input id="docName" required maxlength="240" value="${value('name')}" placeholder="Например, Договор подряда № 18 или Счёт на оплату"></div>
-  <div class="form-group"><label for="docCategory">Категория *</label><select id="docCategory" required>${categoryOptions(current.category||'other')}</select></div>
+  <div class="form-group"><label for="docCategory">Категория *</label><select id="docCategory" required>${categoryOptions(String(current.category||'other').startsWith('custom:')?'other':current.category||'other')}</select></div>
+  <div class="form-group full hidden" id="docCategoryOtherGroup"><label for="docCategoryOther">Уточните категорию *</label><input id="docCategoryOther" maxlength="72" value="${String(current.category||'').startsWith('custom:')?esc(String(current.category).slice(7)):''}" placeholder="Например, страховые документы"></div>
   <div class="form-group"><label for="docNumber">Номер документа</label><input id="docNumber" maxlength="120" value="${value('document_number')}" placeholder="Номер или регистрационный индекс"></div>
   <div class="form-group"><label for="docDepartment">Подразделение</label><input id="docDepartment" maxlength="200" value="${value('department')}" placeholder="Бухгалтерия, объект № 3, регистратура…"></div>
   <div class="form-group"><label for="docCounterparty">Контрагент / объект</label><input id="docCounterparty" maxlength="200" value="${value('counterparty')}" placeholder="Компания, клиент, объект или подразделение"></div>
@@ -1291,13 +1318,14 @@ async function saveDocument(event){
   name,
   expires_at:date?new Date(date+'T23:59:00').toISOString():'',
   action,
-  category:$('docCategory').value,
+  category:$('docCategory').value==='other'&&$('docCategoryOther')?.value.trim()?'custom:'+ $('docCategoryOther').value.trim():$('docCategory').value,
   document_number:$('docNumber').value.trim(),
   department:$('docDepartment').value.trim(),
   counterparty:$('docCounterparty').value.trim(),
   responsible_person:$('docResponsible').value.trim(),
   notes:$('docNotes').value.trim()
  };
+ if($('docCategory').value==='other'&&!$('docCategoryOther').value.trim()){toast('Укажите свою категорию документа.',true);$('docCategoryOther').focus();return;}
  if(!name||!date){toast('Укажите название документа и срок хранения.',true);return;}
  if(!isFourDigitDate(date)){toast('Укажите корректную дату с четырёхзначным годом.',true);return;}
  if(!id&&!file){toast('При создании документа прикрепите файл.',true);return;}

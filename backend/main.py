@@ -1404,8 +1404,9 @@ async def create_document_upload(
         "construction", "logistics", "medical", "education", "procurement",
         "management", "housing_utilities", "correspondence", "other"
     }
-    if category not in allowed_categories:
-        raise HTTPException(status_code=400, detail="Выберите категорию документа из списка.")
+    custom_category = category[7:].strip() if category.startswith("custom:") else ""
+    if category not in allowed_categories and not (custom_category and len(category) <= 80):
+        raise HTTPException(status_code=400, detail="Укажите категорию документа из списка или введите свою.")
     if file is None or not file.filename:
         raise HTTPException(
             status_code=400,
@@ -1635,8 +1636,9 @@ def update_document(
         "construction", "logistics", "medical", "education", "procurement",
         "management", "housing_utilities", "correspondence", "other"
     }
-    if new_category not in allowed_categories:
-        raise HTTPException(status_code=422, detail="Выберите категорию документа из списка.")
+    custom_category = new_category[7:].strip() if new_category.startswith("custom:") else ""
+    if new_category not in allowed_categories and not (custom_category and len(new_category) <= 80):
+        raise HTTPException(status_code=422, detail="Укажите категорию документа из списка или введите свою.")
     new_metadata = {
         "department": document_data.department.strip(),
         "document_number": document_data.document_number.strip(),
