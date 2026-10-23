@@ -129,7 +129,9 @@ app.add_middleware(
 
         "http://localhost:5500",
 
-        "https://obliviondoc-site.onrender.com"
+        "https://obliviondoc-site.onrender.com",
+
+        "https://obliviondoc-site-pr-8.onrender.com"
 
     ],
 
