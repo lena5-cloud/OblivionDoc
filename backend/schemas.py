@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -46,8 +49,6 @@ def validate_password_strength(value: str) -> str:
         raise ValueError("Добавьте в пароль хотя бы один специальный символ.")
 
     return value
-from datetime import datetime
-from typing import Literal
 
 class UserRegister(BaseModel):
 
