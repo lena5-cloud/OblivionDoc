@@ -1122,9 +1122,9 @@ function updatePasswordRequirements(input){
  }
 });
 function toast(message, error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');el.textContent=message;$('toastWrap').append(el);setTimeout(()=>el.remove(),4200);}
-function showLanding(){ $('authScreen').classList.add('hidden'); $('appShell').classList.add('hidden'); $('publicSite').classList.remove('hidden'); document.title='OblivionDoc — документы и сроки под контролем'; }
+function showLanding(){ $('authScreen').style.display='none';$('authScreen').classList.add('hidden');$('appShell').style.display='none';$('appShell').classList.add('hidden');$('publicSite').style.display='';$('publicSite').classList.remove('hidden');document.title='OblivionDoc — документы и сроки под контролем'; }
 function showAuth(form='login'){
- $('publicSite').classList.add('hidden');
+ $('publicSite').style.display='none';$('publicSite').classList.add('hidden');$('appShell').style.display='none';$('appShell').classList.add('hidden');$('authScreen').style.display='';
  const forms={login:'loginForm',register:'registerForm',forgotForm:'forgotForm',resetForm:'resetForm'};
  const activeForm=forms[form]||'loginForm';
  $('appShell').classList.add('hidden');
@@ -1141,7 +1141,7 @@ function showAuth(form='login'){
  $('resetPasswordConfirm').setAttribute('autocomplete',form==='resetForm'?'section-reset new-password':'off');
 }
 function updateHeaderUser(){const fullName=[userProfile.first_name,userProfile.last_name].map(value=>(value||'').trim()).filter(Boolean).join(' ');$('userName').textContent=fullName||'Настроить профиль';$('userEmail').textContent=currentUser?.email||'';const initials=fullName?fullName.split(/\s+/).map(part=>part[0]).join('').slice(0,2).toUpperCase():'П';$('avatar').textContent=initials;const profileName=$('profileDisplayName');if(profileName)profileName.textContent=fullName||'Заполните профиль';const profileAvatar=$('profileAvatarLarge');if(profileAvatar)profileAvatar.textContent=initials;}
-function showApp(){ $('publicSite').classList.add('hidden');$('authScreen').classList.add('hidden');$('appShell').classList.remove('hidden');updateHeaderUser();renderPage();refreshData();loadUserProfile(false); }
+function showApp(){ $('publicSite').style.display='none';$('publicSite').classList.add('hidden');$('authScreen').style.display='none';$('authScreen').classList.add('hidden');$('appShell').style.display='';$('appShell').classList.remove('hidden');updateHeaderUser();renderPage();refreshData();loadUserProfile(false); }
 function showPage(page){if(!pageNames[page])return;currentPage=page;document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('topTitle').textContent=pageNames[page];$('crumb').textContent=pageNames[page].toUpperCase();$('sidebar').classList.remove('open');renderPage();if(page==='profile'){loadUserProfile(false);loadOrganizationSettings();}}
 function fmtDate(value,withTime=false){if(!value)return '—';const d=new Date(value);if(Number.isNaN(d.getTime()))return '—';return new Intl.DateTimeFormat('ru-RU',withTime?{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}:{day:'2-digit',month:'long',year:'numeric'}).format(d);}
 function daysLeft(doc){if(!doc.expires_at)return Infinity;return Math.ceil((new Date(doc.expires_at).getTime()-Date.now())/86400000);}
