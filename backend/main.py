@@ -131,7 +131,11 @@ app.add_middleware(
 
         "https://obliviondoc-site.onrender.com",
 
-        "https://obliviondoc-site-pr-8.onrender.com"
+        "https://obliviondoc-site-pr-8.onrender.com",
+
+        "https://obliviondoc.ru",
+
+        "https://www.obliviondoc.ru"
 
     ],
 
