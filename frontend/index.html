@@ -909,6 +909,18 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 @media(max-width:760px){.preview-modal{width:100%;max-height:94vh}.preview-body{padding:12px;max-height:calc(94vh - 165px)}.preview-frame{height:60vh;min-height:220px}.preview-modal .modal-head,.preview-modal .modal-foot{padding-left:14px;padding-right:14px}}
 @media(max-width:480px){.preview-modal .modal-foot{display:grid;grid-template-columns:minmax(0,1fr)}.preview-modal .modal-foot .btn{width:100%;max-width:100%;white-space:normal}}
 </style>
+<style id="password-requirements-checklist">
+.password-hint{margin-top:8px}
+.password-rules-title{font-size:12px;font-weight:650;color:var(--ink);margin-bottom:7px}
+.password-rules{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 12px}
+.password-rule{display:flex;align-items:center;gap:7px;min-width:0;color:var(--muted);font-size:12px;line-height:1.35;transition:color .15s}
+.password-rule-check{width:16px;height:16px;flex:0 0 16px;display:grid;place-items:center;border:1px solid #bdc7d5;border-radius:4px;background:#fff;transition:background .15s,border-color .15s}
+.password-rule-check::after{content:"✓";font-size:11px;line-height:1;color:#fff;opacity:0}
+.password-rule.is-valid{color:var(--green)}
+.password-rule.is-valid .password-rule-check{background:var(--green);border-color:var(--green)}
+.password-rule.is-valid .password-rule-check::after{opacity:1}
+@media(max-width:480px){.password-rules{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
@@ -1030,10 +1042,10 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
    <p class="auth-intro" id="authIntro">Войдите, чтобы открыть своё рабочее пространство.</p>
    <div class="auth-switch" id="authSwitch"><button id="loginTab" class="active" type="button">Вход</button><button id="registerTab" type="button">Регистрация</button></div>
    <form id="loginForm" class="auth-form" autocomplete="on"><div><label for="loginEmail">Рабочий email</label><input id="loginEmail" name="username" type="email" autocomplete="section-login username" autocapitalize="none" spellcheck="false" placeholder="name@company.ru" required></div><div><label for="loginPassword">Пароль</label><input id="loginPassword" name="password" type="password" autocomplete="section-login current-password" placeholder="Введите пароль" required></div><div id="loginError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Войти в систему <span aria-hidden="true">→</span></button><button class="text-btn" type="button" id="forgotLink">Не помню пароль</button></form>
-   <form id="registerForm" class="auth-form hidden" autocomplete="on"><div><label for="registerEmail">Рабочий email</label><input id="registerEmail" name="username" type="email" autocomplete="section-register username" autocapitalize="none" spellcheck="false" placeholder="name@company.ru" required></div><div><label for="registerPassword">Пароль</label><input id="registerPassword" name="password" type="password" autocomplete="off" minlength="8" maxlength="100" aria-describedby="registerPasswordHint" placeholder="Создайте надёжный пароль" required><div class="form-hint" id="registerPasswordHint">От 8 до 100 символов: заглавная и строчная буквы, цифра и специальный символ. Простые пароли не подойдут.</div></div><div id="registerError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Создать аккаунт <span aria-hidden="true">→</span></button></form>
+   <form id="registerForm" class="auth-form hidden" autocomplete="on"><div><label for="registerEmail">Рабочий email</label><input id="registerEmail" name="username" type="email" autocomplete="section-register username" autocapitalize="none" spellcheck="false" placeholder="name@company.ru" required></div><div><label for="registerPassword">Пароль</label><input id="registerPassword" name="password" type="password" autocomplete="off" minlength="8" maxlength="100" aria-describedby="registerPasswordRequirements" placeholder="Создайте надёжный пароль" required><div class="form-hint password-hint" id="registerPasswordRequirements"><div class="password-rules-title">Требования к паролю:</div><ul class="password-rules"><li class="password-rule" data-password-rule="length"><span class="password-rule-check" aria-hidden="true"></span><span>Не менее 8 символов</span></li><li class="password-rule" data-password-rule="upper"><span class="password-rule-check" aria-hidden="true"></span><span>Заглавная буква</span></li><li class="password-rule" data-password-rule="lower"><span class="password-rule-check" aria-hidden="true"></span><span>Строчная буква</span></li><li class="password-rule" data-password-rule="digit"><span class="password-rule-check" aria-hidden="true"></span><span>Цифры</span></li><li class="password-rule" data-password-rule="special"><span class="password-rule-check" aria-hidden="true"></span><span>Специальный символ</span></li><li class="password-rule" data-password-rule="space"><span class="password-rule-check" aria-hidden="true"></span><span>Без пробелов</span></li></ul></div></div><div id="registerError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Создать аккаунт <span aria-hidden="true">→</span></button></form>
     <form id="forgotForm" class="auth-form hidden" autocomplete="on"><div><label for="forgotEmail">Email аккаунта</label><input id="forgotEmail" name="username" type="email" autocomplete="section-recovery username" required placeholder="name@company.ru"></div><div id="forgotError" class="auth-error" role="status" aria-live="polite"></div><div id="forgotSuccess" class="auth-success" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Отправить ссылку</button><button class="text-btn" type="button" id="backLogin">Вернуться ко входу</button></form>
    <form id="resetForm" class="auth-form hidden">
-<div><label for="resetPassword">Новый пароль</label><input id="resetPassword" name="new-password" type="password" minlength="8" maxlength="100" aria-describedby="resetPasswordHint" required autocomplete="off"><div class="form-hint" id="resetPasswordHint">От 8 до 100 символов: заглавная и строчная буквы, цифра и специальный символ. Не используйте распространённые пароли.</div></div>
+<div><label for="resetPassword">Новый пароль</label><input id="resetPassword" name="new-password" type="password" minlength="8" maxlength="100" aria-describedby="resetPasswordRequirements" required autocomplete="off"><div class="form-hint password-hint" id="resetPasswordRequirements"><div class="password-rules-title">Требования к паролю:</div><ul class="password-rules"><li class="password-rule" data-password-rule="length"><span class="password-rule-check" aria-hidden="true"></span><span>Не менее 8 символов</span></li><li class="password-rule" data-password-rule="upper"><span class="password-rule-check" aria-hidden="true"></span><span>Заглавная буква</span></li><li class="password-rule" data-password-rule="lower"><span class="password-rule-check" aria-hidden="true"></span><span>Строчная буква</span></li><li class="password-rule" data-password-rule="digit"><span class="password-rule-check" aria-hidden="true"></span><span>Цифры</span></li><li class="password-rule" data-password-rule="special"><span class="password-rule-check" aria-hidden="true"></span><span>Специальный символ</span></li><li class="password-rule" data-password-rule="space"><span class="password-rule-check" aria-hidden="true"></span><span>Без пробелов</span></li></ul></div></div>
 <div><label for="resetPasswordConfirm">Повторите пароль</label><input id="resetPasswordConfirm" name="confirm-password" type="password" minlength="8" maxlength="100" required autocomplete="off"></div>
 <div id="resetError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Сохранить пароль</button></form>
 
@@ -1083,6 +1095,32 @@ function passwordPolicyError(value){
  if(!/[^\p{L}\p{N}\s]/u.test(value))return 'Добавьте в пароль хотя бы один специальный символ.';
  return '';
 }
+function updatePasswordRequirements(input){
+ if(!input)return;
+ const value=input.value;
+ const rules={
+  length:Array.from(value).length>=8,
+  upper:/\p{Lu}/u.test(value),
+  lower:/\p{Ll}/u.test(value),
+  digit:/\p{N}/u.test(value),
+  special:/[^\p{L}\p{N}\s]/u.test(value),
+  space:! /\s/u.test(value)
+ };
+ const container=document.getElementById(input.id+'Requirements');
+ if(!container)return;
+ container.querySelectorAll('[data-password-rule]').forEach(item=>{
+  const valid=Boolean(rules[item.dataset.passwordRule]);
+  item.classList.toggle('is-valid',valid);
+  item.setAttribute('aria-label',(item.textContent||'').trim()+(valid?' — выполнено':' — не выполнено'));
+ });
+}
+['registerPassword','resetPassword'].forEach(id=>{
+ const input=$(id);
+ if(input){
+  input.addEventListener('input',()=>updatePasswordRequirements(input));
+  updatePasswordRequirements(input);
+ }
+});
 function toast(message, error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');el.textContent=message;$('toastWrap').append(el);setTimeout(()=>el.remove(),4200);}
 function showLanding(){ $('authScreen').classList.add('hidden'); $('appShell').classList.add('hidden'); $('publicSite').classList.remove('hidden'); document.title='OblivionDoc — документы и сроки под контролем'; }
 function showAuth(form='login'){
