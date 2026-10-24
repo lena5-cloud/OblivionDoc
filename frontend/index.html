@@ -897,6 +897,18 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 @media(max-width:480px){.app-shell .sidebar .nav{grid-template-columns:minmax(0,1fr)}.app-shell .top-actions{width:100%;justify-content:space-between}.app-shell #profileBtn{min-width:0;max-width:calc(100% - 100px)}.app-shell .docs-status-strip{grid-template-columns:minmax(0,1fr)}.app-shell .profile-email-row{grid-template-columns:minmax(0,1fr)}.app-shell .profile-email-value{grid-column:1}}
 #authScreen .auth-card .auth-form input[type="password"]{min-width:0;max-width:100%;box-sizing:border-box}#authScreen .auth-card .form-hint{overflow-wrap:anywhere}
 </style>
+<style id="document-preview-layout">
+.preview-overlay{z-index:80}.preview-modal{width:min(960px,100%);max-width:960px;max-height:92vh;display:flex;flex-direction:column;min-width:0}
+.preview-file-name{padding:10px 20px 0;color:#6a7b70;font-size:12px;overflow-wrap:anywhere}
+.preview-body{padding:16px 20px;min-width:0;min-height:150px;max-height:calc(92vh - 170px);overflow:auto;background:#f5f7f2}
+.preview-frame{display:block;width:100%;height:min(68vh,720px);min-height:300px;border:0;background:#fff;border-radius:8px}
+.preview-image{display:block;max-width:100%;max-height:68vh;object-fit:contain;margin:0 auto;border-radius:8px}
+.preview-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#243b30}
+.preview-unavailable{max-width:640px;margin:25px auto;padding:24px;border:1px solid #dfe7dc;border-radius:14px;background:#fffefa;text-align:center;line-height:1.7}
+.preview-unavailable strong{color:#244b39}.preview-unavailable p{color:#65776a}.preview-modal .modal-foot{flex-wrap:wrap}
+@media(max-width:760px){.preview-modal{width:100%;max-height:94vh}.preview-body{padding:12px;max-height:calc(94vh - 165px)}.preview-frame{height:60vh;min-height:220px}.preview-modal .modal-head,.preview-modal .modal-foot{padding-left:14px;padding-right:14px}}
+@media(max-width:480px){.preview-modal .modal-foot{display:grid;grid-template-columns:minmax(0,1fr)}.preview-modal .modal-foot .btn{width:100%;max-width:100%;white-space:normal}}
+</style>
 </head>
 <body>
 
@@ -1044,7 +1056,7 @@ const API_URL = (location.hostname === '127.0.0.1' || location.hostname === 'loc
 const TOKEN_KEY = 'obliviondoc_token';
 const EMAIL_KEY = 'obliviondoc_email';
 const $ = id => document.getElementById(id);
-let currentUser = null, userProfile = {first_name:'',last_name:''}, documents = [], auditLogs = [], organizationSettings = {organization_name:'',organization_type:'company',industry:'other',subdivision:'',responsible_person:'',retention_policy:''}, currentPage = 'overview', saving = false, refreshing = false, resetToken = new URLSearchParams(location.search).get('reset_token');
+let currentUser = null, userProfile = {first_name:'',last_name:''}, documents = [], auditLogs = [], organizationSettings = {organization_name:'',organization_type:'company',industry:'other',subdivision:'',responsible_person:'',retention_policy:''}, currentPage = 'overview', saving = false, refreshing = false, resetToken = new URLSearchParams(location.search).get('reset_token'), activePreviewUrl = null;
 if (resetToken) history.replaceState({}, '', location.pathname);
 const pageNames = {overview:'Главная',documents:'Документы',deadlines:'Сроки хранения',archive:'Архив',analytics:'Аналитика',audit:'Журнал действий',security:'Безопасность',help:'Справка',profile:'Профиль',settings:'Настройки'};
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1053,7 +1065,7 @@ function authHeaders(extra={}) { return {...extra,...(token()?{Authorization:`Be
 async function apiFetch(path, options={}) { const response = await fetch(API_URL+path,{...options,headers:authHeaders(options.headers||{})}); return response; }
 async function readError(response) {
  try { const data=await response.json(); const detail=data.detail??data.message;
-  if(Array.isArray(detail)){const messages=detail.map(item=>String(item?.msg||item?.message||'').replace(/^Value error,\\s*/i,'')).filter(Boolean);return messages[0]||'Ошибка '+response.status;}
+  if(Array.isArray(detail)){const messages=detail.map(item=>String(item?.msg||item?.message||'').replace(/^Value error,\s*/i,'')).filter(Boolean);return messages[0]||'Ошибка '+response.status;}
   if(typeof detail==='string'&&detail)return detail; return 'Ошибка '+response.status;
  } catch { return 'Ошибка '+response.status; }
 }
@@ -1063,12 +1075,12 @@ function passwordPolicyError(value){
  if(value.length>100)return 'Пароль не должен быть длиннее 100 символов.';
  if(!value.trim())return 'Пароль не может состоять только из пробелов.';
  const compact=value.toLocaleLowerCase('ru').replace(/[^a-z0-9а-яё]/g,'');
- const leet=value.toLocaleLowerCase('ru').replace(/@/g,'a').replace(/\\$/g,'s').replace(/0/g,'o').replace(/1/g,'i').replace(/3/g,'e').replace(/4/g,'a').replace(/5/g,'s').replace(/7/g,'t').replace(/[^a-z0-9а-яё]/g,'');
+ const leet=value.toLocaleLowerCase('ru').replace(/@/g,'a').replace(/\$/g,'s').replace(/0/g,'o').replace(/1/g,'i').replace(/3/g,'e').replace(/4/g,'a').replace(/5/g,'s').replace(/7/g,'t').replace(/[^a-z0-9а-яё]/g,'');
  if(COMMON_WEAK_PASSWORDS.has(compact)||COMMON_WEAK_PASSWORDS.has(leet))return 'Этот пароль слишком распространённый. Выберите другой.';
- if(!/\\p{Lu}/u.test(value))return 'Добавьте в пароль хотя бы одну заглавную букву.';
- if(!/\\p{Ll}/u.test(value))return 'Добавьте в пароль хотя бы одну строчную букву.';
- if(!/\\p{N}/u.test(value))return 'Добавьте в пароль хотя бы одну цифру.';
- if(!/[^\\p{L}\\p{N}\\s]/u.test(value))return 'Добавьте в пароль хотя бы один специальный символ.';
+ if(!/\p{Lu}/u.test(value))return 'Добавьте в пароль хотя бы одну заглавную букву.';
+ if(!/\p{Ll}/u.test(value))return 'Добавьте в пароль хотя бы одну строчную букву.';
+ if(!/\p{N}/u.test(value))return 'Добавьте в пароль хотя бы одну цифру.';
+ if(!/[^\p{L}\p{N}\s]/u.test(value))return 'Добавьте в пароль хотя бы один специальный символ.';
  return '';
 }
 function toast(message, error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');el.textContent=message;$('toastWrap').append(el);setTimeout(()=>el.remove(),4200);}
@@ -1132,7 +1144,7 @@ function docRow(d){
   <td>${esc(fmtDate(d.expires_at))}</td>
   <td>${badge(d.status,d)}</td>
   <td>${esc(actionName(d.action))}</td>
-  <td><div class="row-actions"><button class="action-btn" data-act="edit" data-id="${d.id}">Изменить</button>${(d.file_path||d.file_name)?`<button class="action-btn" data-act="download" data-id="${d.id}" title="Скачать копию файла">Скачать</button>`:''}<button class="action-btn" data-act="delete" data-id="${d.id}">Удалить</button></div></td>
+  <td><div class="row-actions"><button class="action-btn" data-act="edit" data-id="${d.id}">Изменить</button>${(d.file_path||d.file_name)?`<button class="action-btn" data-act="view" data-id="${d.id}" title="Просмотреть документ">Просмотр</button><button class="action-btn" data-act="download" data-id="${d.id}" title="Скачать копию файла">Скачать</button>`:''}<button class="action-btn" data-act="delete" data-id="${d.id}">Удалить</button></div></td>
  </tr>`;
 }
 function table(docs,emptyTitle='Документов пока нет',emptyText='Добавьте первый документ, чтобы начать работу.'){
@@ -1440,9 +1452,9 @@ async function downloadDocument(id){
   const blob=await r.blob();
   const disposition=r.headers.get('Content-Disposition')||'';
   let serverFilename='';
-  const encoded=disposition.match(/filename\\*\\s*=\\s*UTF-8''([^;]+)/i);
+  const encoded=disposition.match(/filename\\*\s*=\s*UTF-8''([^;]+)/i);
   if(encoded){try{serverFilename=decodeURIComponent(encoded[1].trim().replace(/^["']|["']$/g,''));}catch{}}
-  if(!serverFilename){const plain=disposition.match(/filename\\s*=\\s*(?:"([^"]+)"|([^;]+))/i);if(plain)serverFilename=(plain[1]||plain[2]||'').trim();}
+  if(!serverFilename){const plain=disposition.match(/filename\s*=\s*(?:"([^"]+)"|([^;]+))/i);if(plain)serverFilename=(plain[1]||plain[2]||'').trim();}
   const doc=documents.find(d=>d.id===Number(id));
   const filename=serverFilename||doc?.file_name||doc?.name||'document';
   const url=URL.createObjectURL(blob);
@@ -1450,7 +1462,22 @@ async function downloadDocument(id){
   setTimeout(()=>URL.revokeObjectURL(url),1500);
  }catch(e){toast(e.message||'Не удалось скачать файл.',true);}
 }
-async function handleRowAction(e){const b=e.target.closest('[data-act]');if(!b)return;const {act,id}=b.dataset;if(act==='add')openAdd();if(act==='edit')openEdit(id);if(act==='delete')confirmDelete(id);if(act==='download')downloadDocument(id);if(act==='logout')logout();}
+async function previewDocument(id){
+ const doc=documents.find(item=>item.id===Number(id));if(!doc)return;
+ try{
+  const response=await apiFetch('/documents/'+id+'/download');if(!response.ok)throw new Error(await readError(response));
+  const blob=await response.blob();if(activePreviewUrl){URL.revokeObjectURL(activePreviewUrl);activePreviewUrl=null;}const url=URL.createObjectURL(blob);activePreviewUrl=url;
+  const filename=doc.file_name||doc.name||'Документ';const extension=(filename.split('.').pop()||'').toLocaleLowerCase('ru');let preview='';
+  if(extension==='pdf'||blob.type==='application/pdf'){preview='<iframe class="preview-frame" src="'+url+'" title="Просмотр '+esc(filename)+'"></iframe>';}
+  else if(['png','jpg','jpeg'].includes(extension)||blob.type.startsWith('image/')){preview='<img class="preview-image" src="'+url+'" alt="'+esc(filename)+'">';}
+  else if(extension==='txt'||blob.type.startsWith('text/')){const contents=await blob.text();const truncated=contents.length>100000;preview='<pre class="preview-text">'+esc(contents.slice(0,100000))+'</pre>'+(truncated?'<p class="form-hint">Показаны первые 100 000 символов. Скачайте файл, чтобы прочитать его полностью.</p>':'');}
+  else{preview='<div class="preview-unavailable"><strong>Предпросмотр этого формата недоступен в браузере.</strong><p>Скачайте файл, чтобы открыть его в подходящей программе. Исходный документ не изменён.</p></div>';}
+  $('modalHost').innerHTML='<div class="modal-overlay preview-overlay" id="previewOverlay"><section class="modal preview-modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle"><div class="modal-head"><h2 id="previewTitle">Просмотр документа</h2><button class="close-btn" id="previewClose" type="button" aria-label="Закрыть просмотр">×</button></div><div class="preview-file-name">'+esc(filename)+'</div><div class="preview-body">'+preview+'</div><div class="modal-foot"><button class="btn" id="previewDismiss" type="button">Закрыть</button><a class="btn btn-primary" id="previewDownload" href="'+url+'" download="'+esc(filename)+'">Скачать файл</a></div></section></div>';
+  const close=()=>{$('modalHost').innerHTML='';if(activePreviewUrl){URL.revokeObjectURL(activePreviewUrl);activePreviewUrl=null;}};
+  $('previewClose').onclick=close;$('previewDismiss').onclick=close;$('previewOverlay').addEventListener('click',event=>{if(event.target.id==='previewOverlay')close();});$('previewClose').focus();
+ }catch(error){toast(error.message||'Не удалось открыть документ.',true);}
+}
+async function handleRowAction(e){const b=e.target.closest('[data-act]');if(!b)return;const {act,id}=b.dataset;if(act==='add')openAdd();if(act==='edit')openEdit(id);if(act==='delete')confirmDelete(id);if(act==='view')previewDocument(id);if(act==='download')downloadDocument(id);if(act==='logout')logout();}
 async function logout(){try{if(token())await apiFetch('/auth/logout',{method:'POST'});}catch{}localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);currentUser=null;userProfile={first_name:'',last_name:''};documents=[];auditLogs=[];organizationSettings={organization_name:'',organization_type:'company',industry:'other',subdivision:'',responsible_person:'',retention_policy:''};showAuth('login');toast('Вы вышли из аккаунта.');}
 async function checkSession(){if(resetToken){showAuth('resetForm');return;}const t=token();if(!t){showLanding();return;}try{const r=await apiFetch('/auth/me');if(r.status===401){localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(EMAIL_KEY);showAuth();return;}if(!r.ok){showAuth('login');$('loginError').textContent='Сервер временно недоступен (ошибка '+r.status+'). Ваши данные не удалены. Попробуйте обновить страницу позже.';return;}currentUser=await r.json();if(currentUser.email)localStorage.setItem(EMAIL_KEY,currentUser.email);showApp();}catch(e){showLanding();}}
 $('footerYear').textContent=new Date().getFullYear();
