@@ -1407,6 +1407,8 @@ async def create_document_upload(
     custom_category = category[7:].strip() if category.startswith("custom:") else ""
     if category not in allowed_categories and not (custom_category and len(category) <= 80):
         raise HTTPException(status_code=400, detail="Укажите категорию документа из списка или введите свою.")
+    if not name.strip():
+        raise HTTPException(status_code=422, detail="Укажите название документа.")
     if file is None or not file.filename:
         raise HTTPException(
             status_code=400,
@@ -1628,6 +1630,8 @@ def update_document(
         )
 
     new_name = document_data.name.strip()
+    if not new_name:
+        raise HTTPException(status_code=422, detail="Укажите название документа.")
     new_expires_at = normalize_datetime(document_data.expires_at)
     new_action = document_data.action
     new_category = document_data.category
@@ -1808,7 +1812,7 @@ def download_document(
                 filename=document.file_name or document.name,
             )
 
-    if document.file_content:
+    if document.file_content is not None:
         filename = document.file_name or document.name
         media_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
         return Response(
@@ -2004,7 +2008,7 @@ def process_expired_documents():
                 source_path = Path(document.file_path)
 
                 if not source_path.exists():
-                    if document.file_content:
+                    if document.file_content is not None:
                         document.status = "archived"
                         db.add(AuditLog(
                             document_id=document.id,
