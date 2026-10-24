@@ -878,6 +878,25 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 }
 </style>
 
+<style id="urgent-mobile-layout">
+@media(max-width:760px){
+ .app-shell{display:block!important;width:100%;min-width:0;overflow-x:clip}
+ .app-shell .sidebar,.app-shell .sidebar.open{position:relative!important;left:auto!important;top:auto!important;width:100%;height:auto;min-height:0;max-height:none;z-index:auto;box-shadow:none;border-right:0;border-radius:0 0 16px 16px;margin:0;overflow:visible}
+ .app-shell .sidebar{display:none}.app-shell .sidebar.open{display:flex}
+ .app-shell .sidebar .brand{padding:0 8px 13px}.app-shell .sidebar .nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ .app-shell .sidebar .nav-btn{min-width:0;white-space:normal;overflow-wrap:anywhere}.app-shell .sidebar .nav-label{padding-top:12px}.app-shell .sidebar .sidebar-bottom{margin-top:15px}
+ .app-shell .main,.app-shell .content{width:100%;min-width:0;max-width:100%;overflow-x:clip}.app-shell .content{padding-left:14px;padding-right:14px}
+ .app-shell .topbar{width:100%;min-width:0;flex-wrap:wrap;align-items:center}.app-shell .topbar>div:first-child{min-width:0;flex:1 1 auto}.app-shell .top-actions{min-width:0;max-width:100%;flex-wrap:wrap;justify-content:flex-end}
+ .app-shell .profile-layout{grid-template-columns:minmax(0,1fr)!important}.app-shell .profile-hero,.app-shell .profile-tip,.app-shell .profile-panel,.app-shell .profile-form,.app-shell .profile-org-card,.app-shell .profile-org-form,.app-shell .settings-card{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+ .app-shell .profile-email-value,.app-shell .org-summary-value,.app-shell .settings-row>div{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}.app-shell .settings-row{align-items:flex-start;flex-wrap:wrap}.app-shell .settings-row>.btn{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+ .app-shell .form-grid,.app-shell .profile-org-form .form-grid{grid-template-columns:minmax(0,1fr)!important}.app-shell .form-group,.app-shell input,.app-shell select,.app-shell textarea{min-width:0;max-width:100%}
+ .app-shell .settings-card{padding:15px!important}.app-shell .profile-org-form{padding:12px!important}.app-shell .docs-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .app-shell .toolbar>*{min-width:0;max-width:100%}.app-shell .search,.app-shell .docs-toolbar .search{min-width:0;width:100%;flex:1 1 100%}.app-shell .docs-toolbar select{flex:1 1 100%;max-width:100%}
+ .app-shell .table-wrap{max-width:100%}.app-shell .panel,.app-shell .stat-card{min-width:0;max-width:100%}
+}
+@media(max-width:480px){.app-shell .sidebar .nav{grid-template-columns:minmax(0,1fr)}.app-shell .top-actions{width:100%;justify-content:space-between}.app-shell #profileBtn{min-width:0;max-width:calc(100% - 100px)}.app-shell .docs-status-strip{grid-template-columns:minmax(0,1fr)}.app-shell .profile-email-row{grid-template-columns:minmax(0,1fr)}.app-shell .profile-email-value{grid-column:1}}
+#authScreen .auth-card .auth-form input[type="password"]{min-width:0;max-width:100%;box-sizing:border-box}#authScreen .auth-card .form-hint{overflow-wrap:anywhere}
+</style>
 </head>
 <body>
 
@@ -999,9 +1018,13 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
    <p class="auth-intro" id="authIntro">Войдите, чтобы открыть своё рабочее пространство.</p>
    <div class="auth-switch" id="authSwitch"><button id="loginTab" class="active" type="button">Вход</button><button id="registerTab" type="button">Регистрация</button></div>
    <form id="loginForm" class="auth-form" autocomplete="on"><div><label for="loginEmail">Рабочий email</label><input id="loginEmail" name="username" type="email" autocomplete="section-login username" autocapitalize="none" spellcheck="false" placeholder="name@company.ru" required></div><div><label for="loginPassword">Пароль</label><input id="loginPassword" name="password" type="password" autocomplete="section-login current-password" placeholder="Введите пароль" required></div><div id="loginError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Войти в систему <span aria-hidden="true">→</span></button><button class="text-btn" type="button" id="forgotLink">Не помню пароль</button></form>
-   <form id="registerForm" class="auth-form hidden" autocomplete="on"><div><label for="registerEmail">Рабочий email</label><input id="registerEmail" name="username" type="email" autocomplete="section-register username" autocapitalize="none" spellcheck="false" placeholder="name@company.ru" required></div><div><label for="registerPassword">Пароль</label><input id="registerPassword" name="password" type="password" autocomplete="off" minlength="8" placeholder="Не менее 8 символов" required><div class="form-hint">Не менее 8 символов.</div></div><div id="registerError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Создать аккаунт <span aria-hidden="true">→</span></button></form>
-   <form id="forgotForm" class="auth-form hidden" autocomplete="on"><div><label for="forgotEmail">Email аккаунта</label><input id="forgotEmail" name="username" type="email" autocomplete="section-recovery username" required placeholder="name@company.ru"></div><div id="forgotError" class="auth-error" role="status" aria-live="polite"></div><div id="forgotSuccess" class="auth-success" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Отправить ссылку</button><button class="text-btn" type="button" id="backLogin">Вернуться ко входу</button></form>
-   <form id="resetForm" class="auth-form hidden"><div><label for="resetPassword">Новый пароль</label><input id="resetPassword" name="new-password" type="password" minlength="8" required autocomplete="off"></div><div><label for="resetPasswordConfirm">Повторите пароль</label><input id="resetPasswordConfirm" name="confirm-password" type="password" minlength="8" required autocomplete="off"></div><div id="resetError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Сохранить пароль</button></form>
+   <form id="registerForm" class="auth-form hidden" autocomplete="on"><div><label for="registerEmail">Рабочий email</label><input id="registerEmail" name="username" type="email" autocomplete="section-register username" autocapitalize="none" spellcheck="false" placeholder="name@company.ru" required></div><div><label for="registerPassword">Пароль</label><input id="registerPassword" name="password" type="password" autocomplete="off" minlength="8" maxlength="100" aria-describedby="registerPasswordHint" placeholder="Создайте надёжный пароль" required><div class="form-hint" id="registerPasswordHint">От 8 до 100 символов: заглавная и строчная буквы, цифра и специальный символ. Простые пароли не подойдут.</div></div><div id="registerError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Создать аккаунт <span aria-hidden="true">→</span></button></form>
+    <form id="forgotForm" class="auth-form hidden" autocomplete="on"><div><label for="forgotEmail">Email аккаунта</label><input id="forgotEmail" name="username" type="email" autocomplete="section-recovery username" required placeholder="name@company.ru"></div><div id="forgotError" class="auth-error" role="status" aria-live="polite"></div><div id="forgotSuccess" class="auth-success" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Отправить ссылку</button><button class="text-btn" type="button" id="backLogin">Вернуться ко входу</button></form>
+   <form id="resetForm" class="auth-form hidden">
+<div><label for="resetPassword">Новый пароль</label><input id="resetPassword" name="new-password" type="password" minlength="8" maxlength="100" aria-describedby="resetPasswordHint" required autocomplete="off"><div class="form-hint" id="resetPasswordHint">От 8 до 100 символов: заглавная и строчная буквы, цифра и специальный символ. Не используйте распространённые пароли.</div></div>
+<div><label for="resetPasswordConfirm">Повторите пароль</label><input id="resetPasswordConfirm" name="confirm-password" type="password" minlength="8" maxlength="100" required autocomplete="off"></div>
+<div id="resetError" class="auth-error" role="status" aria-live="polite"></div><button class="btn btn-primary" type="submit">Сохранить пароль</button></form>
+
    <div class="auth-bottom"><span class="auth-lock" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span>Рабочее пространство и документы доступны после входа в аккаунт.</span></div>
   </div>
  </section>
@@ -1028,7 +1051,26 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const token = () => localStorage.getItem(TOKEN_KEY);
 function authHeaders(extra={}) { return {...extra,...(token()?{Authorization:`Bearer ${token()}`}:{})}; }
 async function apiFetch(path, options={}) { const response = await fetch(API_URL+path,{...options,headers:authHeaders(options.headers||{})}); return response; }
-async function readError(response) { try { const d=await response.json(); return d.detail||d.message||`Ошибка ${response.status}`; } catch { return `Ошибка ${response.status}`; } }
+async function readError(response) {
+ try { const data=await response.json(); const detail=data.detail??data.message;
+  if(Array.isArray(detail)){const messages=detail.map(item=>String(item?.msg||item?.message||'').replace(/^Value error,\\s*/i,'')).filter(Boolean);return messages[0]||'Ошибка '+response.status;}
+  if(typeof detail==='string'&&detail)return detail; return 'Ошибка '+response.status;
+ } catch { return 'Ошибка '+response.status; }
+}
+const COMMON_WEAK_PASSWORDS=new Set(['12345678','123456789','1234567890','11111111','00000000','qwerty','qwerty123','qwerty12345','password','password1','password123','admin','admin123','welcome','welcome123','letmein','letmein123','iloveyou','abc12345','test1234','user1234','пароль','пароль123','йцукен','йцукен123']);
+function passwordPolicyError(value){
+ if(value.length<8)return 'Пароль должен содержать не менее 8 символов.';
+ if(value.length>100)return 'Пароль не должен быть длиннее 100 символов.';
+ if(!value.trim())return 'Пароль не может состоять только из пробелов.';
+ const compact=value.toLocaleLowerCase('ru').replace(/[^a-z0-9а-яё]/g,'');
+ const leet=value.toLocaleLowerCase('ru').replace(/@/g,'a').replace(/\\$/g,'s').replace(/0/g,'o').replace(/1/g,'i').replace(/3/g,'e').replace(/4/g,'a').replace(/5/g,'s').replace(/7/g,'t').replace(/[^a-z0-9а-яё]/g,'');
+ if(COMMON_WEAK_PASSWORDS.has(compact)||COMMON_WEAK_PASSWORDS.has(leet))return 'Этот пароль слишком распространённый. Выберите другой.';
+ if(!/\\p{Lu}/u.test(value))return 'Добавьте в пароль хотя бы одну заглавную букву.';
+ if(!/\\p{Ll}/u.test(value))return 'Добавьте в пароль хотя бы одну строчную букву.';
+ if(!/\\p{N}/u.test(value))return 'Добавьте в пароль хотя бы одну цифру.';
+ if(!/[^\\p{L}\\p{N}\\s]/u.test(value))return 'Добавьте в пароль хотя бы один специальный символ.';
+ return '';
+}
 function toast(message, error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');el.textContent=message;$('toastWrap').append(el);setTimeout(()=>el.remove(),4200);}
 function showLanding(){ $('authScreen').classList.add('hidden'); $('appShell').classList.add('hidden'); $('publicSite').classList.remove('hidden'); document.title='OblivionDoc — документы и сроки под контролем'; }
 function showAuth(form='login'){
@@ -1415,12 +1457,24 @@ $('footerYear').textContent=new Date().getFullYear();
 $('siteMenuToggle').addEventListener('click',()=>{const opened=$('siteNavLinks').classList.toggle('open');$('siteMenuToggle').setAttribute('aria-expanded',String(opened));});
 $('siteNavLinks').addEventListener('click',e=>{if(e.target.closest('a')){$('siteNavLinks').classList.remove('open');$('siteMenuToggle').setAttribute('aria-expanded','false');}});
 document.addEventListener('click',e=>{const entry=e.target.closest('[data-open-auth]');if(entry){showAuth(entry.dataset.openAuth||'login');window.scrollTo({top:0,behavior:'auto'});}});
-$('loginTab').onclick=()=>showAuth('login');$('registerTab').onclick=()=>showAuth('register');$('forgotLink').onclick=()=>showAuth('forgotForm');$('backLogin').onclick=()=>showAuth('login');$('refreshBtn').onclick=()=>refreshData(true);$('logoutBtn').onclick=logout;$('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
+$('loginTab').onclick=()=>showAuth('login');$('registerTab').onclick=()=>showAuth('register');$('forgotLink').onclick=()=>showAuth('forgotForm');$('backLogin').onclick=()=>showAuth('login');$('refreshBtn').onclick=()=>refreshData(true);$('logoutBtn').onclick=logout;$('menuBtn').onclick=()=>{const opened=$('sidebar').classList.toggle('open');$('menuBtn').setAttribute('aria-expanded',String(opened));};
 document.addEventListener('click',e=>{const nav=e.target.closest('[data-page]');if(nav)showPage(nav.dataset.page);handleRowAction(e);});
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('loginForm').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Вход…';$('loginError').textContent='';try{const r=await fetch(API_URL+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('loginEmail').value.trim().toLowerCase(),password:$('loginPassword').value})});if(!r.ok)throw new Error(await readError(r));const d=await r.json();localStorage.setItem(TOKEN_KEY,d.session_token);localStorage.setItem(EMAIL_KEY,d.user?.email||$('loginEmail').value.trim().toLowerCase());currentUser=d.user;showApp();}catch(err){$('loginError').textContent=err.message||'Не удалось войти. Проверьте подключение.';}finally{btn.disabled=false;btn.innerHTML='Войти в систему <span>→</span>';}});
-$('registerForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('registerForm').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Создание аккаунта…';$('registerError').textContent='';try{const r=await fetch(API_URL+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('registerEmail').value.trim().toLowerCase(),password:$('registerPassword').value})});if(!r.ok)throw new Error(await readError(r));const d=await r.json();if(!d.session_token||!d.user)throw new Error('Аккаунт создан, но сервер не вернул сессию. Войдите в аккаунт вручную.');localStorage.setItem(TOKEN_KEY,d.session_token);localStorage.setItem(EMAIL_KEY,d.user?.email||$('registerEmail').value.trim().toLowerCase());currentUser=d.user;showApp();toast('Аккаунт создан. Добро пожаловать!');}catch(err){$('registerError').textContent=err.message||'Не удалось создать аккаунт.';}finally{btn.disabled=false;btn.innerHTML='Создать аккаунт <span>→</span>';}});
+$('registerForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('registerError').textContent='';const password=$('registerPassword').value;const policyError=passwordPolicyError(password);
+ if(policyError){$('registerError').textContent=policyError;return;}
+ const btn=$('registerForm').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Создание аккаунта…';
+ try{const r=await fetch(API_URL+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('registerEmail').value.trim().toLowerCase(),password})});if(!r.ok)throw new Error(await readError(r));const d=await r.json();if(!d.session_token||!d.user)throw new Error('Аккаунт создан, но сервер не вернул сессию. Войдите в аккаунт вручную.');localStorage.setItem(TOKEN_KEY,d.session_token);localStorage.setItem(EMAIL_KEY,d.user?.email||$('registerEmail').value.trim().toLowerCase());currentUser=d.user;showApp();toast('Аккаунт создан. Добро пожаловать!');}
+ catch(err){$('registerError').textContent=err.message||'Не удалось создать аккаунт.';}finally{btn.disabled=false;btn.innerHTML='Создать аккаунт <span>→</span>';}
+});
 $('forgotForm').addEventListener('submit',async e=>{e.preventDefault();$('forgotError').textContent='';$('forgotSuccess').textContent='';try{const r=await fetch(API_URL+'/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('forgotEmail').value.trim().toLowerCase()})});if(!r.ok)throw new Error(await readError(r));$('forgotSuccess').textContent=(await r.json()).message||'Если аккаунт существует, ссылка отправлена.';}catch(err){$('forgotError').textContent=err.message||'Не удалось запросить восстановление.';}});
-$('resetForm').addEventListener('submit',async e=>{e.preventDefault();$('resetError').textContent='';const p=$('resetPassword').value;if(p!==$('resetPasswordConfirm').value){$('resetError').textContent='Пароли не совпадают.';return;}try{const r=await fetch(API_URL+'/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:resetToken,password:p})});if(!r.ok)throw new Error(await readError(r));history.replaceState({},'',location.pathname);resetToken=null;showAuth('login');toast('Пароль обновлён. Теперь войдите в систему.');}catch(err){$('resetError').textContent=err.message||'Не удалось изменить пароль.';}});
+$('resetForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('resetError').textContent='';const p=$('resetPassword').value;const policyError=passwordPolicyError(p);
+ if(policyError){$('resetError').textContent=policyError;return;}if(p!==$('resetPasswordConfirm').value){$('resetError').textContent='Пароли не совпадают.';return;}
+ const btn=$('resetForm').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Сохранение…';
+ try{const r=await fetch(API_URL+'/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:resetToken,password:p})});if(!r.ok)throw new Error(await readError(r));history.replaceState({},'',location.pathname);resetToken=null;showAuth('login');toast('Пароль обновлён. Теперь войдите в систему.');}
+ catch(err){$('resetError').textContent=err.message||'Не удалось изменить пароль.';}finally{btn.disabled=false;btn.textContent='Сохранить пароль';}
+});
 checkSession();
 })();
 </script>
