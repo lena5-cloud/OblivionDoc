@@ -1452,7 +1452,7 @@ async function downloadDocument(id){
   const blob=await r.blob();
   const disposition=r.headers.get('Content-Disposition')||'';
   let serverFilename='';
-  const encoded=disposition.match(/filename\\*\s*=\s*UTF-8''([^;]+)/i);
+  const encoded=disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
   if(encoded){try{serverFilename=decodeURIComponent(encoded[1].trim().replace(/^["']|["']$/g,''));}catch{}}
   if(!serverFilename){const plain=disposition.match(/filename\s*=\s*(?:"([^"]+)"|([^;]+))/i);if(plain)serverFilename=(plain[1]||plain[2]||'').trim();}
   const doc=documents.find(d=>d.id===Number(id));
