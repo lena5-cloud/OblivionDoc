@@ -921,6 +921,17 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 .password-rule.is-valid .password-rule-check::after{opacity:1}
 @media(max-width:480px){.password-rules{grid-template-columns:1fr}}
 </style>
+
+<style id="mobile-hidden-screen-override">
+/* Keep inactive top-level screens hidden; the mobile workspace layout uses display:block!important. */
+@media(max-width:760px){
+  #appShell.hidden,
+  .app-shell.hidden{display:none!important}
+  #authScreen.hidden,
+  .auth-screen.hidden{display:none!important}
+  #publicSite.hidden{display:none!important}
+}
+</style>
 </head>
 <body>
 
