@@ -23,8 +23,8 @@ def validate_password_strength(value: str) -> str:
     if len(value) > 100:
         raise ValueError("Пароль не должен быть длиннее 100 символов.")
 
-    if not value.strip():
-        raise ValueError("Пароль не может состоять только из пробелов.")
+    if any(char.isspace() for char in value):
+        raise ValueError("Пароль не должен содержать пробелы.")
 
     compact = "".join(char for char in value.casefold() if char.isalnum())
     leet_value = value.casefold().translate(
