@@ -497,7 +497,7 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 .security-detail{display:grid;grid-template-columns:35px minmax(0,1fr) 20px;gap:15px;padding:22px 0;border-bottom:1px solid #ffffff20;align-items:start}
 .security-number{font-size:10px;font-weight:850;color:#8fcab4;padding-top:5px}
 .security-detail h3{font-size:16px;margin:0 0 6px}.security-detail p{font-size:13px;line-height:1.8;color:#bdcbd5;margin:0}
-.security-mark{color:#a7d8c6;font-size:16px}
+.security-mark{color:#a7d8c6;font-size:16px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;transition:color .18s ease,transform .18s ease}.security-mark:hover{color:#fff;transform:translate(2px,-2px)}.security-mark:focus-visible{outline:2px solid #a7d8c6;outline-offset:4px;border-radius:3px}
 .security-disclaimer{display:flex;gap:12px;margin-top:20px;background:#203747;border:1px solid #3c5661;border-radius:12px;padding:15px}
 .security-disclaimer>span{width:22px;height:22px;display:grid;place-items:center;border:1px solid #a6d5c5;border-radius:50%;color:#a6d5c5;font-weight:850;flex-shrink:0}
 .security-disclaimer p{margin:0;color:#d0dbe1;font-size:11px;line-height:1.75}
@@ -995,10 +995,10 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
   <section class="site-section security-section" id="security">
    <div class="security-intro"><div class="site-eyebrow">БЕЗОПАСНОСТЬ БЕЗ ГРОМКИХ ОБЕЩАНИЙ</div><h2>Доверие начинается<br><span>с честности.</span></h2><p>Защита документов — это не одна надпись «безопасно», а конкретные технические меры, их проверка и понятные правила работы с данными.</p></div>
    <div class="security-details">
-    <div class="security-detail"><span class="security-number">01</span><div><h3>Защищённое соединение</h3><p>Публичный сервис открывается по HTTPS. Это помогает защищать данные при передаче между браузером и сервером.</p></div><span class="security-mark">↗</span></div>
-    <div class="security-detail"><span class="security-number">02</span><div><h3>Защита аккаунта</h3><p>Вход выполняется по учётным данным, а пароли хранятся в виде криптографических хешей, а не в открытом виде.</p></div><span class="security-mark">↗</span></div>
-    <div class="security-detail"><span class="security-number">03</span><div><h3>Контроль доступа</h3><p>Работа с документами доступна после входа в аккаунт. Проверка доступа к отдельным операциям остаётся важной частью защиты.</p></div><span class="security-mark">↗</span></div>
-    <div class="security-disclaimer"><span>i</span><p><strong>Что важно знать:</strong> HTTPS защищает данные во время передачи между браузером и сервером. Это не означает автоматически, что содержимое файлов зашифровано и на сервере. Мы не хотим обещать такую защиту, пока не проверим и не подтвердим, как именно она реализована.</p></div>
+    <div class="security-detail"><span class="security-number">01</span><div><h3>Защищённое соединение</h3><p>HTTPS шифрует данные при передаче между браузером и сервером и помогает снизить риск их перехвата в пути.</p></div><a class="security-mark" href="https://developer.mozilla.org/en-US/docs/Glossary/HTTPS" target="_blank" rel="noopener noreferrer" aria-label="Подробнее об HTTPS на MDN — откроется в новой вкладке" title="Подробнее об HTTPS — MDN">↗</a></div>
+    <div class="security-detail"><span class="security-number">02</span><div><h3>Защита паролей</h3><p>Пароли не хранятся в открытом виде: перед сохранением система преобразует их в криптографический хеш, по которому нельзя напрямую восстановить исходный пароль.</p></div><a class="security-mark" href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer" aria-label="Рекомендации OWASP по хранению паролей — откроется в новой вкладке" title="Рекомендации по хранению паролей — OWASP">↗</a></div>
+    <div class="security-detail"><span class="security-number">03</span><div><h3>Проверка доступа</h3><p>Закрытые операции требуют действительный токен сессии. При просмотре, изменении и скачивании документа сервер проверяет, что он принадлежит текущему пользователю.</p></div><a class="security-mark" href="https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer" aria-label="Рекомендации OWASP по контролю доступа — откроется в новой вкладке" title="Рекомендации по контролю доступа — OWASP">↗</a></div>
+    <div class="security-disclaimer"><span>✓</span><p><strong>Несколько уровней защиты.</strong> Помимо HTTPS, OblivionDoc использует стойкое хеширование паролей, проверку сессий и прав на документы, а также защитные HTTP-заголовки на стороне API.</p></div>
    </div>
   </section>
   <section class="site-section how-section" id="how">
