@@ -913,6 +913,17 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 .preview-unavailable strong{color:#244b39}.preview-unavailable p{color:#65776a}.preview-modal .modal-foot{flex-wrap:wrap}
 @media(max-width:760px){.preview-modal{width:100%;max-height:94vh}.preview-body{padding:12px;max-height:calc(94vh - 165px)}.preview-frame{height:60vh;min-height:220px}.preview-modal .modal-head,.preview-modal .modal-foot{padding-left:14px;padding-right:14px}}
 @media(max-width:480px){.preview-modal .modal-foot{display:grid;grid-template-columns:minmax(0,1fr)}.preview-modal .modal-foot .btn{width:100%;max-width:100%;white-space:normal}}
+.preview-docx{background:#fff;color:#222;padding:clamp(16px,3vw,36px);border-radius:8px;font:15px/1.7 Georgia,"Times New Roman",serif;overflow-wrap:anywhere}
+.preview-docx>*:first-child{margin-top:0}.preview-docx>*:last-child{margin-bottom:0}
+.preview-docx h1,.preview-docx h2,.preview-docx h3,.preview-docx h4{font-family:Arial,sans-serif;line-height:1.3;margin:1.25em 0 .55em;color:#243b30}
+.preview-docx p{margin:.45em 0;white-space:pre-wrap}
+.preview-docx ul,.preview-docx ol{padding-left:28px}
+.preview-docx table{border-collapse:collapse;width:100%;max-width:100%;margin:1em 0;font:13px/1.5 Arial,sans-serif}
+.preview-docx td,.preview-docx th{border:1px solid #cfd8d1;padding:7px 9px;vertical-align:top;overflow-wrap:anywhere}
+.preview-docx th{background:#edf3ee;font-weight:700}
+.preview-docx img{display:block;max-width:100%;height:auto;margin:12px auto}
+.preview-docx blockquote{margin:1em 0;padding-left:14px;border-left:3px solid #bdd0c1;color:#53665b}
+.preview-docx pre,.preview-docx code{white-space:pre-wrap;overflow-wrap:anywhere}
 </style>
 <style id="password-requirements-checklist">
 .password-hint{margin-top:8px}
@@ -1517,6 +1528,49 @@ async function downloadDocument(id){
   setTimeout(()=>URL.revokeObjectURL(url),1500);
  }catch(e){toast(e.message||'Не удалось скачать файл.',true);}
 }
+let mammothLoadPromise=null;
+function loadMammoth(){
+ if(window.mammoth)return Promise.resolve(window.mammoth);
+ if(mammothLoadPromise)return mammothLoadPromise;
+ mammothLoadPromise=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');
+  script.src='https://cdn.jsdelivr.net/npm/mammoth@1.13.0/mammoth.browser.min.js';
+  script.async=true;
+  script.onload=()=>window.mammoth?resolve(window.mammoth):reject(new Error('Библиотека предпросмотра Word не загрузилась.'));
+  script.onerror=()=>{mammothLoadPromise=null;reject(new Error('Не удалось загрузить средство предпросмотра Word. Проверьте подключение к интернету и попробуйте снова.'));};
+  document.head.appendChild(script);
+ });
+ return mammothLoadPromise;
+}
+function sanitizeDocxHtml(html){
+ const parsed=new DOMParser().parseFromString(String(html||''),'text/html');
+ const allowed=new Set(['p','h1','h2','h3','h4','h5','h6','br','hr','strong','b','em','i','u','s','del','sub','sup','ul','ol','li','table','thead','tbody','tfoot','tr','td','th','blockquote','pre','code','span','img']);
+ const blocked=new Set(['script','style','iframe','object','embed','svg','math','form','input','button','video','audio','source','meta','link']);
+ function copyNode(node){
+  if(node.nodeType===Node.TEXT_NODE)return document.createTextNode(node.nodeValue||'');
+  if(node.nodeType!==Node.ELEMENT_NODE)return document.createDocumentFragment();
+  const tag=node.tagName.toLowerCase();
+  if(blocked.has(tag))return document.createDocumentFragment();
+  if(!allowed.has(tag)){
+   const fragment=document.createDocumentFragment();
+   node.childNodes.forEach(child=>fragment.appendChild(copyNode(child)));
+   return fragment;
+  }
+  const clean=document.createElement(tag);
+  if(tag==='img'){
+   const src=node.getAttribute('src')||'';
+   if(!/^data:image\/(?:png|jpe?g|gif|bmp|webp);base64,/i.test(src))return document.createTextNode(node.getAttribute('alt')||'');
+   clean.setAttribute('src',src);
+   clean.setAttribute('alt',node.getAttribute('alt')||'');
+   clean.setAttribute('loading','lazy');
+  }
+  node.childNodes.forEach(child=>clean.appendChild(copyNode(child)));
+  return clean;
+ }
+ const result=document.createElement('div');
+ parsed.body.childNodes.forEach(node=>result.appendChild(copyNode(node)));
+ return result.innerHTML;
+}
 async function previewDocument(id){
  const doc=documents.find(item=>item.id===Number(id));if(!doc)return;
  try{
@@ -1526,6 +1580,16 @@ async function previewDocument(id){
   if(extension==='pdf'||blob.type==='application/pdf'){preview='<iframe class="preview-frame" src="'+url+'" title="Просмотр '+esc(filename)+'"></iframe>';}
   else if(['png','jpg','jpeg'].includes(extension)||blob.type.startsWith('image/')){preview='<img class="preview-image" src="'+url+'" alt="'+esc(filename)+'">';}
   else if(extension==='txt'||blob.type.startsWith('text/')){const contents=await blob.text();const truncated=contents.length>100000;preview='<pre class="preview-text">'+esc(contents.slice(0,100000))+'</pre>'+(truncated?'<p class="form-hint">Показаны первые 100 000 символов. Скачайте файл, чтобы прочитать его полностью.</p>':'');}
+  else if(extension==='docx'||blob.type==='application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
+   try{
+    const mammoth=await loadMammoth();
+    const result=await mammoth.convertToHtml({arrayBuffer:await blob.arrayBuffer()});
+    const safeHtml=sanitizeDocxHtml(result.value);
+    preview='<article class="preview-docx">'+(safeHtml||'<p>В документе не найден текст для отображения.</p>')+'</article>'+(result.messages&&result.messages.length?'<p class="form-hint">Документ открыт. Некоторые элементы оформления Word могут отображаться упрощённо.</p>':'');
+   }catch(conversionError){
+    preview='<div class="preview-unavailable"><strong>Не удалось подготовить предпросмотр Word.</strong><p>'+esc(conversionError.message||'Попробуйте открыть документ ещё раз или скачайте исходный файл.')+'</p></div>';
+   }
+  }
   else{preview='<div class="preview-unavailable"><strong>Предпросмотр этого формата недоступен в браузере.</strong><p>Скачайте файл, чтобы открыть его в подходящей программе. Исходный документ не изменён.</p></div>';}
   $('modalHost').innerHTML='<div class="modal-overlay preview-overlay" id="previewOverlay"><section class="modal preview-modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle"><div class="modal-head"><h2 id="previewTitle">Просмотр документа</h2><button class="close-btn" id="previewClose" type="button" aria-label="Закрыть просмотр">×</button></div><div class="preview-file-name">'+esc(filename)+'</div><div class="preview-body">'+preview+'</div><div class="modal-foot"><button class="btn" id="previewDismiss" type="button">Закрыть</button><a class="btn btn-primary" id="previewDownload" href="'+url+'" download="'+esc(filename)+'">Скачать файл</a></div></section></div>';
   const close=()=>{$('modalHost').innerHTML='';if(activePreviewUrl){URL.revokeObjectURL(activePreviewUrl);activePreviewUrl=null;}};
